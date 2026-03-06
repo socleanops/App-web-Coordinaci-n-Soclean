@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html lang="es"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guía de Exportación a Antigravity - CoreOps</title>
+<!-- Tailwind CSS CDN with plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            coreops: {
+              primary: '#1E40AF',
+              secondary: '#1E3A8A',
+              light: '#EFF6FF',
+              dark: '#111827'
+            }
+          }
+        }
+      }
+    }
+  </script>
+<style data-purpose="custom-typography">
+    .step-number {
+      font-feature-settings: "tnum";
+      font-variant-numeric: tabular-nums;
+    }
+    .code-block {
+      font-family: 'ui-monospace', SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 antialiased min-h-screen">
+<!-- BEGIN: MainHeader -->
+<header class="bg-white border-b border-slate-200 sticky top-0 z-50">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+<div class="flex items-center gap-3">
+<!-- Brand Logo Placeholder -->
+<div class="w-10 h-10 bg-coreops-primary rounded-lg flex items-center justify-center text-white font-bold text-xl">C</div>
+<div>
+<h1 class="text-xl font-bold text-slate-900">CoreOps</h1>
+<p class="text-xs text-slate-500 font-medium uppercase tracking-wider">Export Console</p>
+</div>
+</div>
+<!-- Action Button -->
+<button class="inline-flex items-center px-6 py-3 bg-coreops-primary hover:bg-coreops-secondary text-white font-semibold rounded-lg shadow-md transition-all duration-200 gap-2" data-purpose="download-full-package">
+<svg class="h-5 w-5" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+        Descargar Paquete Completo
+      </button>
+</div>
+</header>
+<!-- END: MainHeader -->
+<!-- BEGIN: PageContent -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+<!-- Title Section -->
+<section class="mb-12">
+<h2 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">Guía de Exportación a Antigravity</h2>
+<p class="mt-4 text-lg text-slate-600 max-w-3xl">
+        Sigue estos pasos detallados para migrar tu diseño y lógica de negocio desde el entorno de CoreOps hacia la infraestructura de producción en Antigravity.
+      </p>
+</section>
+<!-- BEGIN: ExportStepsGrid -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+<!-- Step 1: Exporting Code -->
+<article class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full" data-purpose="step-export-code">
+<div class="flex items-center gap-4 mb-6">
+<div class="p-3 bg-blue-100 text-coreops-primary rounded-xl">
+<svg class="h-8 w-8" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h3 class="text-xl font-bold">1. Exportación de Código</h3>
+</div>
+<p class="text-slate-600 mb-6">Obtén el código fuente completo basado en React 18 y TypeScript listo para desarrollo local o CI/CD.</p>
+<ul class="space-y-4 flex-grow text-slate-700">
+<li class="flex gap-3">
+<span class="step-number flex-shrink-0 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs font-bold text-slate-500">A</span>
+<span>Selecciona <strong>ZIP Download</strong> para una copia local rápida de los archivos fuente.</span>
+</li>
+<li class="flex gap-3">
+<span class="step-number flex-shrink-0 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs font-bold text-slate-500">B</span>
+<span>Usa <strong>Push to Git</strong> para vincular directamente con tu repositorio en GitHub o GitLab.</span>
+</li>
+</ul>
+<div class="mt-8 flex gap-3">
+<button class="flex-1 py-2 px-4 border border-slate-300 rounded-md text-sm font-medium hover:bg-slate-50 transition-colors">Download ZIP</button>
+<button class="flex-1 py-2 px-4 border border-slate-300 rounded-md text-sm font-medium hover:bg-slate-50 transition-colors">Git Connect</button>
+</div>
+</article>
+<!-- Step 2: Database Sync -->
+<article class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full" data-purpose="step-database-sync">
+<div class="flex items-center gap-4 mb-6">
+<div class="p-3 bg-green-100 text-green-700 rounded-xl">
+<svg class="h-8 w-8" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h3 class="text-xl font-bold">2. Sincronización de Base de Datos</h3>
+</div>
+<p class="text-slate-600 mb-6">Aplica el modelo de datos y las políticas de seguridad (RLS) en tu instancia de Supabase/Antigravity.</p>
+<div class="bg-slate-900 rounded-lg p-4 mb-6">
+<code class="code-block text-sm text-green-400"># Ejecuta el script de migración SQL<br/>psql -h db.antigravity.io -f schema.sql</code>
+</div>
+<ul class="space-y-4 flex-grow text-slate-700">
+<li class="flex gap-3">
+<span class="step-number flex-shrink-0 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs font-bold text-slate-500">A</span>
+<span>Copia los scripts generados de <strong>RLS (Row Level Security)</strong>.</span>
+</li>
+<li class="flex gap-3">
+<span class="step-number flex-shrink-0 w-6 h-6 bg-slate-100 rounded-full flex items-center justify-center text-xs font-bold text-slate-500">B</span>
+<span>Ejecútalos en el Editor SQL de tu Dashboard de Antigravity.</span>
+</li>
+</ul>
+</article>
+<!-- Step 3: Assets & Styles -->
+<article class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full" data-purpose="step-assets-styles">
+<div class="flex items-center gap-4 mb-6">
+<div class="p-3 bg-purple-100 text-purple-700 rounded-xl">
+<svg class="h-8 w-8" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h3 class="text-xl font-bold">3. Recursos y Estilos</h3>
+</div>
+<p class="text-slate-600 mb-6">Asegúrate de que la identidad visual se mantenga íntegra exportando las configuraciones de Tailwind.</p>
+<div class="space-y-4 flex-grow">
+<div class="flex items-center justify-between p-3 border border-slate-100 bg-slate-50 rounded-lg">
+<span class="text-sm font-medium">tailwind.config.js</span>
+<button class="text-coreops-primary text-sm font-semibold hover:underline">Exportar</button>
+</div>
+<div class="flex items-center justify-between p-3 border border-slate-100 bg-slate-50 rounded-lg">
+<span class="text-sm font-medium">Assets Folder (/public)</span>
+<button class="text-coreops-primary text-sm font-semibold hover:underline">Exportar</button>
+</div>
+<div class="flex items-center justify-between p-3 border border-slate-100 bg-slate-50 rounded-lg">
+<span class="text-sm font-medium">Design Tokens (JSON)</span>
+<button class="text-coreops-primary text-sm font-semibold hover:underline">Exportar</button>
+</div>
+</div>
+</article>
+<!-- Step 4: Next Steps -->
+<article class="bg-white p-8 rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full" data-purpose="step-next-steps">
+<div class="flex items-center gap-4 mb-6">
+<div class="p-3 bg-amber-100 text-amber-700 rounded-xl">
+<svg class="h-8 w-8" fill="none" stroke="currentColor" viewbox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path d="M13 10V3L4 14h7v7l9-11h-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+</div>
+<h3 class="text-xl font-bold">4. Próximos Pasos</h3>
+</div>
+<p class="text-slate-600 mb-6">Configuración final antes de que tu aplicación esté en vivo.</p>
+<ul class="space-y-4 flex-grow text-slate-700">
+<li class="flex gap-3">
+<svg class="h-5 w-5 text-amber-500 mt-0.5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"></path>
+</svg>
+<span>Configura las <strong>Variables de Entorno</strong> (.env) con tus claves API de Antigravity.</span>
+</li>
+<li class="flex gap-3">
+<svg class="h-5 w-5 text-amber-500 mt-0.5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"></path>
+</svg>
+<span>Realiza un <code>npm install</code> y <code>npm run build</code> para verificar el bundle.</span>
+</li>
+<li class="flex gap-3">
+<svg class="h-5 w-5 text-amber-500 mt-0.5" fill="currentColor" viewbox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" fill-rule="evenodd"></path>
+</svg>
+<span>Despliega a producción usando Antigravity Cloud o tu provider preferido.</span>
+</li>
+</ul>
+</article>
+</div>
+<!-- END: ExportStepsGrid -->
+<!-- BEGIN: SupportSection -->
+<section class="mt-16 bg-coreops-dark text-white rounded-3xl p-10 flex flex-col md:flex-row items-center justify-between gap-8">
+<div>
+<h3 class="text-2xl font-bold mb-2">¿Necesitas asistencia técnica?</h3>
+<p class="text-slate-400">Nuestro equipo de ingenieros está disponible para ayudarte con migraciones complejas.</p>
+</div>
+<div class="flex gap-4">
+<button class="px-6 py-3 border border-slate-700 rounded-lg hover:bg-slate-800 transition-colors">Ver Documentación</button>
+<button class="px-6 py-3 bg-white text-coreops-dark font-bold rounded-lg hover:bg-slate-100 transition-colors">Contactar Soporte</button>
+</div>
+</section>
+<!-- END: SupportSection -->
+</main>
+<!-- END: PageContent -->
+<!-- BEGIN: MainFooter -->
+<footer class="bg-white border-t border-slate-200 mt-20 py-8">
+<div class="max-w-7xl mx-auto px-4 text-center">
+<p class="text-slate-500 text-sm">
+        © 2024 CoreOps Systems. Generado para entorno Antigravity v4.2.
+      </p>
+</div>
+</footer>
+<!-- END: MainFooter -->
+</body></html>
