@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Search, MapPin, AlertCircle, RefreshCw, Filter } from 'lucide-react';
+import { Clock, Search, AlertCircle, RefreshCw, Filter } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -61,9 +61,9 @@ export default function Attendance() {
                 <div>
                     <h2 className="text-3xl font-bold tracking-tight text-primary flex items-center gap-2">
                         <Clock className="h-8 w-8" />
-                        Control de Asistencia Biométrico
+                        Chequeo de Planillas de Asistencia
                     </h2>
-                    <p className="text-muted-foreground text-sm mt-1">Monitorea el ingreso/egreso del personal en tiempo real y gestiona faltas.</p>
+                    <p className="text-muted-foreground text-sm mt-1">Verifica y confirma los horarios realizados cotejando las planillas físicas firmadas por los clientes.</p>
                 </div>
                 <div className="flex gap-2 w-full sm:w-auto items-center">
                     <Button
@@ -107,11 +107,10 @@ export default function Attendance() {
                             <TableHeader className="bg-muted/50">
                                 <TableRow>
                                     <TableHead>Empleado</TableHead>
-                                    <TableHead>Horario Teórico / Servicio</TableHead>
-                                    <TableHead>Marcación Entrada</TableHead>
-                                    <TableHead>Marcación Salida</TableHead>
-                                    <TableHead>Control GPS</TableHead>
-                                    <TableHead>Resolución</TableHead>
+                                    <TableHead>Cliente / Servicio</TableHead>
+                                    <TableHead>Horario Coordinado</TableHead>
+                                    <TableHead>Estado Cumplimiento</TableHead>
+                                    <TableHead>Observaciones / Diferencia Horaria</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -123,10 +122,10 @@ export default function Attendance() {
                                     </TableRow>
                                 ) : filteredAsistencias.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={6} className="text-center h-24 text-muted-foreground flex flex-col items-center justify-center gap-2">
+                                        <TableCell colSpan={5} className="text-center h-24 text-muted-foreground flex flex-col items-center justify-center gap-2">
                                             <AlertCircle className="h-8 w-8 text-slate-400" />
-                                            <span>No hay turnos ni marcas registradas para la fecha seleccionada. (El generador diario automático aún no está activo en esta fase)</span>
-                                            <span className="text-xs">Los turnos se volcarán a esta tabla cada madrugada automáticamente en el paso final del proyecto.</span>
+                                            <span>No hay turnos registrados para la fecha seleccionada. (El generador diario automático aún no está activo)</span>
+                                            <span className="text-xs">Los turnos se volcarán a esta tabla para ser chequeados con las planillas físicas.</span>
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -139,42 +138,21 @@ export default function Attendance() {
                                                 <div className="text-xs text-muted-foreground">ID: {a.funcionario_id.substring(0, 8)}...</div>
                                             </TableCell>
                                             <TableCell>
-                                                <div className="text-sm font-mono text-coreops-primary dark:text-blue-400">
-                                                    {a.horarios?.hora_entrada?.substring(0, 5)} - {a.horarios?.hora_salida?.substring(0, 5)}
+                                                <div className="text-xs text-muted-foreground font-semibold line-clamp-1">
+                                                    {a.horarios?.servicios?.clientes?.razon_social}
                                                 </div>
-                                                <div className="text-xs text-muted-foreground line-clamp-1">
-                                                    {a.horarios?.servicios?.clientes?.razon_social} / {a.horarios?.servicios?.nombre}
+                                                <div className="text-xs text-slate-500 line-clamp-1">
+                                                    {a.horarios?.servicios?.nombre}
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                {a.hora_entrada_registrada ? (
-                                                    <span className="font-semibold">{new Date(a.hora_entrada_registrada).toLocaleTimeString()} hs</span>
-                                                ) : (
-                                                    <span className="text-slate-400 text-xs italic">Sin marcar</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                {a.hora_salida_registrada ? (
-                                                    <span className="font-semibold">{new Date(a.hora_salida_registrada).toLocaleTimeString()} hs</span>
-                                                ) : (
-                                                    <span className="text-slate-400 text-xs italic">Sin marcar</span>
-                                                )}
-                                            </TableCell>
-                                            <TableCell>
-                                                {a.distancia_entrada_metros != null ? (
-                                                    <div className="flex items-center gap-1 text-xs">
-                                                        <MapPin className="h-3 w-3 text-emerald-500" />
-                                                        A {a.distancia_entrada_metros}m del objetivo
-                                                    </div>
-                                                ) : (
-                                                    <div className="flex items-center gap-1 text-xs text-slate-400">
-                                                        <MapPin className="h-3 w-3" /> Sin datos GPS
-                                                    </div>
-                                                )}
+                                                <div className="text-sm font-mono font-medium text-coreops-primary dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded inline-block">
+                                                    {a.horarios?.hora_entrada?.substring(0, 5)} hrs a {a.horarios?.hora_salida?.substring(0, 5)} hrs
+                                                </div>
                                             </TableCell>
                                             <TableCell>
                                                 <Select defaultValue={a.estado} onValueChange={(val) => handleActualizarEstado(a.id, val)}>
-                                                    <SelectTrigger className={`h-8 w-[140px] text-xs font-semibold border ${ESTADOS_MAP[a.estado].color}`}>
+                                                    <SelectTrigger className={`h-9 w-[150px] text-xs font-semibold border ${ESTADOS_MAP[a.estado].color}`}>
                                                         <SelectValue />
                                                     </SelectTrigger>
                                                     <SelectContent>
@@ -183,6 +161,24 @@ export default function Attendance() {
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
+                                            </TableCell>
+                                            <TableCell className="max-w-xs">
+                                                <Input
+                                                    defaultValue={a.observaciones || ''}
+                                                    placeholder="Ej: Faltó 1 hora, Salida tarde..."
+                                                    className="h-9 text-xs"
+                                                    onBlur={async (e) => {
+                                                        const newVal = e.target.value;
+                                                        if (newVal !== a.observaciones) {
+                                                            try {
+                                                                await updateAsistencia.mutateAsync({ id: a.id, data: { observaciones: newVal } as any });
+                                                                toast.success('Observación guardada');
+                                                            } catch (err) {
+                                                                toast.error('Error al guardar observación');
+                                                            }
+                                                        }
+                                                    }}
+                                                />
                                             </TableCell>
                                         </TableRow>
                                     ))
