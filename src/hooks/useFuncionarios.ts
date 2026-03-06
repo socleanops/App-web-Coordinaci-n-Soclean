@@ -55,7 +55,8 @@ export function useFuncionarios() {
         mutationFn: async (formData: FuncionarioFormData) => {
             let profileId = formData.id; // if it already exists
 
-            const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}@soclean.internal`;
+            const randomSuffix = Math.random().toString(36).substring(2, 8);
+            const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
             const safePassword = formData.password?.trim() || `SC${formData.cedula.replace(/\D/g, '')}#2026`;
 
             // 1. Create Auth User if it's new
@@ -71,12 +72,14 @@ export function useFuncionarios() {
                     // Check if they already have a funcionario
                     const { data: existingFunc } = await supabase
                         .from('funcionarios')
-                        .select('id')
+                        .select('id, profiles(nombre, apellido)')
                         .eq('profile_id', existingProfile.id)
                         .maybeSingle();
 
                     if (existingFunc) {
-                        throw new Error('Este correo/cédula ya está registrado y asignado a un funcionario activo.');
+                        const prof = existingFunc.profiles as any;
+                        const fullName = prof ? `${prof.nombre} ${prof.apellido}` : 'un funcionario activo';
+                        throw new Error(`Este correo/cédula ya está registrado y asignado a ${fullName}.`);
                     }
 
                     // Recover the existing profile ID

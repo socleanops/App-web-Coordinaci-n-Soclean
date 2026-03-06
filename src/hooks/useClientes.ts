@@ -22,11 +22,9 @@ export function useClientes() {
     const createCliente = useMutation({
         mutationFn: async (formData: ClienteFormData) => {
             const { id, ...dataToInsert } = formData;
-            // Hotfix: the old user's schema requires a 'nombre' column. Let's feed it the same value as razon_social.
-            const payload = { ...dataToInsert, nombre: dataToInsert.razon_social };
             const { data, error } = await supabase
                 .from('clientes')
-                .insert(payload)
+                .insert(dataToInsert)
                 .select()
                 .single();
 
@@ -40,14 +38,9 @@ export function useClientes() {
 
     const updateCliente = useMutation({
         mutationFn: async ({ id, data }: { id: string; data: Partial<ClienteFormData> }) => {
-            const payload = { ...data };
-            if (payload.razon_social) {
-                (payload as any).nombre = payload.razon_social;
-            }
-
             const { data: result, error } = await supabase
                 .from('clientes')
-                .update(payload)
+                .update(data)
                 .eq('id', id)
                 .select()
                 .single();

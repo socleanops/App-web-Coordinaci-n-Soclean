@@ -1,19 +1,28 @@
-import { useEffect } from 'react';
+import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
-import Dashboard from './pages/Dashboard';
-import Employees from './pages/Employees';
-import Schedules from './pages/Schedules';
-import Clients from './pages/Clients';
-import Services from './pages/Services';
-import Login from './pages/Login';
-import LogisticsMap from './pages/LogisticsMap';
-import Attendance from './pages/Attendance';
-import Billing from './pages/Billing';
-import Reports from './pages/Reports';
-import Nomina from './pages/Nomina';
-import Settings from './pages/Settings';
+
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Employees = lazy(() => import('./pages/Employees'));
+const Schedules = lazy(() => import('./pages/Schedules'));
+const Clients = lazy(() => import('./pages/Clients'));
+const Services = lazy(() => import('./pages/Services'));
+const Login = lazy(() => import('./pages/Login'));
+const LogisticsMap = lazy(() => import('./pages/LogisticsMap'));
+const Attendance = lazy(() => import('./pages/Attendance'));
+const Billing = lazy(() => import('./pages/Billing'));
+const Reports = lazy(() => import('./pages/Reports'));
+const Nomina = lazy(() => import('./pages/Nomina'));
+const Settings = lazy(() => import('./pages/Settings'));
+
+const PageLoader = () => (
+  <div className="flex flex-col h-screen w-full items-center justify-center bg-background/50 backdrop-blur-sm">
+    <Loader2 className="h-10 w-10 animate-spin text-primary" />
+    <span className="text-sm text-muted-foreground mt-4 font-medium animate-pulse">Cargando módulo...</span>
+  </div>
+);
 import { supabase } from './lib/supabase';
 import { useAuthStore } from './stores/authStore';
 
@@ -107,33 +116,35 @@ function App() {
 
   return (
     <Router>
-      <Routes>
-        <Route
-          path="/login"
-          element={user ? <Navigate to="/" replace /> : <Login />}
-        />
+      <Suspense fallback={<PageLoader />}>
+        <Routes>
+          <Route
+            path="/login"
+            element={user ? <Navigate to="/" replace /> : <Login />}
+          />
 
-        <Route element={<ProtectedRoute />}>
-          <Route path="/" element={<DashboardLayout />}>
-            <Route index element={<Dashboard />} />
-            <Route path="funcionarios" element={<Employees />} />
-            <Route path="horarios" element={<Schedules />} />
-            <Route path="clientes" element={<Clients />} />
-            <Route path="servicios" element={<Services />} />
-            <Route path="logistica" element={<LogisticsMap />} />
-            <Route path="asistencia" element={<Attendance />} />
-            <Route path="reportes" element={<Reports />} />
-            <Route path="facturacion" element={<Billing />} />
+          <Route element={<ProtectedRoute />}>
+            <Route path="/" element={<DashboardLayout />}>
+              <Route index element={<Dashboard />} />
+              <Route path="funcionarios" element={<Employees />} />
+              <Route path="horarios" element={<Schedules />} />
+              <Route path="clientes" element={<Clients />} />
+              <Route path="servicios" element={<Services />} />
+              <Route path="logistica" element={<LogisticsMap />} />
+              <Route path="asistencia" element={<Attendance />} />
+              <Route path="reportes" element={<Reports />} />
+              <Route path="facturacion" element={<Billing />} />
 
-            {/* TBD Modules with smooth placeholders */}
-            <Route path="nomina" element={<Nomina />} />
-            <Route path="configuracion" element={<Settings />} />
+              {/* TBD Modules with smooth placeholders */}
+              <Route path="nomina" element={<Nomina />} />
+              <Route path="configuracion" element={<Settings />} />
 
-            {/* Catch-all to 404/Dashboard inside Layout */}
-            <Route path="*" element={<Navigate to="/" replace />} />
+              {/* Catch-all to 404/Dashboard inside Layout */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Route>
           </Route>
-        </Route>
-      </Routes>
+        </Routes>
+      </Suspense>
     </Router>
   );
 }

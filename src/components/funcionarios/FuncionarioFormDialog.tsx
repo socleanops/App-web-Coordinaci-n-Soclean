@@ -351,11 +351,11 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                         </div>
 
                         <div className="flex justify-end pt-6 border-t mt-4 gap-2">
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={form.formState.isSubmitting}>
                                 Cancelar
                             </Button>
-                            <Button type="submit">
-                                {funcionarioToEdit ? 'Actualizar' : 'Guardar y Crear Acceso'}
+                            <Button type="submit" disabled={form.formState.isSubmitting}>
+                                {form.formState.isSubmitting ? 'Guardando...' : (funcionarioToEdit ? 'Actualizar' : 'Guardar y Crear Acceso')}
                             </Button>
                         </div>
                     </form>
