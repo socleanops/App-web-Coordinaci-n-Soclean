@@ -25,13 +25,17 @@ export default function LogisticsMap() {
     const handleGenerateRoute = () => {
         if (!selectedService || !selectedFuncionario) return;
 
-        // Use standard Google Maps directions link as fallback or Embed style
+        const origin = encodeURIComponent(selectedFuncionario.direccion);
         const destination = encodeURIComponent(selectedService.direccion);
-        // Using Maps Embed is cleaner. 
-        // We set src for iframe. Usually directions embed needs API key, but we can do a hacky embed using standard query if simple, or just a direct link to Maps.
-        // Actually, the easiest is to just open a direct link in a new tab for "Buses", or embed a search of the destination only and display the link externally. Let's do a basic map for the service location, and an external link for the full navigation route to see buses.
-        const url = `https://maps.google.com/maps?q=${destination}&output=embed`;
-        setMapUrl(url);
+        const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+
+        if (apiKey) {
+            const url = `https://www.google.com/maps/embed/v1/directions?key=${apiKey}&origin=${origin}&destination=${destination}&mode=transit`;
+            setMapUrl(url);
+        } else {
+            const url = `https://maps.google.com/maps?q=${destination}&output=embed`;
+            setMapUrl(url);
+        }
     };
 
     const handleOpenExternalRoute = () => {
