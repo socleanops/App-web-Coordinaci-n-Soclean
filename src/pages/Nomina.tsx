@@ -52,7 +52,7 @@ export default function Nomina() {
 
                     hours = Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60));
 
-                    let current = new Date(start.getTime());
+                    const current = new Date(start.getTime());
                     while (current < end) {
                         const h = current.getHours();
                         if (h >= 22 || h < 6) nightHours += 1;
