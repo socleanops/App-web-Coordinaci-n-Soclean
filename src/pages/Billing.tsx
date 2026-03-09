@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Search, FileText, Download, MoreVertical } from 'lucide-react';
@@ -42,6 +42,12 @@ export default function Billing() {
         return num.includes(search) || cliente.includes(search);
     });
 
+    const totalHorasCotizadas = useMemo(() => {
+        return facturas.reduce((acc: number, current: Factura) =>
+            acc + (current.items?.reduce((accItem: number, item: import("@/types").FacturaItem) => accItem + (item.cantidad || 0), 0) || 0), 0
+        );
+    }, [facturas]);
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -69,7 +75,7 @@ export default function Billing() {
                         <CardTitle className="text-lg font-medium opacity-90 text-white">Total Horas Cotizadas (Mes)</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold">{facturas.reduce((acc, current) => acc + current.items.reduce((accItem: any, item: any) => accItem + item.cantidad, 0), 0)} Horas</div>
+                        <div className="text-3xl font-bold">{totalHorasCotizadas} Horas</div>
                         <p className="text-sm opacity-80 mt-1">Estimación operativa de carga horaria acumulada</p>
                     </CardContent>
                 </Card>

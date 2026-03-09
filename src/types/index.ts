@@ -100,6 +100,7 @@ export type Factura = {
     created_at?: string;
     updated_at?: string;
     clientes?: Cliente; // Joined Data
+    items?: FacturaItem[]; // Joined Data
 };
 
 export type FacturaItem = {
