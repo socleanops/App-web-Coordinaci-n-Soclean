@@ -1,4 +1,4 @@
-import { Bell, UserCircle } from 'lucide-react';
+import { UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
@@ -10,6 +10,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { NotificationDropdown } from './NotificationDropdown';
 
 export function Header() {
     const navigate = useNavigate();
@@ -29,10 +30,7 @@ export function Header() {
 
                 {/* Right Nav */}
                 <div className="flex items-center space-x-4">
-                    <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
-                        <Bell className="h-5 w-5" />
-                        <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-600"></span>
-                    </Button>
+                    <NotificationDropdown />
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -44,8 +42,8 @@ export function Header() {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Mi Perfil</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>Configuración</DropdownMenuItem>
-                            <DropdownMenuItem>Soporte</DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/configuracion')}>Configuración</DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => window.location.href = 'mailto:soporte@soclean.uy'}>Soporte</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-red-500 cursor-pointer" onClick={handleSignOut}>Cerrar Sesión</DropdownMenuItem>
                         </DropdownMenuContent>
