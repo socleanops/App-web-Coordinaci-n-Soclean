@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { User } from '@supabase/supabase-js';
 
 // We map our role names
-export type Role = 'superadmin' | 'admin' | 'supervisor' | 'facturador' | 'funcionario' | null;
+type Role = 'superadmin' | 'admin' | 'supervisor' | 'facturador' | 'funcionario' | null;
 
 interface AuthState {
     user: User | null;
