@@ -1,22 +1,12 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Clock, Search, AlertCircle, RefreshCw, Filter } from 'lucide-react';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Clock, Search, RefreshCw, Filter } from 'lucide-react';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAsistencia } from '@/hooks/useAsistencia';
 import type { Asistencia } from '@/types';
 import { toast } from 'sonner';
-
-const ESTADOS_MAP: Record<string, { label: string, color: string }> = {
-    'presente': { label: 'Presente', color: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' },
-    'ausente': { label: 'Ausente', color: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' },
-    'tardanza': { label: 'Tardanza', color: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800' },
-    'salida_anticipada': { label: 'Salida Anticipada', color: 'bg-orange-100 text-orange-800 border-orange-200 dark:bg-orange-900/30 dark:text-orange-400 dark:border-orange-800' },
-    'pendiente': { label: 'Pendiente', color: 'bg-slate-100 text-slate-800 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700' },
-    'justificado': { label: 'Falta Justificada', color: 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800' },
-};
+import { AttendanceTable } from '@/components/attendance/AttendanceTable';
 
 export default function Attendance() {
     // Defaults to today
@@ -43,9 +33,18 @@ export default function Attendance() {
     const handleActualizarEstado = async (id: string, nuevoEstado: string) => {
         try {
             await updateAsistencia.mutateAsync({ id, data: { estado: nuevoEstado as any } });
-            toast.success(`Estado actualizado a ${ESTADOS_MAP[nuevoEstado].label}`);
+            toast.success('Estado actualizado exitosamente');
         } catch (error: any) {
             toast.error(error.message || 'No se pudo actualizar el estado de asistencia');
+        }
+    };
+
+    const handleActualizarObservaciones = async (id: string, nuevaObservacion: string) => {
+        try {
+            await updateAsistencia.mutateAsync({ id, data: { observaciones: nuevaObservacion } as any });
+            toast.success('Observación guardada');
+        } catch (err) {
+            toast.error('Error al guardar observación');
         }
     };
 
@@ -116,99 +115,14 @@ export default function Attendance() {
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-background/50 overflow-hidden">
-                        <Table>
-                            <TableHeader className="bg-muted/50">
-                                <TableRow>
-                                    <TableHead>Empleado</TableHead>
-                                    <TableHead>Cliente / Servicio</TableHead>
-                                    <TableHead>Horario Coordinado</TableHead>
-                                    <TableHead>Estado Cumplimiento</TableHead>
-                                    <TableHead>Observaciones / Diferencia Horaria</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {isLoading ? (
-                                    <TableRow>
-                                        <TableCell colSpan={6} className="text-center h-24 text-muted-foreground">
-                                            Buscando registros biométricos del día...
-                                        </TableCell>
-                                    </TableRow>
-                                ) : filteredAsistencias.length === 0 ? (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="text-center h-32 text-muted-foreground">
-                                            <div className="flex flex-col items-center justify-center gap-4 py-8">
-                                                <AlertCircle className="h-10 w-10 text-slate-400" />
-                                                <div className="space-y-1">
-                                                    <p className="text-lg font-medium text-slate-700 dark:text-slate-300">No hay turnos registrados para la fecha seleccionada</p>
-                                                    <p className="text-sm">Genera la planilla para volcar los horarios teóricos correspondientes a este día y poder chequearlos.</p>
-                                                </div>
-                                                <Button
-                                                    onClick={handleGenerarPlanilla}
-                                                    disabled={generarPlanillaDia.isPending}
-                                                    className="mt-2"
-                                                >
-                                                    {generarPlanillaDia.isPending ? 'Generando...' : 'Generar Planilla del Día'}
-                                                </Button>
-                                            </div>
-                                        </TableCell>
-                                    </TableRow>
-                                ) : (
-                                    filteredAsistencias.map((a: Asistencia) => (
-                                        <TableRow key={a.id} className="group hover:bg-muted/30 transition-colors">
-                                            <TableCell>
-                                                <div className="font-semibold text-slate-800 dark:text-slate-200">
-                                                    {a.funcionarios?.profiles?.nombre} {a.funcionarios?.profiles?.apellido}
-                                                </div>
-                                                <div className="text-xs text-muted-foreground">ID: {a.funcionario_id.substring(0, 8)}...</div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="text-xs text-muted-foreground font-semibold line-clamp-1">
-                                                    {a.horarios?.servicios?.clientes?.razon_social}
-                                                </div>
-                                                <div className="text-xs text-slate-500 line-clamp-1">
-                                                    {a.horarios?.servicios?.nombre}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <div className="text-sm font-mono font-medium text-coreops-primary dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded inline-block">
-                                                    {a.horarios?.hora_entrada?.substring(0, 5)} hrs a {a.horarios?.hora_salida?.substring(0, 5)} hrs
-                                                </div>
-                                            </TableCell>
-                                            <TableCell>
-                                                <Select defaultValue={a.estado} onValueChange={(val) => handleActualizarEstado(a.id, val)}>
-                                                    <SelectTrigger className={`h-9 w-[150px] text-xs font-semibold border ${ESTADOS_MAP[a.estado].color}`}>
-                                                        <SelectValue />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {Object.entries(ESTADOS_MAP).map(([key, val]) => (
-                                                            <SelectItem key={key} value={key}>{val.label}</SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </TableCell>
-                                            <TableCell className="max-w-xs">
-                                                <Input
-                                                    defaultValue={a.observaciones || ''}
-                                                    placeholder="Ej: Faltó 1 hora, Salida tarde..."
-                                                    className="h-9 text-xs"
-                                                    onBlur={async (e) => {
-                                                        const newVal = e.target.value;
-                                                        if (newVal !== a.observaciones) {
-                                                            try {
-                                                                await updateAsistencia.mutateAsync({ id: a.id, data: { observaciones: newVal } as any });
-                                                                toast.success('Observación guardada');
-                                                            } catch (err) {
-                                                                toast.error('Error al guardar observación');
-                                                            }
-                                                        }
-                                                    }}
-                                                />
-                                            </TableCell>
-                                        </TableRow>
-                                    ))
-                                )}
-                            </TableBody>
-                        </Table>
+                        <AttendanceTable
+                            asistencias={filteredAsistencias}
+                            isLoading={isLoading}
+                            isPendingGenerar={generarPlanillaDia.isPending}
+                            onGenerarPlanilla={handleGenerarPlanilla}
+                            onUpdateEstado={handleActualizarEstado}
+                            onUpdateObservaciones={handleActualizarObservaciones}
+                        />
                     </div>
                 </CardContent>
             </Card>
