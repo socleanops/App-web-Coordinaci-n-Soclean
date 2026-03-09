@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { User, Shield, Bell, Key, Store, Moon, Sun } from 'lucide-react';
+import { User, Shield, Bell, Store } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { toast } from 'sonner';
+import { ProfileSettings } from '@/components/settings/ProfileSettings';
+import { CompanySettings } from '@/components/settings/CompanySettings';
+import { PreferenceSettings } from '@/components/settings/PreferenceSettings';
+import { SecuritySettings } from '@/components/settings/SecuritySettings';
 
 export default function Settings() {
     const { user, role } = useAuthStore();
@@ -66,154 +66,16 @@ export default function Settings() {
 
                 <div className="flex-1">
                     {activeTab === 'perfil' && (
-                        <Card className="border-slate-200 dark:border-slate-800 shadow-sm bg-white/60 dark:bg-slate-900/60 backdrop-blur-md">
-                            <CardHeader>
-                                <CardTitle>Información Personal</CardTitle>
-                                <CardDescription>Actualiza tus datos de contacto y rol operativo.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="nombre">Nombre</Label>
-                                        <Input id="nombre" defaultValue={user?.user_metadata?.nombre || ''} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="apellido">Apellido</Label>
-                                        <Input id="apellido" defaultValue={user?.user_metadata?.apellido || ''} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="email">Correo Electrónico</Label>
-                                        <Input id="email" defaultValue={user?.email || ''} disabled className="bg-slate-50 text-slate-500" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="rol">Rol Asignado</Label>
-                                        <Input id="rol" defaultValue={role?.toUpperCase() || ''} disabled className="bg-slate-50 text-slate-500 font-bold" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="border-t pt-6 bg-slate-50/50 dark:bg-slate-900/50">
-                                <Button onClick={handleSave} disabled={isSaving} className="ml-auto bg-coreops-primary hover:bg-coreops-secondary">
-                                    {isSaving ? 'Guardando...' : 'Guardar Cambios'}
-                                </Button>
-                            </CardFooter>
-                        </Card>
+                        <ProfileSettings user={user} role={role} isSaving={isSaving} handleSave={handleSave} />
                     )}
-
                     {activeTab === 'empresa' && (
-                        <Card className="border-slate-200 dark:border-slate-800 shadow-sm bg-white/60 dark:bg-slate-900/60 backdrop-blur-md">
-                            <CardHeader>
-                                <CardTitle>Datos de la Empresa</CardTitle>
-                                <CardDescription>Configuración global de Soclean que afecta a los reportes.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="razon">Razón Social</Label>
-                                        <Input id="razon" defaultValue="Soclean Coordinación" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="rut">RUT</Label>
-                                        <Input id="rut" defaultValue="210000000018" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="direccion">Dirección Central</Label>
-                                        <Input id="direccion" defaultValue="Montevideo, Uruguay" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="telefono">Teléfono Principal</Label>
-                                        <Input id="telefono" defaultValue="+598 90 000 000" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="border-t pt-6 bg-slate-50/50 dark:bg-slate-900/50">
-                                <Button onClick={handleSave} disabled={isSaving} className="ml-auto bg-coreops-primary hover:bg-coreops-secondary">
-                                    Guardar Datos de Empresa
-                                </Button>
-                            </CardFooter>
-                        </Card>
+                        <CompanySettings isSaving={isSaving} handleSave={handleSave} />
                     )}
-
                     {activeTab === 'preferencias' && (
-                        <Card className="border-slate-200 dark:border-slate-800 shadow-sm bg-white/60 dark:bg-slate-900/60 backdrop-blur-md">
-                            <CardHeader>
-                                <CardTitle>Apariencia y Notificaciones</CardTitle>
-                                <CardDescription>Personaliza tu experiencia dentro de la plataforma.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-6">
-
-                                <div className="flex items-center justify-between border-b pb-4">
-                                    <div>
-                                        <h4 className="font-semibold text-slate-800 dark:text-slate-200">Tema Visual</h4>
-                                        <p className="text-sm text-slate-500">Elige entre modo claro o oscuro.</p>
-                                    </div>
-                                    <div className="flex gap-2 bg-slate-100 p-1 rounded-lg dark:bg-slate-800">
-                                        <Button
-                                            variant={theme === 'light' ? 'default' : 'ghost'}
-                                            size="sm"
-                                            onClick={() => setTheme('light')}
-                                            className={theme === 'light' ? 'bg-white text-slate-900 shadow-sm' : ''}
-                                        >
-                                            <Sun className="h-4 w-4 mr-2" /> Claro
-                                        </Button>
-                                        <Button
-                                            variant={theme === 'dark' ? 'default' : 'ghost'}
-                                            size="sm"
-                                            onClick={() => setTheme('dark')}
-                                            className={theme === 'dark' ? 'bg-slate-900 text-white shadow-sm' : ''}
-                                        >
-                                            <Moon className="h-4 w-4 mr-2" /> Oscuro
-                                        </Button>
-                                    </div>
-                                </div>
-
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <h4 className="font-semibold text-slate-800 dark:text-slate-200">Notificaciones UI/UX</h4>
-                                        <p className="text-sm text-slate-500">Mostrar alertas emergentes en pantalla.</p>
-                                    </div>
-                                    <Button
-                                        variant={notifications ? 'default' : 'outline'}
-                                        onClick={() => setNotifications(!notifications)}
-                                        className={notifications ? 'bg-emerald-600 hover:bg-emerald-700' : ''}
-                                    >
-                                        {notifications ? 'Activadas' : 'Desactivadas'}
-                                    </Button>
-                                </div>
-
-                            </CardContent>
-                        </Card>
+                        <PreferenceSettings theme={theme} setTheme={setTheme} notifications={notifications} setNotifications={setNotifications} />
                     )}
-
                     {activeTab === 'seguridad' && (
-                        <Card className="border-slate-200 dark:border-slate-800 shadow-sm bg-white/60 dark:bg-slate-900/60 backdrop-blur-md border border-red-100">
-                            <CardHeader>
-                                <CardTitle className="flex items-center gap-2 text-red-600">
-                                    <Key className="h-5 w-5" /> Acceso y Contraseña
-                                </CardTitle>
-                                <CardDescription>Configuración sensible de tu credencial de acceso.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="max-w-md space-y-4">
-                                    <div className="space-y-2">
-                                        <Label htmlFor="old-pass">Contraseña Actual</Label>
-                                        <Input id="old-pass" type="password" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="new-pass">Nueva Contraseña</Label>
-                                        <Input id="new-pass" type="password" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="confirm-pass">Confirmar Contraseña</Label>
-                                        <Input id="confirm-pass" type="password" />
-                                    </div>
-                                </div>
-                            </CardContent>
-                            <CardFooter className="border-t pt-6 bg-red-50/30 dark:bg-red-900/10">
-                                <Button variant="destructive">
-                                    Actualizar Credenciales
-                                </Button>
-                            </CardFooter>
-                        </Card>
+                        <SecuritySettings />
                     )}
                 </div>
             </div>
