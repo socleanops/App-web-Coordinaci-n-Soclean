@@ -71,83 +71,88 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
             let currentProgress = 0;
             const newErrors: string[] = [];
 
-            // Process row by row
-            for (let i = 0; i < data.length; i++) {
-                const row = data[i];
+            // Process row by row in chunks
+            const CHUNK_SIZE = 10;
+            for (let i = 0; i < data.length; i += CHUNK_SIZE) {
+                const chunk = data.slice(i, i + CHUNK_SIZE);
 
-                try {
-                    // Try mapping columns (expected headers)
-                    const emailRaw = row.Email || row.email || row.EMAIL || row.Correo || '';
-                    const email = emailRaw ? emailRaw.toString().trim() : '';
+                await Promise.all(
+                    chunk.map(async (row: any, indexInChunk: number) => {
+                        const rowIndex = i + indexInChunk;
+                        try {
+                            // Try mapping columns (expected headers)
+                            const emailRaw = row.Email || row.email || row.EMAIL || row.Correo || '';
+                            const email = emailRaw ? emailRaw.toString().trim() : '';
 
-                    const nombre = row.Nombre || row.nombre || row.NOMBRE || '-';
-                    const apellido = row.Apellido || row.apellido || row.APELLIDO || '-';
-                    const cedula = String(row.Cedula || row.cedula || row.CEDULA || '0000000');
-                    const cargo = row.Cargo || row.cargo || row.CARGO || 'General';
-                    const direccion = row.Dirección || row.direccion || row.DIRECCION || row.Direccion || '-';
+                            const nombre = row.Nombre || row.nombre || row.NOMBRE || '-';
+                            const apellido = row.Apellido || row.apellido || row.APELLIDO || '-';
+                            const cedula = String(row.Cedula || row.cedula || row.CEDULA || '0000000');
+                            const cargo = row.Cargo || row.cargo || row.CARGO || 'General';
+                            const direccion = row.Dirección || row.direccion || row.DIRECCION || row.Direccion || '-';
 
-                    // Match department by name vaguely, by exact ID, or safely fallback to first one
-                    const reqDeptoId = row.departamento_id || row.Departamento_id;
-                    const reqDeptoName = String(row.Departamento || row.departamento || row.DEPARTAMENTO || '').toLowerCase().trim();
+                            // Match department by name vaguely, by exact ID, or safely fallback to first one
+                            const reqDeptoId = row.departamento_id || row.Departamento_id;
+                            const reqDeptoName = String(row.Departamento || row.departamento || row.DEPARTAMENTO || '').toLowerCase().trim();
 
-                    let matchedDepto = reqDeptoId
-                        ? currentDeptos.find(d => d.id === reqDeptoId)
-                        : currentDeptos.find(d => d.nombre.toLowerCase() === reqDeptoName);
+                            let matchedDepto = reqDeptoId
+                                ? currentDeptos.find(d => d.id === reqDeptoId)
+                                : currentDeptos.find(d => d.nombre.toLowerCase() === reqDeptoName);
 
-                    if (!matchedDepto && currentDeptos.length > 0) {
-                        matchedDepto = currentDeptos[0]; // fallback
-                    }
+                            if (!matchedDepto && currentDeptos.length > 0) {
+                                matchedDepto = currentDeptos[0]; // fallback
+                            }
 
-                    if (!matchedDepto) {
-                        throw new Error(`Fila ${i + 2}: No hay departamentos creados en el sistema para asociar al empleado.`);
-                    }
+                            if (!matchedDepto) {
+                                throw new Error(`Fila ${rowIndex + 2}: No hay departamentos creados en el sistema para asociar al empleado.`);
+                            }
 
-                    // Default role for bulk or grab from excel
-                    const rol = (row.rol || row.Rol || row.ROL || 'funcionario').toLowerCase();
-                    const password = row.password || row.Password || row.PASSWORD || cedula; // Default password is the ID
+                            // Default role for bulk or grab from excel
+                            const rol = (row.rol || row.Rol || row.ROL || 'funcionario').toLowerCase();
+                            const password = row.password || row.Password || row.PASSWORD || cedula; // Default password is the ID
 
-                    let parsedFechaIngreso = new Date().toISOString().split('T')[0];
-                    const rawFecha = row.fecha_ingreso || row.Fecha_ingreso || row.Fecha_Ingreso || row.FECHA_INGRESO || row.Ingreso || row.ingreso;
+                            let parsedFechaIngreso = new Date().toISOString().split('T')[0];
+                            const rawFecha = row.fecha_ingreso || row.Fecha_ingreso || row.Fecha_Ingreso || row.FECHA_INGRESO || row.Ingreso || row.ingreso;
 
-                    if (rawFecha instanceof Date) {
-                        // Extract correctly ignoring timezone shifts in the Date output
-                        const d = new Date(rawFecha);
-                        parsedFechaIngreso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                    } else if (typeof rawFecha === 'number') {
-                        // Fallback: Convert Excel Serial Date to JS Date
-                        const jsDate = new Date(Math.round((rawFecha - 25569) * 86400 * 1000));
-                        parsedFechaIngreso = jsDate.toISOString().split('T')[0];
-                    } else if (typeof rawFecha === 'string' && rawFecha.trim() !== '') {
-                        // Try to fix DD/MM/YYYY string formats to YYYY-MM-DD for PostgreSQL
-                        parsedFechaIngreso = rawFecha.includes('/')
-                            ? rawFecha.split('/').reverse().join('-')
-                            : rawFecha;
-                    }
+                            if (rawFecha instanceof Date) {
+                                // Extract correctly ignoring timezone shifts in the Date output
+                                const d = new Date(rawFecha);
+                                parsedFechaIngreso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                            } else if (typeof rawFecha === 'number') {
+                                // Fallback: Convert Excel Serial Date to JS Date
+                                const jsDate = new Date(Math.round((rawFecha - 25569) * 86400 * 1000));
+                                parsedFechaIngreso = jsDate.toISOString().split('T')[0];
+                            } else if (typeof rawFecha === 'string' && rawFecha.trim() !== '') {
+                                // Try to fix DD/MM/YYYY string formats to YYYY-MM-DD for PostgreSQL
+                                parsedFechaIngreso = rawFecha.includes('/')
+                                    ? rawFecha.split('/').reverse().join('-')
+                                    : rawFecha;
+                            }
 
-                    const fecha_ingreso = parsedFechaIngreso;
-                    const tipo_contrato = row.tipo_contrato || row.Tipo_contrato || 'Indefinido';
-                    const estado = (row.estado || row.Estado || 'activo').toLowerCase();
+                            const fecha_ingreso = parsedFechaIngreso;
+                            const tipo_contrato = row.tipo_contrato || row.Tipo_contrato || 'Indefinido';
+                            const estado = (row.estado || row.Estado || 'activo').toLowerCase();
 
-                    await createFuncionario.mutateAsync({
-                        nombre,
-                        apellido,
-                        email,
-                        password,
-                        rol,
-                        cedula,
-                        cargo,
-                        departamento_id: matchedDepto.id,
-                        direccion,
-                        fecha_ingreso,
-                        tipo_contrato,
-                        estado
-                    });
+                            await createFuncionario.mutateAsync({
+                                nombre,
+                                apellido,
+                                email,
+                                password,
+                                rol,
+                                cedula,
+                                cargo,
+                                departamento_id: matchedDepto.id,
+                                direccion,
+                                fecha_ingreso,
+                                tipo_contrato,
+                                estado
+                            });
+                        } catch (err: any) {
+                            newErrors.push(err.message || `Fila ${rowIndex + 2}: Error desconocido`);
+                        }
+                    })
+                );
 
-                } catch (err: any) {
-                    newErrors.push(err.message || `Fila ${i + 2}: Error desconocido`);
-                }
-
-                currentProgress++;
+                currentProgress += chunk.length;
                 setProgress(currentProgress);
             }
 
