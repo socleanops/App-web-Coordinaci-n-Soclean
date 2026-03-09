@@ -2,8 +2,6 @@
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { PlusCircle, Trash2 } from 'lucide-react';
-
 import {
     Dialog,
     DialogContent,
@@ -11,21 +9,14 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog';
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
+import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { useFacturas } from '@/hooks/useFacturas';
 import { useClientes } from '@/hooks/useClientes';
 import { facturaSchema, type FacturaFormData } from '@/lib/validations/facturacion';
+import { FacturaBasicInfoFields } from './FacturaBasicInfoFields';
+import { FacturaLineItems } from './FacturaLineItems';
 
 interface Props {
     open: boolean;
@@ -100,174 +91,9 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
 
-                        <div className="grid grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="cliente_id"
-                                render={({ field }) => (
-                                    <FormItem className="col-span-2">
-                                        <FormLabel>Cliente a Facturar</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value || undefined}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Seleccionar Cliente" />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                {clientes.map(c => (
-                                                    <SelectItem key={c.id} value={c.id}>
-                                                        {c.razon_social} {c.rut ? `(RUT: ${c.rut})` : ''}
-                                                    </SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
+                        <FacturaBasicInfoFields form={form} clientes={clientes} />
 
-                            <FormField
-                                control={form.control}
-                                name="numero"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Referencia Interna (Nro de Registro)</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Ej. A-0001" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="estado"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Estado Inicial</FormLabel>
-                                        <Select onValueChange={field.onChange} value={field.value}>
-                                            <FormControl>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Seleccionar..." />
-                                                </SelectTrigger>
-                                            </FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="borrador">Borrador</SelectItem>
-                                                <SelectItem value="emitida">Emitida (Pendiente de Pago)</SelectItem>
-                                                <SelectItem value="pagada">Pagada</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="fecha_emision"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Fecha del Servicio</FormLabel>
-                                        <FormControl>
-                                            <Input type="date" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="fecha_vencimiento"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Vencimiento (Opcional)</FormLabel>
-                                        <FormControl>
-                                            <Input type="date" {...field} value={field.value || ''} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        {/* Line Items */}
-                        <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-4 bg-slate-50 dark:bg-slate-900/50">
-                            <h3 className="font-semibold text-lg mb-4">Conceptos o Ítems</h3>
-
-                            <div className="space-y-4">
-                                {fields.map((field, index) => (
-                                    <div key={field.id} className="flex flex-col sm:flex-row gap-3 items-end border-b border-slate-200 dark:border-slate-800 pb-4 last:border-0 last:pb-0">
-                                        <div className="flex-grow w-full">
-                                            <FormField
-                                                control={form.control}
-                                                name={`items.${index}.descripcion`}
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className="text-xs">Detalle del Servicio Realizado</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="Ej. Limpieza post-obra en planta baja..." {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                        <div className="w-full sm:w-24">
-                                            <FormField
-                                                control={form.control}
-                                                name={`items.${index}.cantidad`}
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className="text-xs">Horas Realizadas</FormLabel>
-                                                        <FormControl>
-                                                            <Input type="number" min="1" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                        <div className="hidden">
-                                            <FormField
-                                                control={form.control}
-                                                name={`items.${index}.precio_unitario`}
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel className="text-xs">Precio Unit. ($)</FormLabel>
-                                                        <FormControl>
-                                                            <Input type="number" step="0.01" min="0" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                        </div>
-                                        <Button
-                                            type="button"
-                                            variant="ghost"
-                                            size="icon"
-                                            className="text-red-500 shrink-0 mb-0.5"
-                                            onClick={() => remove(index)}
-                                            disabled={fields.length === 1}
-                                        >
-                                            <Trash2 className="h-4 w-4" />
-                                        </Button>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                className="mt-4"
-                                onClick={() => append({ descripcion: '', cantidad: 1, precio_unitario: 0 })}
-                            >
-                                <PlusCircle className="h-4 w-4 mr-2" /> Agregar Concepto
-                            </Button>
-                        </div>
+                        <FacturaLineItems form={form} fields={fields} append={append} remove={remove} />
 
                         {/* Eliminadas las cajas de totales financieros, solo requerimos registro de horas */}
                         <div className="hidden"></div>
