@@ -24,7 +24,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 import { useHorarios } from '@/hooks/useHorarios';
-import { useFuncionarios } from '@/hooks/useFuncionarios';
+import { useGetFuncionarios } from '@/hooks/useFuncionarios';
 import { useServicios } from '@/hooks/useServicios';
 import { horarioSchema, type HorarioFormData } from '@/lib/validations/horario';
 import type { Horario } from '@/types';
@@ -47,7 +47,7 @@ const DIAS_SEMANA = [
 
 export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: HorarioFormDialogProps) {
     const { createHorario, updateHorario } = useHorarios();
-    const { getFuncionarios } = useFuncionarios();
+    const getFuncionarios = useGetFuncionarios();
     const { getServicios } = useServicios();
 
     const isEditing = !!horarioToEdit;

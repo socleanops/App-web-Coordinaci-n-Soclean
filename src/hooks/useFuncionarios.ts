@@ -11,10 +11,8 @@ const authClient = createClient(
     { auth: { persistSession: false, autoRefreshToken: false } }
 );
 
-export function useFuncionarios() {
-    const queryClient = useQueryClient();
-
-    const getFuncionarios = useQuery({
+export function useGetFuncionarios() {
+    return useQuery({
         queryKey: ['funcionarios'],
         queryFn: async (): Promise<Funcionario[]> => {
             const { data, error } = await supabase
@@ -30,8 +28,10 @@ export function useFuncionarios() {
             return data as any;
         },
     });
+}
 
-    const getDepartamentos = useQuery({
+export function useGetDepartamentos() {
+    return useQuery({
         queryKey: ['departamentos'],
         queryFn: async () => {
             const { data, error } = await supabase.from('departamentos').select('*');
@@ -39,8 +39,12 @@ export function useFuncionarios() {
             return data;
         },
     });
+}
 
-    const createDepartamento = useMutation({
+export function useCreateDepartamento() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
         mutationFn: async (nombre: string) => {
             const { data, error } = await supabase.from('departamentos').insert({ nombre }).select().single();
             if (error) throw new Error(error.message);
@@ -50,8 +54,12 @@ export function useFuncionarios() {
             queryClient.invalidateQueries({ queryKey: ['departamentos'] });
         },
     });
+}
 
-    const createFuncionario = useMutation({
+export function useCreateFuncionario() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
         mutationFn: async (formData: FuncionarioFormData) => {
             let profileId = formData.id; // if it already exists
 
@@ -144,8 +152,12 @@ export function useFuncionarios() {
             queryClient.invalidateQueries({ queryKey: ['funcionarios'] });
         },
     });
+}
 
-    const updateFuncionario = useMutation({
+export function useUpdateFuncionario() {
+    const queryClient = useQueryClient();
+
+    return useMutation({
         mutationFn: async ({ id, data }: { id: string; data: Partial<FuncionarioFormData> }) => {
             // 1. Get the actual funcionario row to find profile_id
             const { data: funcData, error: fetchErr } = await supabase.from('funcionarios').select('profile_id').eq('id', id).single();
@@ -185,12 +197,4 @@ export function useFuncionarios() {
             queryClient.invalidateQueries({ queryKey: ['funcionarios'] });
         },
     });
-
-    return {
-        getFuncionarios,
-        getDepartamentos,
-        createDepartamento,
-        createFuncionario,
-        updateFuncionario,
-    };
 }

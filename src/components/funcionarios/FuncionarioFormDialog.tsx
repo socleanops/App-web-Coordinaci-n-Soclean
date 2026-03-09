@@ -27,7 +27,7 @@ import {
 } from '@/components/ui/select';
 import type { FuncionarioFormData } from '@/lib/validations/funcionario';
 import { funcionarioSchema } from '@/lib/validations/funcionario';
-import { useFuncionarios } from '@/hooks/useFuncionarios';
+import { useGetDepartamentos, useCreateDepartamento, useCreateFuncionario, useUpdateFuncionario } from '@/hooks/useFuncionarios';
 
 interface Props {
     open: boolean;
@@ -36,7 +36,11 @@ interface Props {
 }
 
 export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }: Props) {
-    const { getDepartamentos, createDepartamento, createFuncionario, updateFuncionario } = useFuncionarios();
+    const getDepartamentos = useGetDepartamentos();
+    const createDepartamento = useCreateDepartamento();
+    const createFuncionario = useCreateFuncionario();
+    const updateFuncionario = useUpdateFuncionario();
+
     const form = useForm<FuncionarioFormData>({
         resolver: zodResolver(funcionarioSchema) as any,
         defaultValues: {

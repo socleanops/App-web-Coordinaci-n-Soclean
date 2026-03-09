@@ -2,14 +2,14 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Map, MapPin, User, Navigation } from 'lucide-react';
 import { useServicios } from '@/hooks/useServicios';
-import { useFuncionarios } from '@/hooks/useFuncionarios';
+import { useGetFuncionarios } from '@/hooks/useFuncionarios';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 
 export default function LogisticsMap() {
     const { getServicios } = useServicios();
     const { data: servicios = [] } = getServicios;
-    const { getFuncionarios } = useFuncionarios();
+    const getFuncionarios = useGetFuncionarios();
     const { data: funcionarios = [] } = getFuncionarios;
 
     const [selectedServiceId, setSelectedServiceId] = useState<string>('');

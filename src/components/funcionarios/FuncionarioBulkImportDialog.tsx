@@ -11,7 +11,7 @@ import {
     DialogTitle,
     DialogFooter,
 } from '@/components/ui/dialog';
-import { useFuncionarios } from '@/hooks/useFuncionarios';
+import { useCreateFuncionario, useGetDepartamentos } from '@/hooks/useFuncionarios';
 
 interface Props {
     open: boolean;
@@ -19,7 +19,8 @@ interface Props {
 }
 
 export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
-    const { createFuncionario, getDepartamentos } = useFuncionarios();
+    const createFuncionario = useCreateFuncionario();
+    const getDepartamentos = useGetDepartamentos();
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [progress, setProgress] = useState(0);
