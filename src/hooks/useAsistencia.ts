@@ -71,9 +71,62 @@ export function useAsistencia(fechaFiltro?: string) {
         },
     });
 
+    const generarPlanillaDia = useMutation({
+        mutationFn: async (fecha: string) => {
+            // 1. Determine day of week (0 = Sunday, 1 = Monday ...)
+            const dateObj = new Date(fecha + 'T12:00:00Z'); // noon UTC
+            const diaSemana = dateObj.getUTCDay();
+
+            // 2. Fetch all active schedules for this day of week
+            const { data: horarios, error: horariosErr } = await supabase
+                .from('horarios')
+                .select('*')
+                .eq('dia_semana', diaSemana)
+                .is('vigente_hasta', null); // only active schedules
+
+            if (horariosErr) throw new Error(horariosErr.message);
+            if (!horarios || horarios.length === 0) return { count: 0 };
+
+            // 3. Fetch existing attendance records for this date
+            const { data: existentes, error: extErr } = await supabase
+                .from('asistencia')
+                .select('horario_id')
+                .eq('fecha', fecha);
+
+            if (extErr) throw new Error(extErr.message);
+
+            const existingHorariosMap = new Set(existentes?.map(e => e.horario_id));
+
+            // 4. Create new attendance records for missing schedules
+            const nuevosRegistros = horarios
+                .filter(h => !existingHorariosMap.has(h.id))
+                .map(h => ({
+                    funcionario_id: h.funcionario_id,
+                    horario_id: h.id,
+                    fecha: fecha,
+                    estado: 'pendiente'
+                }));
+
+            if (nuevosRegistros.length === 0) return { count: 0 };
+
+            // 5. Bulk insert
+            const { error: insErr } = await supabase
+                .from('asistencia')
+                .insert(nuevosRegistros);
+
+            if (insErr) throw new Error(insErr.message);
+
+            return { count: nuevosRegistros.length };
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['asistencia'] });
+        }
+    });
+
     return {
         getAsistencias,
         createAsistencia,
         updateAsistencia,
+        generarPlanillaDia,
     };
 }

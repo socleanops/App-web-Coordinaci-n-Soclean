@@ -24,8 +24,21 @@ export default function Attendance() {
     const [searchTerm, setSearchTerm] = useState('');
     const [hideResolved, setHideResolved] = useState(true);
 
-    const { getAsistencias, updateAsistencia } = useAsistencia(fecha);
+    const { getAsistencias, updateAsistencia, generarPlanillaDia } = useAsistencia(fecha);
     const { data: asistencias = [], isLoading, refetch } = getAsistencias;
+
+    const handleGenerarPlanilla = async () => {
+        try {
+            const result = await generarPlanillaDia.mutateAsync(fecha);
+            if (result.count > 0) {
+                toast.success(`Planilla generada: se agregaron ${result.count} registros basados en los horarios teóricos.`);
+            } else {
+                toast.info('No se encontraron horarios teóricos activos para aplicar en esta fecha, o los registros ya estaban creados.');
+            }
+        } catch (error: any) {
+            toast.error(error.message || 'Error al intentar generar la planilla');
+        }
+    };
 
     const handleActualizarEstado = async (id: string, nuevoEstado: string) => {
         try {
@@ -122,10 +135,21 @@ export default function Attendance() {
                                     </TableRow>
                                 ) : filteredAsistencias.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={5} className="text-center h-24 text-muted-foreground flex flex-col items-center justify-center gap-2">
-                                            <AlertCircle className="h-8 w-8 text-slate-400" />
-                                            <span>No hay turnos registrados para la fecha seleccionada. (El generador diario automático aún no está activo)</span>
-                                            <span className="text-xs">Los turnos se volcarán a esta tabla para ser chequeados con las planillas físicas.</span>
+                                        <TableCell colSpan={5} className="text-center h-32 text-muted-foreground">
+                                            <div className="flex flex-col items-center justify-center gap-4 py-8">
+                                                <AlertCircle className="h-10 w-10 text-slate-400" />
+                                                <div className="space-y-1">
+                                                    <p className="text-lg font-medium text-slate-700 dark:text-slate-300">No hay turnos registrados para la fecha seleccionada</p>
+                                                    <p className="text-sm">Genera la planilla para volcar los horarios teóricos correspondientes a este día y poder chequearlos.</p>
+                                                </div>
+                                                <Button
+                                                    onClick={handleGenerarPlanilla}
+                                                    disabled={generarPlanillaDia.isPending}
+                                                    className="mt-2"
+                                                >
+                                                    {generarPlanillaDia.isPending ? 'Generando...' : 'Generar Planilla del Día'}
+                                                </Button>
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ) : (
