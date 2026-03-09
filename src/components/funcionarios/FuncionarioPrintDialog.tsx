@@ -36,6 +36,9 @@ export function FuncionarioPrintDialog({ open, onOpenChange, employees }: Props)
 
         const dateStr = new Date().toLocaleDateString();
 
+        const activeCount = employees.filter(e => e.estado === 'activo').length;
+        const deptsCount = new Set(employees.map(e => e.departamentos?.nombre).filter(Boolean)).size;
+
         let tableHtml = `
       <html>
         <head>
@@ -46,12 +49,21 @@ export function FuncionarioPrintDialog({ open, onOpenChange, employees }: Props)
             th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
             th { background-color: #f2f2f2; }
             h2 { margin-bottom: 5px; }
-            p { color: #555; font-size: 14px; }
+            .summary { background-color: #f8f9fa; padding: 15px; border-radius: 5px; margin-bottom: 20px; border: 1px solid #e9ecef; }
+            .summary ul { margin: 5px 0 0 0; padding-left: 20px; color: #444; font-size: 14px; }
+            p { color: #555; font-size: 14px; margin: 0 0 10px 0; }
           </style>
         </head>
         <body>
-          <h2>Listado de Personal</h2>
-          <p>Generado el: ${dateStr} - Total: ${employees.length} funcionarios</p>
+          <h2>Reporte: Listado de Personal</h2>
+          <div class="summary">
+            <p><strong>Resumen del reporte emitido el ${dateStr}:</strong></p>
+            <ul>
+              <li><strong>Total de Funcionarios:</strong> ${employees.length}</li>
+              <li><strong>Funcionarios Activos:</strong> ${activeCount}</li>
+              <li><strong>Departamentos representados:</strong> ${deptsCount}</li>
+            </ul>
+          </div>
           <table>
             <thead>
               <tr>
