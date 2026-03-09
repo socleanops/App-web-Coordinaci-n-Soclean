@@ -42,6 +42,11 @@ export default function Billing() {
         return num.includes(search) || cliente.includes(search);
     });
 
+    const totalHorasCotizadas = facturas.reduce((acc, current) => {
+        const items = current.items || [];
+        return acc + items.reduce((accItem: number, item: any) => accItem + (item.cantidad || 0), 0);
+    }, 0);
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
@@ -69,7 +74,7 @@ export default function Billing() {
                         <CardTitle className="text-lg font-medium opacity-90 text-white">Total Horas Cotizadas (Mes)</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold">{facturas.reduce((acc, current) => acc + current.items.reduce((accItem: any, item: any) => accItem + item.cantidad, 0), 0)} Horas</div>
+                        <div className="text-3xl font-bold">{totalHorasCotizadas} Horas</div>
                         <p className="text-sm opacity-80 mt-1">Estimación operativa de carga horaria acumulada</p>
                     </CardContent>
                 </Card>
