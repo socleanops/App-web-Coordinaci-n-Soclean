@@ -3,7 +3,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Pencil } from 'lucide-react';
+import { Search, Pencil, Printer } from 'lucide-react';
+import { FuncionarioPrintDialog } from './FuncionarioPrintDialog';
 
 interface FuncionariosTableProps {
     employees: any[];
@@ -13,6 +14,7 @@ interface FuncionariosTableProps {
 
 export function FuncionariosTable({ employees, isLoading, onEdit }: FuncionariosTableProps) {
     const [searchTerm, setSearchTerm] = useState('');
+    const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
 
     const filteredEmployees = employees.filter((emp: any) => {
         const search = searchTerm.toLowerCase();
@@ -37,6 +39,13 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsPrintDialogOpen(true)}
+                        disabled={filteredEmployees.length === 0}
+                    >
+                        <Printer className="h-4 w-4 mr-2" /> Imprimir
+                    </Button>
                 </div>
             </CardHeader>
             <CardContent>
@@ -109,6 +118,12 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
                     </Table>
                 </div>
             </CardContent>
+
+            <FuncionarioPrintDialog
+                open={isPrintDialogOpen}
+                onOpenChange={setIsPrintDialogOpen}
+                employees={filteredEmployees}
+            />
         </Card>
     );
 }

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Pencil, Search, CalendarClock, Trash2, Smartphone } from 'lucide-react';
+import { PlusCircle, Pencil, Search, CalendarClock, Trash2, Smartphone, Printer } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { HorarioFormDialog } from '@/components/horarios/HorarioFormDialog';
+import { HorarioPrintDialog } from '@/components/horarios/HorarioPrintDialog';
 import { useHorarios } from '@/hooks/useHorarios';
 import type { Horario } from '@/types';
 import { toast } from 'sonner';
@@ -21,6 +22,7 @@ const DIAS_MAP: Record<number, string> = {
 
 export default function Schedules() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
     const [editingHorario, setEditingHorario] = useState<Horario | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
 
@@ -101,6 +103,14 @@ export default function Schedules() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsPrintDialogOpen(true)}
+                            disabled={filteredHorarios.length === 0}
+                            className="shrink-0"
+                        >
+                            <Printer className="h-4 w-4 mr-2" /> Imprimir
+                        </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -202,6 +212,12 @@ export default function Schedules() {
                 open={isDialogOpen}
                 onOpenChange={setIsDialogOpen}
                 horarioToEdit={editingHorario}
+            />
+
+            <HorarioPrintDialog
+                open={isPrintDialogOpen}
+                onOpenChange={setIsPrintDialogOpen}
+                horarios={filteredHorarios}
             />
         </div>
     );
