@@ -19,7 +19,7 @@ interface Props {
 }
 
 export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
-    const { createFuncionario, getDepartamentos } = useFuncionarios();
+    const { createFuncionario, getDepartamentos, createDepartamento } = useFuncionarios();
     const [file, setFile] = useState<File | null>(null);
     const [isUploading, setIsUploading] = useState(false);
     const [progress, setProgress] = useState(0);
@@ -88,14 +88,24 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
 
                     // Match department by name vaguely, by exact ID, or safely fallback to first one
                     const reqDeptoId = row.departamento_id || row.Departamento_id;
-                    const reqDeptoName = String(row.Departamento || row.departamento || row.DEPARTAMENTO || '').toLowerCase().trim();
+                    const reqDeptoNameOriginal = String(row.Departamento || row.departamento || row.DEPARTAMENTO || 'General').trim();
+                    const reqDeptoName = reqDeptoNameOriginal.toLowerCase();
 
                     let matchedDepto = reqDeptoId
                         ? currentDeptos.find(d => d.id === reqDeptoId)
                         : currentDeptos.find(d => d.nombre.toLowerCase() === reqDeptoName);
 
-                    if (!matchedDepto && currentDeptos.length > 0) {
-                        matchedDepto = currentDeptos[0]; // fallback
+                    if (!matchedDepto) {
+                        try {
+                            matchedDepto = await createDepartamento.mutateAsync(reqDeptoNameOriginal);
+                            if (matchedDepto) currentDeptos.push(matchedDepto);
+                        } catch (e: any) {
+                            if (currentDeptos.length > 0) {
+                                matchedDepto = currentDeptos[0]; // fallback
+                            } else {
+                                throw new Error(`Fila ${i + 2}: No hay departamentos y error al crear '${reqDeptoNameOriginal}': ${e.message}`);
+                            }
+                        }
                     }
 
                     if (!matchedDepto) {
