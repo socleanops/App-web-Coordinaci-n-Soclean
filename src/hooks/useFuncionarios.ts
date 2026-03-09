@@ -55,7 +55,9 @@ export function useFuncionarios() {
         mutationFn: async (formData: FuncionarioFormData) => {
             let profileId = formData.id; // if it already exists
 
-            const randomSuffix = Math.random().toString(36).substring(2, 8);
+            const array = new Uint32Array(1);
+            window.crypto.getRandomValues(array);
+            const randomSuffix = array[0].toString(36).substring(0, 6);
             const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
             const safePassword = formData.password?.trim() || `SC${formData.cedula.replace(/\D/g, '')}#2026`;
 
