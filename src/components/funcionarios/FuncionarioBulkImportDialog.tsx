@@ -129,9 +129,30 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         parsedFechaIngreso = jsDate.toISOString().split('T')[0];
                     } else if (typeof rawFecha === 'string' && rawFecha.trim() !== '') {
                         // Try to fix DD/MM/YYYY string formats to YYYY-MM-DD for PostgreSQL
-                        parsedFechaIngreso = rawFecha.includes('/')
-                            ? rawFecha.split('/').reverse().join('-')
-                            : rawFecha;
+                        let parts = rawFecha.includes('/') ? rawFecha.split('/') : rawFecha.split('-');
+                        if (parts.length === 3) {
+                            // Find the 4-digit year format
+                            const yearIndex = parts.findIndex(p => p.length === 4);
+                            if (yearIndex === 2) {
+                                // XX/XX/YYYY
+                                const p0 = parseInt(parts[0], 10);
+                                const p1 = parseInt(parts[1], 10);
+                                if (p1 > 12) {
+                                    // p1 is day, p0 is month -> MM/DD/YYYY
+                                    parsedFechaIngreso = `${parts[2]}-${String(p0).padStart(2, '0')}-${String(p1).padStart(2, '0')}`;
+                                } else {
+                                    // default to DD/MM/YYYY format
+                                    parsedFechaIngreso = `${parts[2]}-${String(p1).padStart(2, '0')}-${String(p0).padStart(2, '0')}`;
+                                }
+                            } else if (yearIndex === 0) {
+                                // YYYY/MM/DD
+                                parsedFechaIngreso = `${parts[0]}-${String(parts[1]).padStart(2, '0')}-${String(parts[2]).padStart(2, '0')}`;
+                            } else {
+                                parsedFechaIngreso = rawFecha.split('/').reverse().join('-');
+                            }
+                        } else {
+                            parsedFechaIngreso = rawFecha.includes('/') ? rawFecha.split('/').reverse().join('-') : rawFecha;
+                        }
                     }
 
                     const fecha_ingreso = parsedFechaIngreso;
@@ -154,7 +175,15 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                     });
 
                 } catch (err: any) {
-                    newErrors.push(err.message || `Fila ${i + 2}: Error desconocido`);
+                    const msg = err.message || '';
+                    if (msg.includes('duplicate key value') || msg.includes('cedula_key')) {
+                        const duplicateCedula = row.Cedula || row.cedula || row.CEDULA || 'especificada';
+                        newErrors.push(`Fila ${i + 2}: El funcionario con la cédula ${duplicateCedula} ya se encuentra registrado.`);
+                    } else if (msg.includes('date/time field value out of range')) {
+                        newErrors.push(`Fila ${i + 2}: El formato de la fecha de ingreso es inválido o incomprensible.`);
+                    } else {
+                        newErrors.push(msg || `Fila ${i + 2}: Error desconocido`);
+                    }
                 }
 
                 currentProgress++;
