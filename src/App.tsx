@@ -1,6 +1,7 @@
 import { useEffect, lazy, Suspense } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { Loader2 } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 import { DashboardLayout } from './components/layout/DashboardLayout';
 import { ProtectedRoute } from './components/layout/ProtectedRoute';
 
@@ -145,6 +146,7 @@ function App() {
           </Route>
         </Routes>
       </Suspense>
+      <Analytics />
     </Router>
   );
 }
