@@ -85,7 +85,7 @@ export default function Attendance() {
                         className="h-11"
                     >
                         <Filter className="h-4 w-4 mr-2" />
-                        {hideResolved ? `Pendientes (${pendingCount})` : 'Viendo Todos'}
+                        {hideResolved ? `Pendientes (${pendingCount})` : 'Todos'}
                     </Button>
                     <Input
                         type="date"
