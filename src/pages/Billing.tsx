@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Search, FileText, Download, MoreVertical } from 'lucide-react';
@@ -35,12 +35,20 @@ export default function Billing() {
         }
     };
 
-    const filteredFacturas = facturas.filter((f: Factura) => {
-        const search = searchTerm.toLowerCase();
-        const num = f.numero?.toLowerCase() || '';
-        const cliente = f.clientes?.razon_social?.toLowerCase() || '';
-        return num.includes(search) || cliente.includes(search);
-    });
+    const filteredFacturas = useMemo(() => {
+        const dateFormatter = new Intl.DateTimeFormat();
+        return facturas
+            .filter((f: Factura) => {
+                const search = searchTerm.toLowerCase();
+                const num = f.numero?.toLowerCase() || '';
+                const cliente = f.clientes?.razon_social?.toLowerCase() || '';
+                return num.includes(search) || cliente.includes(search);
+            })
+            .map((f: Factura) => ({
+                ...f,
+                fecha_emision_formatted: f.fecha_emision ? dateFormatter.format(new Date(f.fecha_emision)) : ''
+            }));
+    }, [facturas, searchTerm]);
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -131,7 +139,7 @@ export default function Billing() {
                                                     {f.numero}
                                                 </div>
                                                 <div className="text-xs text-muted-foreground">
-                                                    Emisión: {new Date(f.fecha_emision).toLocaleDateString()}
+                                                    Emisión: {(f as any).fecha_emision_formatted}
                                                 </div>
                                             </TableCell>
                                             <TableCell>
