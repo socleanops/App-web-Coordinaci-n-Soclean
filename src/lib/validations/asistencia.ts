@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 export const asistenciaSchema = z.object({
     id: z.string().optional(),
-    funcionario_id: z.string().min(1, 'Selecciona un funcionario'),
-    horario_id: z.string().optional(),
-    fecha: z.string().min(1, 'La fecha es obligatoria'),
+    horario_id: z.string().min(1, 'Seleccione un horario base'),
+    funcionario_id: z.string().min(1, 'Seleccione un funcionario'),
+    fecha: z.string().min(1, 'Seleccione una fecha'),
     hora_entrada_registrada: z.string().optional().nullable(),
     hora_salida_registrada: z.string().optional().nullable(),
     distancia_entrada_metros: z.number().optional().nullable(),
