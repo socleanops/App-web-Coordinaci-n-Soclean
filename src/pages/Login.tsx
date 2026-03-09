@@ -9,6 +9,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { toast } from 'sonner';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 const loginSchema = z.object({
     email: z.string().email('Debe ser un correo electrónico válido'),
@@ -20,6 +29,12 @@ type LoginForm = z.infer<typeof loginSchema>;
 export default function Login() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
+
+    // Forgot password state
+    const [isResetOpen, setIsResetOpen] = useState(false);
+    const [resetEmail, setResetEmail] = useState('');
+    const [isResetting, setIsResetting] = useState(false);
+
     const setUser = useAuthStore((state) => state.setUser);
     const setRole = useAuthStore((state) => state.setRole);
     const navigate = useNavigate();
@@ -65,6 +80,25 @@ export default function Login() {
         }
     };
 
+    const handleResetPassword = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!resetEmail) return;
+        setIsResetting(true);
+        try {
+            const { error } = await supabase.auth.resetPasswordForEmail(resetEmail, {
+                redirectTo: window.location.origin,
+            });
+            if (error) throw error;
+            toast.success('Se ha enviado un correo con las instrucciones para restablecer tu contraseña. Revisa tu bandeja de entrada o spam.');
+            setIsResetOpen(false);
+            setResetEmail('');
+        } catch (err: any) {
+            toast.error(err.message || 'Error al enviar el correo de recuperación');
+        } finally {
+            setIsResetting(false);
+        }
+    };
+
     return (
         <div className="flex h-screen items-center justify-center bg-slate-50 dark:bg-slate-900 border-2">
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-secondary/20 pointer-events-none" />
@@ -98,9 +132,13 @@ export default function Login() {
                             <div className="space-y-2">
                                 <div className="flex items-center justify-between">
                                     <Label htmlFor="password">Contraseña</Label>
-                                    <a href="#" className="text-sm text-primary hover:underline">
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsResetOpen(true)}
+                                        className="text-sm text-primary hover:underline hover:text-primary/80 transition-colors"
+                                    >
                                         ¿Olvidaste tu contraseña?
-                                    </a>
+                                    </button>
                                 </div>
                                 <Input
                                     id="password"
@@ -127,6 +165,43 @@ export default function Login() {
                     </CardContent>
                 </Card>
             </div>
+
+            <Dialog open={isResetOpen} onOpenChange={setIsResetOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <form onSubmit={handleResetPassword}>
+                        <DialogHeader>
+                            <DialogTitle>Restablecer Contraseña</DialogTitle>
+                            <DialogDescription>
+                                Ingresa el correo electrónico asociado a tu cuenta y te enviaremos un enlace para crear una nueva contraseña.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="py-4 space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="reset-email">Correo electrónico</Label>
+                                <Input
+                                    id="reset-email"
+                                    type="email"
+                                    placeholder="nombre@empresa.com"
+                                    value={resetEmail}
+                                    onChange={(e) => setResetEmail(e.target.value)}
+                                    required
+                                    disabled={isResetting}
+                                />
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setIsResetOpen(false)}>
+                                Cancelar
+                            </Button>
+                            <Button type="submit" disabled={isResetting || !resetEmail}>
+                                {isResetting ? 'Enviando...' : 'Enviar correo'}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
