@@ -21,7 +21,8 @@ export function useClientes() {
 
     const createCliente = useMutation({
         mutationFn: async (formData: ClienteFormData) => {
-            const { id, ...dataToInsert } = formData;
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const { id: _id, ...dataToInsert } = formData;
             const payload = { ...dataToInsert, nombre: dataToInsert.razon_social };
             const { data, error } = await supabase
                 .from('clientes')
@@ -39,7 +40,7 @@ export function useClientes() {
 
     const updateCliente = useMutation({
         mutationFn: async ({ id, data }: { id: string; data: Partial<ClienteFormData> }) => {
-            const payload: any = { ...data };
+            const payload: Record<string, unknown> = { ...data };
             if (payload.razon_social) {
                 payload.nombre = payload.razon_social;
             }
