@@ -22,9 +22,10 @@ export function useClientes() {
     const createCliente = useMutation({
         mutationFn: async (formData: ClienteFormData) => {
             const { id, ...dataToInsert } = formData;
+            const payload = { ...dataToInsert, nombre: dataToInsert.razon_social };
             const { data, error } = await supabase
                 .from('clientes')
-                .insert(dataToInsert)
+                .insert(payload)
                 .select()
                 .single();
 
@@ -38,9 +39,13 @@ export function useClientes() {
 
     const updateCliente = useMutation({
         mutationFn: async ({ id, data }: { id: string; data: Partial<ClienteFormData> }) => {
+            const payload: any = { ...data };
+            if (payload.razon_social) {
+                payload.nombre = payload.razon_social;
+            }
             const { data: result, error } = await supabase
                 .from('clientes')
-                .update(data)
+                .update(payload)
                 .eq('id', id)
                 .select()
                 .single();
