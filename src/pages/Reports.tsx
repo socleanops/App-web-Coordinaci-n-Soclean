@@ -1,17 +1,45 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { FileText, Download, Calendar, ArrowRightCircle } from 'lucide-react';
+import { FileText, Download, Calendar, ArrowRightCircle, Filter } from 'lucide-react';
 import { useAsistencia } from '@/hooks/useAsistencia';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Reports() {
     const [mes, setMes] = useState<string>(new Date().toISOString().substring(0, 7)); // YYYY-MM
     const [loadingReport, setLoadingReport] = useState(false);
+    const [filtroFuncionario, setFiltroFuncionario] = useState<string>('todos');
+    const [filtroServicio, setFiltroServicio] = useState<string>('todos');
 
     // Using useAsistencia without filter to get everything (simplified for prototype)
     const { getAsistencias } = useAsistencia();
     const { data: asistencias = [], isLoading } = getAsistencias;
+
+    // Obtener listas únicas para los selectores base de datos cargados
+    const uniqueEmpleados = asistencias.reduce((acc: any[], current: any) => {
+        if (!acc.find(item => item.funcionario_id === current.funcionario_id) && current.funcionario_id) {
+            acc.push(current);
+        }
+        return acc;
+    }, []).sort((a: any, b: any) => {
+        const nameA = a.funcionarios?.profiles?.nombre || '';
+        const nameB = b.funcionarios?.profiles?.nombre || '';
+        return nameA.localeCompare(nameB);
+    });
+
+    const uniqueServicios = asistencias.reduce((acc: any[], current: any) => {
+        const servicioId = current.horarios?.servicio_id;
+        if (!acc.find(item => item.horarios?.servicio_id === servicioId) && servicioId) {
+            acc.push(current);
+        }
+        return acc;
+    }, []).sort((a: any, b: any) => {
+        const nameA = a.horarios?.servicios?.nombre || '';
+        const nameB = b.horarios?.servicios?.nombre || '';
+        return nameA.localeCompare(nameB);
+    });
 
     const generarReporteCSV = (tipo: 'empleados' | 'clientes' | 'quincena1') => {
         setLoadingReport(true);
@@ -19,9 +47,18 @@ export default function Reports() {
 
         setTimeout(() => {
             // Filtrar asistencias por mes seleccionado o quincena
-            const registrosMes = asistencias.filter(a => a.fecha.startsWith(mes));
+            const registrosMes = asistencias.filter((a: any) => a.fecha.startsWith(mes));
 
             let registrosAUsar = registrosMes;
+
+            // Aplicar filtros adicionales si están seleccionados
+            if (filtroFuncionario !== 'todos') {
+                registrosAUsar = registrosAUsar.filter((a: any) => a.funcionario_id === filtroFuncionario);
+            }
+            if (filtroServicio !== 'todos') {
+                registrosAUsar = registrosAUsar.filter((a: any) => a.horarios?.servicio_id === filtroServicio);
+            }
+
             if (tipo === 'quincena1') {
                 registrosAUsar = registrosMes.filter(a => parseInt(a.fecha.split('-')[2]) <= 15);
             }
@@ -33,32 +70,133 @@ export default function Reports() {
             }
 
             // Agrupar datos según el tipo
-            let rawCsv = '';
+            let dataToExport: any[] = [];
             if (tipo === 'empleados' || tipo === 'quincena1') {
-                rawCsv = 'FECHA,ID_EMPLEADO,NOMBRE_EMPLEADO,CLIENTE/SERVICIO,ESTADO,HORA_ENTRADA_REAL,HORA_SALIDA_REAL\n';
-                registrosAUsar.forEach(r => {
-                    const nombre = `${r.funcionarios?.profiles?.nombre} ${r.funcionarios?.profiles?.apellido}`;
-                    const servicio = `${r.horarios?.servicios?.clientes?.razon_social} - ${r.horarios?.servicios?.nombre}`;
-                    rawCsv += `${r.fecha},${r.funcionario_id},"${nombre}","${servicio}",${r.estado},${r.hora_entrada_registrada ? new Date(r.hora_entrada_registrada).toLocaleTimeString() : 'Sin marcar'},${r.hora_salida_registrada ? new Date(r.hora_salida_registrada).toLocaleTimeString() : 'Sin marcar'}\n`;
+                // Ordenar por empleado alfabéticamente, y luego por fecha
+                const registrosOrdenados = [...registrosAUsar].sort((a, b) => {
+                    const nameA = a.funcionarios?.profiles?.nombre || '';
+                    const nameB = b.funcionarios?.profiles?.nombre || '';
+                    if (nameA !== nameB) return nameA.localeCompare(nameB);
+                    return a.fecha.localeCompare(b.fecha);
+                });
+
+                dataToExport = registrosOrdenados.map(r => {
+                    let totalHoras = '0 hs';
+                    const hEntrada = r.horarios?.hora_entrada?.substring(0, 5);
+                    const hSalida = r.horarios?.hora_salida?.substring(0, 5);
+
+                    if (hEntrada && hSalida) {
+                        const [eH, eM] = hEntrada.split(':').map(Number);
+                        const [sH, sM] = hSalida.split(':').map(Number);
+                        let minutes = (sH * 60 + sM) - (eH * 60 + eM);
+                        if (minutes < 0) minutes += 24 * 60; // manejo de turnos de noche
+
+                        const hours = Math.floor(minutes / 60);
+                        const mins = minutes % 60;
+                        totalHoras = mins === 0 ? `${hours} hs` : `${hours}:${mins.toString().padStart(2, '0')} hs`;
+                    }
+
+                    return {
+                        'Nombre Empleado': `${r.funcionarios?.profiles?.nombre} ${r.funcionarios?.profiles?.apellido}`,
+                        'Fecha': r.fecha,
+                        'Cédula': r.funcionarios?.cedula || 'N/A',
+                        'Cliente / Servicio': `${r.horarios?.servicios?.clientes?.razon_social || ''} - ${r.horarios?.servicios?.nombre || ''}`,
+                        'Horario de Entrada': hEntrada || 'N/A',
+                        'Horario de Salida': hSalida || 'N/A',
+                        'Total Horas': totalHoras,
+                        'Estado Confirmación': r.estado.toUpperCase(),
+                        'Observaciones': r.observaciones || ''
+                    };
                 });
             } else if (tipo === 'clientes') {
-                rawCsv = 'FECHA,CLIENTE,SERVICIO,NOMBRE_EMPLEADO,ESTADO_SERVICIO,OBSERVACIONES\n';
-                registrosAUsar.forEach(r => {
-                    const nombre = `${r.funcionarios?.profiles?.nombre} ${r.funcionarios?.profiles?.apellido}`;
-                    const cliente = r.horarios?.servicios?.clientes?.razon_social || 'N/A';
-                    const servicio = r.horarios?.servicios?.nombre || 'N/A';
-                    rawCsv += `${r.fecha},"${cliente}","${servicio}","${nombre}",${r.estado},"${r.observaciones || ''}"\n`;
+                // Ordenar por Cliente, luego por Servicio, y luego por Fecha
+                const registrosOrdenados = [...registrosAUsar].sort((a, b) => {
+                    const clientA = a.horarios?.servicios?.clientes?.razon_social || '';
+                    const clientB = b.horarios?.servicios?.clientes?.razon_social || '';
+                    if (clientA !== clientB) return clientA.localeCompare(clientB);
+
+                    const servA = a.horarios?.servicios?.nombre || '';
+                    const servB = b.horarios?.servicios?.nombre || '';
+                    if (servA !== servB) return servA.localeCompare(servB);
+
+                    return a.fecha.localeCompare(b.fecha);
+                });
+
+                dataToExport = registrosOrdenados.map(r => {
+                    let totalHoras = '0 hs';
+                    const hEntrada = r.horarios?.hora_entrada?.substring(0, 5);
+                    const hSalida = r.horarios?.hora_salida?.substring(0, 5);
+
+                    if (hEntrada && hSalida) {
+                        const [eH, eM] = hEntrada.split(':').map(Number);
+                        const [sH, sM] = hSalida.split(':').map(Number);
+                        let minutes = (sH * 60 + sM) - (eH * 60 + eM);
+                        if (minutes < 0) minutes += 24 * 60; // manejo de turnos de noche
+
+                        const hours = Math.floor(minutes / 60);
+                        const mins = minutes % 60;
+                        totalHoras = mins === 0 ? `${hours} hs` : `${hours}:${mins.toString().padStart(2, '0')} hs`;
+                    }
+
+                    return {
+                        'Cliente': r.horarios?.servicios?.clientes?.razon_social || 'N/A',
+                        'Servicio': r.horarios?.servicios?.nombre || 'N/A',
+                        'Fecha': r.fecha,
+                        'Nombre Empleado': `${r.funcionarios?.profiles?.nombre} ${r.funcionarios?.profiles?.apellido}`,
+                        'Horario de Entrada': hEntrada || 'N/A',
+                        'Horario de Salida': hSalida || 'N/A',
+                        'Total Horas': totalHoras,
+                        'Estado': r.estado.toUpperCase(),
+                        'Observaciones': r.observaciones || ''
+                    };
                 });
             }
 
-            // Descargar archivo
-            const blob = new Blob([rawCsv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `reporte_soclean_${tipo}_${mes}.csv`;
-            a.click();
-            URL.revokeObjectURL(url);
+            // Calcular el total global de tiempo en todos los registros mostrados
+            let totalMinutosGlobal = 0;
+            dataToExport.forEach(row => {
+                if (row['Total Horas'] && row['Total Horas'] !== '0 hs') {
+                    const timePart = row['Total Horas'].replace(' hs', '').trim();
+                    const parts = timePart.split(':');
+                    if (parts.length === 2) {
+                        totalMinutosGlobal += (parseInt(parts[0]) * 60) + parseInt(parts[1]);
+                    } else if (parts.length === 1) {
+                        totalMinutosGlobal += parseInt(parts[0]) * 60;
+                    }
+                }
+            });
+
+            if (totalMinutosGlobal > 0) {
+                const totalHoursCalculated = Math.floor(totalMinutosGlobal / 60);
+                const totalMinsCalculated = totalMinutosGlobal % 60;
+                const formattedGlobalTotal = totalMinsCalculated === 0
+                    ? `${totalHoursCalculated} hs`
+                    : `${totalHoursCalculated}:${totalMinsCalculated.toString().padStart(2, '0')} hs`;
+
+                // Agregar una fila en blanco separadora
+                dataToExport.push({});
+
+                // Crear objeto de total. Mapear "Total Horas" a la columna respectiva, 
+                // y usar la primera columna disponible para el texto "TOTAL GLOBAL DE HORAS DE ESTE REPORTE"
+                const summaryRow: any = {};
+                const firstKey = Object.keys(dataToExport[0])[0]; // 'Nombre Empleado' o 'Cliente'
+                summaryRow[firstKey] = '=> TOTAL GLOBAL DE HORAS DE ESTE REPORTE <=';
+                summaryRow['Total Horas'] = formattedGlobalTotal;
+
+                // Si el reporte es 'empleados', 'Total Horas' se llamaba diferente. Lo unificamos.
+                if (tipo !== 'clientes') {
+                    summaryRow['Total Horas Teóricas'] = formattedGlobalTotal;
+                    delete summaryRow['Total Horas'];
+                }
+
+                dataToExport.push(summaryRow);
+            }
+
+            // Generar y descargar archivo Excel
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Reporte");
+            XLSX.writeFile(workbook, `reporte_soclean_${tipo}_${mes}.xlsx`);
 
             toast.success('Reporte exportado exitosamente con ruta de auditoría adjunta');
             setLoadingReport(false);
@@ -85,15 +223,55 @@ export default function Reports() {
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-6">
-                    <div className="flex flex-col sm:flex-row gap-4 items-end mb-8">
-                        <div className="w-full sm:w-64 space-y-2">
-                            <label className="text-sm font-semibold">Mes Objetivo</label>
+                    <div className="flex flex-col md:flex-row gap-4 mb-8">
+                        <div className="w-full md:w-48 space-y-2">
+                            <label className="text-sm font-semibold text-slate-700">Mes Objetivo</label>
                             <input
                                 type="month"
                                 value={mes}
                                 onChange={(e) => setMes(e.target.value)}
-                                className="flex h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900"
+                                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-coreops-primary"
                             />
+                        </div>
+
+                        <div className="w-full md:w-64 space-y-2">
+                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-1">
+                                <Filter className="h-3 w-3" />
+                                Filtrar por Funcionario
+                            </label>
+                            <Select value={filtroFuncionario} onValueChange={setFiltroFuncionario}>
+                                <SelectTrigger className="h-10 border-slate-300">
+                                    <SelectValue placeholder="Todos los funcionarios" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="todos">Todos los Empleados</SelectItem>
+                                    {uniqueEmpleados.map((a: any) => (
+                                        <SelectItem key={`emp_${a.funcionario_id}`} value={a.funcionario_id}>
+                                            {a.funcionarios?.profiles?.nombre} {a.funcionarios?.profiles?.apellido}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+
+                        <div className="w-full md:w-72 space-y-2">
+                            <label className="text-sm font-semibold text-slate-700 flex items-center gap-1">
+                                <Filter className="h-3 w-3" />
+                                Filtrar por Servicio
+                            </label>
+                            <Select value={filtroServicio} onValueChange={setFiltroServicio}>
+                                <SelectTrigger className="h-10 border-slate-300">
+                                    <SelectValue placeholder="Todos los servicios" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="todos">Todos los Servicios</SelectItem>
+                                    {uniqueServicios.map((a: any) => (
+                                        <SelectItem key={`srv_${a.horarios?.servicio_id}`} value={a.horarios?.servicio_id}>
+                                            {a.horarios?.servicios?.clientes?.razon_social} - {a.horarios?.servicios?.nombre}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
                     </div>
 
@@ -109,7 +287,7 @@ export default function Reports() {
                                 disabled={loadingReport || isLoading}
                             >
                                 <Download className="h-4 w-4 mr-2" />
-                                Exportar Quincena a CSV
+                                Exportar Quincena a Excel
                             </Button>
                         </div>
 
@@ -123,7 +301,7 @@ export default function Reports() {
                                 disabled={loadingReport || isLoading}
                             >
                                 <Download className="h-4 w-4 mr-2" />
-                                Exportar Mes a CSV
+                                Exportar Mes a Excel
                             </Button>
                         </div>
 

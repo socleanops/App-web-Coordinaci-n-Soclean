@@ -187,11 +187,23 @@ export function useFuncionarios() {
         },
     });
 
+    const resetPassword = useMutation({
+        mutationFn: async ({ profileId, newPassword }: { profileId: string; newPassword: string }) => {
+            const { error } = await supabase.rpc('reset_user_password', {
+                target_user_id: profileId,
+                new_password: newPassword
+            });
+            if (error) throw new Error(error.message);
+            return true;
+        }
+    });
+
     return {
         getFuncionarios,
         getDepartamentos,
         createDepartamento,
         createFuncionario,
         updateFuncionario,
+        resetPassword,
     };
 }

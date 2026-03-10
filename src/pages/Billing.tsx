@@ -114,7 +114,10 @@ export default function Billing() {
                                 {isLoading ? (
                                     <TableRow>
                                         <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                            Cargando comprobantes...
+                                            <div className="flex flex-col items-center justify-center">
+                                                <span className="spinner-border text-primary inline-block w-6 h-6 border-2 rounded-full border-t-transparent animate-spin mb-2 hidden"></span>
+                                                Cargando movimientos o validando base de datos...
+                                            </div>
                                         </TableCell>
                                     </TableRow>
                                 ) : filteredFacturas.length === 0 ? (
@@ -131,7 +134,7 @@ export default function Billing() {
                                                     {f.numero}
                                                 </div>
                                                 <div className="text-xs text-muted-foreground">
-                                                    Emisión: {new Date(f.fecha_emision).toLocaleDateString()}
+                                                    {f.periodo ? `Período: ${f.periodo}` : `Emisión: ${new Date(f.fecha_emision).toLocaleDateString()}`}
                                                 </div>
                                             </TableCell>
                                             <TableCell>

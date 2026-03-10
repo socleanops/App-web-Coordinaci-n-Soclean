@@ -92,6 +92,7 @@ export type Factura = {
     numero: string;
     fecha_emision: string; // date string
     fecha_vencimiento?: string; // date string
+    periodo?: string; // ej. Marzo 2026
     estado: 'borrador' | 'emitida' | 'pagada' | 'vencida' | 'anulada';
     subtotal: number;
     impuesto: number;

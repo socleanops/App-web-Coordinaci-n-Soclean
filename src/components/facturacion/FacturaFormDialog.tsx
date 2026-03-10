@@ -46,6 +46,7 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
             numero: `FAC-${Date.now().toString().slice(-6)}`,
             fecha_emision: new Date().toISOString().split('T')[0],
             fecha_vencimiento: '',
+            periodo: '',
             estado: 'emitida',
             subtotal: 0,
             impuesto: 0,
@@ -76,6 +77,7 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
                 numero: `FAC-${Date.now().toString().slice(-6)}`,
                 fecha_emision: new Date().toISOString().split('T')[0],
                 fecha_vencimiento: '',
+                periodo: '',
                 estado: 'emitida',
                 subtotal: 0,
                 impuesto: 22, // default IVA
@@ -134,6 +136,20 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
                                         <FormLabel>Referencia Interna (Nro de Registro)</FormLabel>
                                         <FormControl>
                                             <Input placeholder="Ej. A-0001" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+
+                            <FormField
+                                control={form.control}
+                                name="periodo"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Período a Facturar (Mensual o Libre)</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="Ej. Marzo 2026, 1ra Quincena, etc." {...field} value={field.value || ''} />
                                         </FormControl>
                                         <FormMessage />
                                     </FormItem>

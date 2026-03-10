@@ -46,6 +46,7 @@ export function useFacturas() {
                     numero: numero,
                     fecha_emision: facturaData.fecha_emision,
                     fecha_vencimiento: facturaData.fecha_vencimiento || null,
+                    periodo: facturaData.periodo || null,
                     estado: facturaData.estado,
                     subtotal: facturaData.subtotal,
                     impuesto: facturaData.impuesto,
