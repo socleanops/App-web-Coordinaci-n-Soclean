@@ -107,6 +107,15 @@ export default function Attendance() {
         }
     };
 
+    const handleGuardarHora = async (id: string, field: 'hora_entrada_registrada' | 'hora_salida_registrada', value: string) => {
+        try {
+            await updateAsistencia.mutateAsync({ id, data: { [field]: value || null } as any });
+            toast.success(field === 'hora_entrada_registrada' ? 'Entrada real guardada' : 'Salida real guardada');
+        } catch {
+            toast.error('Error al guardar hora real');
+        }
+    };
+
     const filteredAsistencias = asistencias.filter((a: Asistencia) => {
         const search = searchTerm.toLowerCase();
         const func = (a.funcionarios?.profiles?.nombre + ' ' + a.funcionarios?.profiles?.apellido).toLowerCase();
@@ -252,27 +261,28 @@ export default function Attendance() {
                 </CardHeader>
                 <CardContent>
                     <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-background/50 overflow-x-auto overflow-y-hidden">
-                        <Table className="min-w-[900px]">
+                        <Table className="min-w-[1100px]">
                             <TableHeader className="bg-muted/50">
                                 <TableRow>
-                                    {viewMode === 'semana' && <TableHead className="w-[120px]">Fecha</TableHead>}
+                                    {viewMode === 'semana' && <TableHead className="w-[100px]">Fecha</TableHead>}
                                     <TableHead>Empleado</TableHead>
                                     <TableHead>Cliente / Servicio</TableHead>
-                                    <TableHead>Horario Coordinado</TableHead>
-                                    <TableHead>Estado Cumplimiento</TableHead>
+                                    <TableHead>H. Coordinado</TableHead>
+                                    <TableHead>Hora Real</TableHead>
+                                    <TableHead>Estado</TableHead>
                                     <TableHead>Observaciones</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {isLoading ? (
                                     <TableRow>
-                                        <TableCell colSpan={viewMode === 'semana' ? 6 : 5} className="text-center h-24 text-muted-foreground">
+                                        <TableCell colSpan={viewMode === 'semana' ? 7 : 6} className="text-center h-24 text-muted-foreground">
                                             Buscando registros del período...
                                         </TableCell>
                                     </TableRow>
                                 ) : filteredAsistencias.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={viewMode === 'semana' ? 6 : 5} className="text-center h-32 text-muted-foreground">
+                                        <TableCell colSpan={viewMode === 'semana' ? 7 : 6} className="text-center h-32 text-muted-foreground">
                                             <div className="flex flex-col items-center justify-center gap-4 py-8">
                                                 <AlertCircle className="h-10 w-10 text-slate-400" />
                                                 <div className="space-y-1">
@@ -287,7 +297,7 @@ export default function Attendance() {
                                     groupedByDate.map(([fecha, records]) => (
                                         <>
                                             <TableRow key={`header-${fecha}`} className="bg-slate-50 dark:bg-slate-800/50 border-t-2 border-slate-300 dark:border-slate-600">
-                                                <TableCell colSpan={6} className="py-2">
+                                                <TableCell colSpan={7} className="py-2">
                                                     <span className="font-bold text-coreops-primary dark:text-blue-400 capitalize">
                                                         {(() => {
                                                             const d = new Date(fecha + 'T12:00:00');
@@ -317,8 +327,25 @@ export default function Attendance() {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <div className="text-sm font-mono font-medium text-coreops-primary dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded inline-block">
+                                                        <div className="text-xs font-mono font-medium text-coreops-primary dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded inline-block">
                                                             {a.horarios?.hora_entrada?.substring(0, 5)} - {a.horarios?.hora_salida?.substring(0, 5)}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <div className="flex gap-1 items-center">
+                                                            <Input
+                                                                type="time"
+                                                                defaultValue={a.hora_entrada_registrada?.substring(0, 5) || ''}
+                                                                className="h-8 w-[90px] text-xs font-mono"
+                                                                onBlur={(e) => handleGuardarHora(a.id, 'hora_entrada_registrada', e.target.value)}
+                                                            />
+                                                            <span className="text-xs text-muted-foreground">-</span>
+                                                            <Input
+                                                                type="time"
+                                                                defaultValue={a.hora_salida_registrada?.substring(0, 5) || ''}
+                                                                className="h-8 w-[90px] text-xs font-mono"
+                                                                onBlur={(e) => handleGuardarHora(a.id, 'hora_salida_registrada', e.target.value)}
+                                                            />
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
@@ -374,8 +401,25 @@ export default function Attendance() {
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <div className="text-sm font-mono font-medium text-coreops-primary dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded inline-block">
+                                                <div className="text-xs font-mono font-medium text-coreops-primary dark:text-blue-400 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded inline-block">
                                                     {a.horarios?.hora_entrada?.substring(0, 5)} - {a.horarios?.hora_salida?.substring(0, 5)}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex gap-1 items-center">
+                                                    <Input
+                                                        type="time"
+                                                        defaultValue={a.hora_entrada_registrada?.substring(0, 5) || ''}
+                                                        className="h-8 w-[90px] text-xs font-mono"
+                                                        onBlur={(e) => handleGuardarHora(a.id, 'hora_entrada_registrada', e.target.value)}
+                                                    />
+                                                    <span className="text-xs text-muted-foreground">-</span>
+                                                    <Input
+                                                        type="time"
+                                                        defaultValue={a.hora_salida_registrada?.substring(0, 5) || ''}
+                                                        className="h-8 w-[90px] text-xs font-mono"
+                                                        onBlur={(e) => handleGuardarHora(a.id, 'hora_salida_registrada', e.target.value)}
+                                                    />
                                                 </div>
                                             </TableCell>
                                             <TableCell>
