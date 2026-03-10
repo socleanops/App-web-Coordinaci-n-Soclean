@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { useAsistencia } from '@/hooks/useAsistencia';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 export default function Nomina() {
     const [mes, setMes] = useState<string>(new Date().toISOString().substring(0, 7)); // YYYY-MM
@@ -106,29 +107,46 @@ export default function Nomina() {
         }), { horas: 0, dias: 0, faltas: 0 });
     }, [horasPorFuncionario]);
 
-    const generarReporteCSV = () => {
+    const generarReporteExcel = () => {
         setIsExporting(true);
-        toast.info("Generando reporte de horas consolidadas para RRHH...");
+        toast.info("Generando reporte Excel de horas consolidadas para RRHH...");
 
         setTimeout(() => {
-            let csv = 'CEDULA,NOMBRE_FUNCIONARIO,TOTAL_HORAS,HORAS_NORMALES,HORAS_NOCTURNAS(22-06),HORAS_FERIADO,CANTIDAD_DIAS,FALTAS\n';
-
-            horasPorFuncionario.forEach(f => {
+            const dataToExport = horasPorFuncionario.map(f => {
                 const hrNormales = f.totalHoras - f.horasNocturnas;
-                csv += `${f.cedula},"${f.nombreCompleto}",${f.totalHoras.toFixed(2)},${hrNormales.toFixed(2)},${f.horasNocturnas.toFixed(2)},${f.horasFeriado.toFixed(2)},${f.diasTrabajados},${f.faltas}\n`;
+                return {
+                    'Cédula': f.cedula,
+                    'Nombre Empleado': f.nombreCompleto,
+                    'Días Asistidos': f.diasTrabajados,
+                    'Faltas': f.faltas,
+                    'Horas Normales': hrNormales > 0 ? parseFloat(hrNormales.toFixed(2)) : 0,
+                    'Horas Nocturnas (22-06)': f.horasNocturnas > 0 ? parseFloat(f.horasNocturnas.toFixed(2)) : 0,
+                    'Horas Feriado': f.horasFeriado > 0 ? parseFloat(f.horasFeriado.toFixed(2)) : 0,
+                    'Total Horas': parseFloat(f.totalHoras.toFixed(2))
+                };
             });
 
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `Reporte_Mensual_Horas_${mes}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+            // Set column widths matching the style seen in `Reports.tsx`
+            const wscols = [
+                { wch: 15 }, // Cédula
+                { wch: 30 }, // Nombre
+                { wch: 15 }, // Días Asistidos
+                { wch: 10 }, // Faltas
+                { wch: 15 }, // Horas Normales
+                { wch: 25 }, // Horas Nocturnas
+                { wch: 15 }, // Horas Feriado
+                { wch: 15 }, // Total Horas
+            ];
+            worksheet['!cols'] = wscols;
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Nómina_RRHH");
+            XLSX.writeFile(workbook, `Reporte_Mensual_Horas_${mes}.xlsx`);
 
             setIsExporting(false);
-            toast.success("Reporte de horas exportado correctamente.");
+            toast.success("Reporte Excel exportado correctamente.");
         }, 1200);
     };
 
@@ -150,12 +168,12 @@ export default function Nomina() {
                         className="w-auto h-11 border-slate-300 shadow-sm"
                     />
                     <Button
-                        onClick={generarReporteCSV}
+                        onClick={generarReporteExcel}
                         disabled={isExporting || horasPorFuncionario.length === 0}
                         className="bg-primary group hover:bg-primary/90 text-white rounded-xl shadow-lg transition-all h-11 shrink-0 px-6"
                     >
                         <FileSpreadsheet className="mr-2 h-5 w-5 group-hover:-translate-y-1 transition-transform" />
-                        Descargar a CSV
+                        Descargar Excel
                     </Button>
                 </div>
             </div>
