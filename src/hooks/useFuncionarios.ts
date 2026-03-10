@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { Funcionario } from '@/types';
 import type { FuncionarioFormData } from '@/lib/validations/funcionario';
 import { createClient } from '@supabase/supabase-js';
+import { generateSecureRandomString } from '@/lib/utils';
 
 // Special client that doesn't persist session, so admin can create users without being logged out
 const authClient = createClient(
@@ -55,7 +56,7 @@ export function useFuncionarios() {
         mutationFn: async (formData: FuncionarioFormData) => {
             let profileId = formData.id; // if it already exists
 
-            const randomSuffix = Math.random().toString(36).substring(2, 8);
+            const randomSuffix = generateSecureRandomString(6);
             const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
             const safePassword = formData.password?.trim() || `SC${formData.cedula.replace(/\D/g, '')}#2026`;
 
