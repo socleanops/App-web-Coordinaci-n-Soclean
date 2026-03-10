@@ -39,6 +39,7 @@ interface Props {
 
 export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props) {
     const { createServicio, updateServicio } = useServicios();
+    const isPending = createServicio.isPending || updateServicio.isPending;
     const { getClientes } = useClientes();
     const { data: clientes = [] } = getClientes;
 
@@ -206,11 +207,11 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
                         </div>
 
                         <div className="flex justify-end pt-6 border-t mt-4 gap-2">
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
                                 Cancelar
                             </Button>
-                            <Button type="submit">
-                                {servicioToEdit ? 'Guardar Cambios' : 'Añadir Servicio a Cliente'}
+                            <Button type="submit" disabled={isPending}>
+                                {isPending ? 'Guardando...' : (servicioToEdit ? 'Guardar Cambios' : 'Añadir Servicio a Cliente')}
                             </Button>
                         </div>
                     </form>

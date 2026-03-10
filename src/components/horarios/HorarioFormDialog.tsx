@@ -255,12 +255,12 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                         </div>
 
                         <DialogFooter className="pt-4">
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
                                 Cancelar
                             </Button>
                             <Button type="submit" disabled={isPending}>
                                 {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isEditing ? 'Guardar Cambios' : 'Generar Turno'}
+                                {isPending ? 'Guardando...' : (isEditing ? 'Guardar Cambios' : 'Generar Turno')}
                             </Button>
                         </DialogFooter>
                     </form>

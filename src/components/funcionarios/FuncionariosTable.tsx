@@ -3,7 +3,8 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Pencil } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
+import { Search, Pencil, ChevronLeft, ChevronRight } from 'lucide-react';
 
 import type { Funcionario } from '@/types';
 
@@ -21,6 +22,13 @@ interface FuncionariosTableProps {
 
 export function FuncionariosTable({ employees, isLoading, onEdit }: FuncionariosTableProps) {
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1);
+    };
 
     const filteredEmployees = employees.filter((emp: EmployeeWithDetails) => {
         const search = searchTerm.toLowerCase();
@@ -30,6 +38,12 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
         const cargo = emp?.cargo?.toLowerCase() || '';
         return n.includes(search) || a.includes(search) || cedula.includes(search) || cargo.includes(search);
     });
+
+    const totalPages = Math.ceil(filteredEmployees.length / itemsPerPage);
+    const paginatedEmployees = filteredEmployees.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     return (
         <Card className="border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
@@ -42,7 +56,7 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
                             placeholder="Buscar por nombre, CI o cargo..."
                             className="pl-9 bg-background/50 border-slate-200 dark:border-slate-700"
                             value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
+                            onChange={handleSearchChange}
                         />
                     </div>
                 </div>
@@ -63,11 +77,17 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
                         </TableHeader>
                         <TableBody>
                             {isLoading ? (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
-                                        Cargando información...
-                                    </TableCell>
-                                </TableRow>
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-10 w-[180px]" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-32" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-16 rounded-full" /></TableCell>
+                                        <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                                    </TableRow>
+                                ))
                             ) : filteredEmployees.length === 0 ? (
                                 <TableRow>
                                     <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
@@ -75,7 +95,7 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredEmployees.map((emp: EmployeeWithDetails) => (
+                                paginatedEmployees.map((emp: EmployeeWithDetails) => (
                                     <TableRow key={emp.id} className="group hover:bg-muted/30 transition-colors">
                                         <TableCell>
                                             <div className="font-medium">{emp.profiles?.nombre} {emp.profiles?.apellido}</div>
@@ -116,6 +136,37 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
                         </TableBody>
                     </Table>
                 </div>
+
+                {!isLoading && totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                        <div className="text-sm text-muted-foreground">
+                            Mostrando {(currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, filteredEmployees.length)} de {filteredEmployees.length} registros
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                Anterior
+                            </Button>
+                            <div className="text-sm font-medium px-2">
+                                Página {currentPage} de {totalPages}
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                disabled={currentPage === totalPages}
+                            >
+                                Siguiente
+                                <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
             </CardContent>
         </Card>
     );

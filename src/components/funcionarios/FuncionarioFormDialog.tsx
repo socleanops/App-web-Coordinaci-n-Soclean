@@ -77,6 +77,8 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
         }
     }, [funcionarioToEdit, form]);
 
+    const isPending = createFuncionario.isPending || updateFuncionario.isPending;
+
     const onSubmit = async (data: FuncionarioFormData) => {
         const isEditing = !!funcionarioToEdit;
         const loadingId = toast.loading(isEditing ? 'Actualizando funcionario...' : 'Creando perfil y registrando funcionario...');
@@ -351,11 +353,11 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                         </div>
 
                         <div className="flex justify-end pt-6 border-t mt-4 gap-2">
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={form.formState.isSubmitting}>
+                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
                                 Cancelar
                             </Button>
-                            <Button type="submit" disabled={form.formState.isSubmitting}>
-                                {form.formState.isSubmitting ? 'Guardando...' : (funcionarioToEdit ? 'Actualizar' : 'Guardar y Crear Acceso')}
+                            <Button type="submit" disabled={isPending}>
+                                {isPending ? 'Guardando...' : (funcionarioToEdit ? 'Actualizar' : 'Guardar y Crear Acceso')}
                             </Button>
                         </div>
                     </form>

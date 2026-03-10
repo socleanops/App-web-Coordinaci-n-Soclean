@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Pencil, Search, CalendarClock, Trash2, Smartphone } from 'lucide-react';
+import { PlusCircle, Pencil, Search, CalendarClock, Trash2, Smartphone, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
+import { Skeleton } from '@/components/ui/skeleton';
 import { HorarioFormDialog } from '@/components/horarios/HorarioFormDialog';
 import { useHorarios } from '@/hooks/useHorarios';
 import type { Horario } from '@/types';
@@ -23,6 +24,14 @@ export default function Schedules() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingHorario, setEditingHorario] = useState<Horario | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 10;
+
+    // Reset to page 1 when search changes
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchTerm(e.target.value);
+        setCurrentPage(1);
+    };
 
     const { getHorarios, deleteHorario } = useHorarios();
     const { data: horarios = [], isLoading } = getHorarios;
@@ -54,6 +63,12 @@ export default function Schedules() {
         const serv = h.servicios?.clientes?.razon_social?.toLowerCase() + ' ' + h.servicios?.nombre?.toLowerCase();
         return func.includes(search) || serv.includes(search);
     });
+
+    const totalPages = Math.ceil(filteredHorarios.length / itemsPerPage);
+    const paginatedHorarios = filteredHorarios.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
 
     const openWhatsApp = (h: Horario) => {
         const nombreFuncionario = `${h.funcionarios?.profiles?.nombre} ${h.funcionarios?.profiles?.apellido}`;
@@ -98,7 +113,7 @@ export default function Schedules() {
                                 placeholder="Buscar por empleado o cliente..."
                                 className="pl-9 bg-background/50 border-slate-200 dark:border-slate-700"
                                 value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onChange={handleSearchChange}
                             />
                         </div>
                     </div>
@@ -117,11 +132,21 @@ export default function Schedules() {
                             </TableHeader>
                             <TableBody>
                                 {isLoading ? (
-                                    <TableRow>
-                                        <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                            Cargando horarios de trabajo...
-                                        </TableCell>
-                                    </TableRow>
+                                    Array.from({ length: 4 }).map((_, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell><Skeleton className="h-10 w-24" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-40" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-48" /></TableCell>
+                                            <TableCell><Skeleton className="h-8 w-28" /></TableCell>
+                                            <TableCell className="text-right">
+                                                <div className="flex justify-end gap-2">
+                                                    <Skeleton className="h-8 w-8 rounded-md" />
+                                                    <Skeleton className="h-8 w-8 rounded-md" />
+                                                    <Skeleton className="h-8 w-8 rounded-md" />
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
                                 ) : filteredHorarios.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
@@ -129,7 +154,7 @@ export default function Schedules() {
                                         </TableCell>
                                     </TableRow>
                                 ) : (
-                                    filteredHorarios.map((h: Horario) => (
+                                    paginatedHorarios.map((h: Horario) => (
                                         <TableRow key={h.id} className="group hover:bg-muted/30 transition-colors">
                                             <TableCell>
                                                 <div className="font-bold text-coreops-primary dark:text-blue-400">
@@ -195,6 +220,37 @@ export default function Schedules() {
                             </TableBody>
                         </Table>
                     </div>
+
+                {!isLoading && totalPages > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                        <div className="text-sm text-muted-foreground">
+                            Mostrando {(currentPage - 1) * itemsPerPage + 1} a {Math.min(currentPage * itemsPerPage, filteredHorarios.length)} de {filteredHorarios.length} registros
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                disabled={currentPage === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                Anterior
+                            </Button>
+                            <div className="text-sm font-medium px-2">
+                                Página {currentPage} de {totalPages}
+                            </div>
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                disabled={currentPage === totalPages}
+                            >
+                                Siguiente
+                                <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                        </div>
+                    </div>
+                )}
                 </CardContent>
             </Card>
 

@@ -37,6 +37,7 @@ interface Props {
 
 export function ClienteFormDialog({ open, onOpenChange, clienteToEdit }: Props) {
     const { createCliente, updateCliente } = useClientes();
+    const isPending = createCliente.isPending || updateCliente.isPending;
 
     const form = useForm<ClienteFormData>({
         resolver: zodResolver(clienteSchema) as any,
@@ -281,11 +282,11 @@ export function ClienteFormDialog({ open, onOpenChange, clienteToEdit }: Props) 
                         </div>
 
                         <div className="flex justify-end pt-6 border-t mt-4 gap-2">
-                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
                                 Cancelar
                             </Button>
-                            <Button type="submit">
-                                {clienteToEdit ? 'Actualizar Cliente' : 'Guardar Cliente'}
+                            <Button type="submit" disabled={isPending}>
+                                {isPending ? 'Procesando...' : (clienteToEdit ? 'Actualizar Cliente' : 'Guardar Cliente')}
                             </Button>
                         </div>
                     </form>

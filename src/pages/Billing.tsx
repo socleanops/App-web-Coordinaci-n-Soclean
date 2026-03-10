@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Search, FileText, Download, MoreVertical } from 'lucide-react';
+import { PlusCircle, Search, FileText, Download, MoreVertical, FilterX } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -22,6 +22,7 @@ const ESTADOS_MAP: Record<string, { label: string, color: string }> = {
 export default function Billing() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
 
     const { getFacturas, updateFacturaStatus } = useFacturas();
     const { data: facturas = [], isLoading } = getFacturas;
@@ -39,7 +40,10 @@ export default function Billing() {
         const search = searchTerm.toLowerCase();
         const num = f.numero?.toLowerCase() || '';
         const cliente = f.clientes?.razon_social?.toLowerCase() || '';
-        return num.includes(search) || cliente.includes(search);
+        const matchesSearch = num.includes(search) || cliente.includes(search);
+        const matchesStatus = statusFilter === 'all' || f.estado === statusFilter;
+
+        return matchesSearch && matchesStatus;
     });
 
     return (
@@ -88,14 +92,33 @@ export default function Billing() {
                 <CardHeader className="pb-4">
                     <div className="flex flex-col sm:flex-row justify-between w-full items-center gap-4">
                         <CardTitle className="text-lg flex-1">Histórico de Movimientos</CardTitle>
-                        <div className="relative w-full sm:w-72">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Buscar por cliente o Nro de factura..."
-                                className="pl-9 bg-background/50 border-slate-200 dark:border-slate-700"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+                            <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                <SelectTrigger className="w-full sm:w-[160px] bg-background/50">
+                                    <SelectValue placeholder="Estado" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Todos los Estados</SelectItem>
+                                    {Object.entries(ESTADOS_MAP).map(([key, val]) => (
+                                        <SelectItem key={key} value={key}>{val.label}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+
+                            <div className="relative w-full sm:w-72">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                    placeholder="Buscar cliente o Nro..."
+                                    className="pl-9 bg-background/50 border-slate-200 dark:border-slate-700"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                />
+                                {searchTerm && (
+                                    <button onClick={() => setSearchTerm('')} className="absolute right-2 top-2.5 text-muted-foreground hover:text-slate-900">
+                                        <FilterX className="h-4 w-4" />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 </CardHeader>
