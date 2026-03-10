@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTheme } from '@/components/theme-provider';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,11 +11,20 @@ import { toast } from 'sonner';
 
 export default function Settings() {
     const { user, role } = useAuthStore();
+    const { theme, setTheme } = useTheme();
+    
     const [isSaving, setIsSaving] = useState(false);
+    const [isSavingEmpresa, setIsSavingEmpresa] = useState(false);
 
     const [activeTab, setActiveTab] = useState('perfil');
-    const [theme, setTheme] = useState('light');
-    const [notifications, setNotifications] = useState(true);
+    const [notifications, setNotifications] = useState(() => localStorage.getItem('soclean-notifications') !== 'false');
+
+    // Empresa form state
+    const [empresaId, setEmpresaId] = useState<string | null>(null);
+    const [razonSocial, setRazonSocial] = useState('');
+    const [rut, setRut] = useState('');
+    const [direccion, setDireccion] = useState('');
+    const [telefono, setTelefono] = useState('');
 
     // Profile form state
     const [nombre, setNombre] = useState('');
@@ -25,22 +35,39 @@ export default function Settings() {
     const [confirmPass, setConfirmPass] = useState('');
     const [isChangingPass, setIsChangingPass] = useState(false);
 
-    // Load current profile from Supabase
+    // Load current profile and empresa config from Supabase
     useEffect(() => {
-        async function loadProfile() {
+        async function loadData() {
             if (!user) return;
-            const { data, error } = await supabase
+            
+            // Load Profile
+            const { data: profile } = await supabase
                 .from('profiles')
                 .select('nombre, apellido')
                 .eq('id', user.id)
                 .single();
 
-            if (!error && data) {
-                setNombre(data.nombre || '');
-                setApellido(data.apellido || '');
+            if (profile) {
+                setNombre(profile.nombre || '');
+                setApellido(profile.apellido || '');
+            }
+
+            // Load Empresa Config
+            const { data: empresa } = await supabase
+                .from('empresa_config')
+                .select('*')
+                .limit(1)
+                .maybeSingle();
+                
+            if (empresa) {
+                setEmpresaId(empresa.id);
+                setRazonSocial(empresa.razon_social || '');
+                setRut(empresa.rut || '');
+                setDireccion(empresa.direccion || '');
+                setTelefono(empresa.telefono || '');
             }
         }
-        loadProfile();
+        loadData();
     }, [user]);
 
     const handleSaveProfile = async () => {
@@ -58,6 +85,51 @@ export default function Settings() {
             toast.error(err.message || "No se pudo guardar el perfil.");
         } finally {
             setIsSaving(false);
+        }
+    };
+
+    const handleSaveEmpresa = async () => {
+        if (role !== 'superadmin') {
+            toast.error("Solo los superadministradores pueden modificar los datos de la empresa.");
+            return;
+        }
+        setIsSavingEmpresa(true);
+        try {
+            const payload = {
+                razon_social: razonSocial,
+                rut,
+                direccion,
+                telefono,
+                updated_at: new Date().toISOString()
+            };
+
+            let err;
+            if (empresaId) {
+                const { error } = await supabase.from('empresa_config').update(payload).eq('id', empresaId);
+                err = error;
+            } else {
+                const { data, error } = await supabase.from('empresa_config').insert([payload]).select().single();
+                if (data) setEmpresaId(data.id);
+                err = error;
+            }
+
+            if (err) throw err;
+            toast.success("Datos de la empresa actualizados exitosamente.");
+        } catch (error: any) {
+            toast.error(error.message || "Error al guardar los datos de la empresa.");
+        } finally {
+            setIsSavingEmpresa(false);
+        }
+    };
+
+    const toggleNotifications = () => {
+        const newVal = !notifications;
+        setNotifications(newVal);
+        localStorage.setItem('soclean-notifications', String(newVal));
+        if (newVal) {
+            toast.success("Notificaciones UI/UX activadas.");
+        } else {
+            toast.info("Notificaciones UI/UX desactivadas.");
         }
     };
 
@@ -152,31 +224,31 @@ export default function Settings() {
                         <Card className="border-slate-200 dark:border-slate-800 shadow-sm bg-white/60 dark:bg-slate-900/60 backdrop-blur-md">
                             <CardHeader>
                                 <CardTitle>Datos de la Empresa</CardTitle>
-                                <CardDescription>Configuración global de Soclean que afecta a los reportes.</CardDescription>
+                                <CardDescription>Configuración global de Soclean que afecta a los reportes. Solo accesible por Superadmin.</CardDescription>
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     <div className="space-y-2">
                                         <Label htmlFor="razon">Razón Social</Label>
-                                        <Input id="razon" defaultValue="Soclean Coordinación" />
+                                        <Input id="razon" value={razonSocial} onChange={(e) => setRazonSocial(e.target.value)} disabled={role !== 'superadmin'} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="rut">RUT</Label>
-                                        <Input id="rut" defaultValue="210000000018" />
+                                        <Input id="rut" value={rut} onChange={(e) => setRut(e.target.value)} disabled={role !== 'superadmin'} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="direccion">Dirección Central</Label>
-                                        <Input id="direccion" defaultValue="Montevideo, Uruguay" />
+                                        <Input id="direccion" value={direccion} onChange={(e) => setDireccion(e.target.value)} disabled={role !== 'superadmin'} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="telefono">Teléfono Principal</Label>
-                                        <Input id="telefono" defaultValue="+598 90 000 000" />
+                                        <Input id="telefono" value={telefono} onChange={(e) => setTelefono(e.target.value)} disabled={role !== 'superadmin'} />
                                     </div>
                                 </div>
                             </CardContent>
                             <CardFooter className="border-t pt-6 bg-slate-50/50 dark:bg-slate-900/50">
-                                <Button onClick={handleSaveProfile} disabled={isSaving} className="ml-auto bg-coreops-primary hover:bg-coreops-secondary">
-                                    Guardar Datos de Empresa
+                                <Button onClick={handleSaveEmpresa} disabled={isSavingEmpresa || role !== 'superadmin'} className="ml-auto bg-coreops-primary hover:bg-coreops-secondary">
+                                    {isSavingEmpresa ? 'Guardando...' : 'Guardar Datos de Empresa'}
                                 </Button>
                             </CardFooter>
                         </Card>
@@ -208,7 +280,7 @@ export default function Settings() {
                                         <h4 className="font-semibold text-slate-800 dark:text-slate-200">Notificaciones UI/UX</h4>
                                         <p className="text-sm text-slate-500">Mostrar alertas emergentes en pantalla.</p>
                                     </div>
-                                    <Button variant={notifications ? 'default' : 'outline'} onClick={() => setNotifications(!notifications)} className={notifications ? 'bg-emerald-600 hover:bg-emerald-700' : ''}>
+                                    <Button variant={notifications ? 'default' : 'outline'} onClick={toggleNotifications} className={notifications ? 'bg-emerald-600 hover:bg-emerald-700' : ''}>
                                         {notifications ? 'Activadas' : 'Desactivadas'}
                                     </Button>
                                 </div>
