@@ -22,6 +22,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { SearchableSelect } from '@/components/ui/searchable-select';
 
 import { useHorarios } from '@/hooks/useHorarios';
 import { useFuncionarios } from '@/hooks/useFuncionarios';
@@ -67,6 +68,16 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
 
     const funcionarios = getFuncionarios.data?.filter(f => f.estado === 'activo') || [];
     const servicios = getServicios.data?.filter(s => s.estado === 'activo') || [];
+
+    const funcionarioOptions = funcionarios.map(f => ({
+        value: f.id,
+        label: `${f.profiles?.nombre} ${f.profiles?.apellido} - ${f.cargo}`,
+    }));
+
+    const servicioOptions = servicios.map(s => ({
+        value: s.id,
+        label: `${s.clientes?.razon_social} - ${s.nombre}`,
+    }));
 
     const form = useForm<HorarioFormData>({
         resolver: zodResolver(horarioSchema),
@@ -185,21 +196,15 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Funcionario</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value || undefined}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Seleccionar Funcionario" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {funcionarios.length === 0 && <SelectItem value="none" disabled>No hay funcionarios activos</SelectItem>}
-                                            {funcionarios.map(f => (
-                                                <SelectItem key={f.id} value={f.id}>
-                                                    {f.profiles?.nombre} {f.profiles?.apellido} - {f.cargo}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <FormControl>
+                                        <SearchableSelect
+                                            options={funcionarioOptions}
+                                            value={field.value}
+                                            onValueChange={field.onChange}
+                                            placeholder="Seleccionar Funcionario"
+                                            searchPlaceholder="Buscar por nombre o cargo..."
+                                        />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -211,21 +216,15 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>Servicio / Locación de Trabajo</FormLabel>
-                                    <Select onValueChange={field.onChange} value={field.value || undefined}>
-                                        <FormControl>
-                                            <SelectTrigger>
-                                                <SelectValue placeholder="Seleccionar Servicio" />
-                                            </SelectTrigger>
-                                        </FormControl>
-                                        <SelectContent>
-                                            {servicios.length === 0 && <SelectItem value="none" disabled>No hay servicios activos</SelectItem>}
-                                            {servicios.map(s => (
-                                                <SelectItem key={s.id} value={s.id}>
-                                                    {s.clientes?.razon_social} - {s.nombre}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
+                                    <FormControl>
+                                        <SearchableSelect
+                                            options={servicioOptions}
+                                            value={field.value}
+                                            onValueChange={field.onChange}
+                                            placeholder="Seleccionar Servicio"
+                                            searchPlaceholder="Buscar por cliente o servicio..."
+                                        />
+                                    </FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )}
@@ -269,8 +268,8 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                                             type="button"
                                             onClick={() => toggleDay(d.value)}
                                             className={`px-3 py-2 rounded-lg text-sm font-semibold border transition-all ${selectedDays.includes(d.value)
-                                                    ? 'bg-coreops-primary text-white border-coreops-primary shadow-sm'
-                                                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700'
+                                                ? 'bg-coreops-primary text-white border-coreops-primary shadow-sm'
+                                                : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700'
                                                 }`}
                                         >
                                             {d.label}
@@ -286,8 +285,8 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                                             type="button"
                                             onClick={() => applyPreset(p.days)}
                                             className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-all flex items-center gap-1 ${JSON.stringify(selectedDays) === JSON.stringify(p.days)
-                                                    ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700'
-                                                    : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                                                ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700'
+                                                : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
                                                 }`}
                                         >
                                             <Zap className="h-3 w-3" />
