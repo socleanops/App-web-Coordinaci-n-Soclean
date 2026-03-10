@@ -90,6 +90,7 @@ export function Sidebar() {
                     size="icon"
                     onClick={() => setCollapsed(!collapsed)}
                     className="mx-auto flex w-full justify-center"
+                    aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
                 >
                     {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
                 </Button>
