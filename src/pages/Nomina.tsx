@@ -53,11 +53,12 @@ export default function Nomina() {
 
                     hours = Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60));
 
+                    // Precision: iterate in 15-minute blocks for accurate nocturnal calculation
                     let current = new Date(start.getTime());
                     while (current < end) {
                         const h = current.getHours();
-                        if (h >= 22 || h < 6) nightHours += 1;
-                        current.setHours(current.getHours() + 1);
+                        if (h >= 22 || h < 6) nightHours += 0.25;
+                        current.setTime(current.getTime() + 15 * 60 * 1000); // +15 min
                     }
                 } else if (a.horarios?.hora_entrada && a.horarios?.hora_salida) {
                     const [hIn, mIn] = a.horarios.hora_entrada.split(':').map(Number);
@@ -69,20 +70,35 @@ export default function Nomina() {
                     if (endHours < startHours) endHours += 24;
                     hours = endHours - startHours;
 
-                    for (let i = Math.floor(startHours); i < Math.floor(endHours); i++) {
-                        const actualHour = i % 24;
-                        if (actualHour >= 22 || actualHour < 6) nightHours++;
+                    // 15-minute precision for schedule-based calculation
+                    for (let mins = startHours * 60; mins < endHours * 60; mins += 15) {
+                        const actualHour = Math.floor(mins / 60) % 24;
+                        if (actualHour >= 22 || actualHour < 6) nightHours += 0.25;
                     }
                 }
 
                 agrupar[funcId].totalHoras += Math.max(0, hours);
                 agrupar[funcId].horasNocturnas += Math.max(0, nightHours);
 
-                // Add to Feriados if applicable
-                const isFeriado = a.fecha.endsWith('-01-01') || a.fecha.endsWith('-05-01') ||
-                    a.fecha.endsWith('-07-18') || a.fecha.endsWith('-08-25') ||
-                    a.fecha.endsWith('-12-25');
-                if (isFeriado) {
+                // Feriados de Uruguay (fijos + móviles 2026)
+                // Fijos: 1/1, 1/5, 18/7, 25/8, 25/12
+                // Móviles aprox: Carnaval, Semana Turismo, etc.
+                const FERIADOS_UY = [
+                    '01-01', '01-06', // Año Nuevo, Día de Reyes
+                    '02-16', '02-17', // Carnaval (aprox)
+                    '04-06', '04-07', '04-08', '04-09', '04-10', // Semana de Turismo
+                    '04-19', // Desembarco de los 33
+                    '05-01', // Día del Trabajador
+                    '05-18', // Batalla de las Piedras
+                    '06-19', // Natalicio de Artigas
+                    '07-18', // Jura de la Constitución
+                    '08-25', // Declaratoria de Independencia
+                    '10-12', // Día de la Diversidad Cultural
+                    '11-02', // Día de los Difuntos
+                    '12-25', // Navidad
+                ];
+                const mmdd = a.fecha.substring(5); // YYYY-MM-DD → MM-DD
+                if (FERIADOS_UY.includes(mmdd)) {
                     agrupar[funcId].horasFeriado += Math.max(0, hours);
                 }
 
