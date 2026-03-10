@@ -1,0 +1,10 @@
+﻿0ff8af2 fix: Correct `search_path` in `reset_user_password` function to properly utilize pgcrypto functions.
+6459bd8 feat: implement `FuncionariosTable` component for displaying a searchable and filterable employee list with actions.
+2d30cac feat: add a secure function for superadmins to reset user passwords using pgcrypto.
+266fa8a feat: introduce billing page with comprehensive invoice management, creation, and status update functionalities.
+66d99a1 feat: add reports page with filtering by month, employee, and service, and CSV export functionality for employee, client, and fortnight data.
+c025d07 feat: implement Reports page with attendance data filtering and Excel export capabilities for employee, client, and bi-weekly reports.
+82e5de8 feat: Add reports page with month, employee, and service filtering and Excel export functionality for attendance data.
+fcee1c2 feat: implement a new Reports page for generating monthly and fortnightly attendance and operational reports.
+d8d7db9 feat: implement Excel export functionality for attendance reports and add cli-latest file
+df1c5b6 Merge branch 'main' of https://github.com/socleanops/App-web-Coordinaci-n-Soclean
