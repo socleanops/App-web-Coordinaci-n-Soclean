@@ -58,8 +58,8 @@ export default function Login() {
                 setUser(authData.user);
                 navigate('/'); // Redirect to dashboard
             }
-        } catch (err: any) {
-            setError(err.message || 'Error al iniciar sesión');
+        } catch (error: unknown) {
+            setError(error instanceof Error ? error.message : 'Error al iniciar sesión. Verifica tus credenciales.');
         } finally {
             setIsLoading(false);
         }

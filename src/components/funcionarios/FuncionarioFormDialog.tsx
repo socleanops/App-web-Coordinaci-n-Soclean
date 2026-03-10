@@ -32,7 +32,7 @@ import { useFuncionarios } from '@/hooks/useFuncionarios';
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    funcionarioToEdit?: any | null; // using any for simplicity, usually Funcionario type
+    funcionarioToEdit?: (FuncionarioFormData & { id: string, profiles?: { nombre: string, apellido: string, email: string, rol: string } }) | null;
 }
 
 export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }: Props) {
@@ -63,14 +63,14 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                 apellido: funcionarioToEdit.profiles?.apellido || '',
                 email: funcionarioToEdit.profiles?.email || '',
                 password: '', // do not set password on edit
-                rol: (funcionarioToEdit.profiles?.rol as any) || 'funcionario',
+                rol: (funcionarioToEdit.profiles?.rol as 'funcionario' | 'supervisor' | 'admin' | 'facturador' | 'superadmin') || 'funcionario',
                 cedula: funcionarioToEdit.cedula,
                 cargo: funcionarioToEdit.cargo,
                 departamento_id: funcionarioToEdit.departamento_id || '',
                 direccion: funcionarioToEdit.direccion || '',
                 fecha_ingreso: funcionarioToEdit.fecha_ingreso,
                 tipo_contrato: funcionarioToEdit.tipo_contrato,
-                estado: funcionarioToEdit.estado as any,
+                estado: funcionarioToEdit.estado || 'activo',
             });
         } else {
             form.reset();
@@ -90,9 +90,9 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                 toast.success('Usuario y funcionario creados correctamente', { id: loadingId });
             }
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Form Submit Error:", error);
-            toast.error(`Error: ${error.message || 'No se pudo guardar la información'}`, { id: loadingId, duration: 8000 });
+            toast.error(`Error: ${error instanceof Error ? error.message : 'No se pudo guardar la información'}`, { id: loadingId, duration: 8000 });
         }
     };
 
@@ -268,7 +268,7 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                                                                 form.setValue('departamento_id', data.id);
                                                                 return 'Departamento añadido';
                                                             },
-                                                            error: (err: any) => `Error al crear: ${err.message}`
+                                                            error: (err: unknown) => `Error al crear: ${err instanceof Error ? err.message : 'Desconocido'}`
                                                         });
                                                     }
                                                 }}

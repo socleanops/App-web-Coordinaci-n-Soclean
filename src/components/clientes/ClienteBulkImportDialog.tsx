@@ -55,7 +55,7 @@ export function ClienteBulkImportDialog({ open, onOpenChange }: Props) {
             const worksheet = workbook.Sheets[firstSheetName];
 
             // Convert to JSON
-            const data = utils.sheet_to_json<any>(worksheet);
+            const data = utils.sheet_to_json<Record<string, unknown>>(worksheet);
 
             if (!data || data.length === 0) {
                 toast.error("El archivo está vacío o no se pudo leer.");
@@ -72,15 +72,15 @@ export function ClienteBulkImportDialog({ open, onOpenChange }: Props) {
                 const row = data[i];
 
                 try {
-                    const razon_social = row['Razon Social'] || row.razon_social || row['RAZON SOCIAL'] || row.Nombre || row.nombre || '';
+                    const razon_social = String(row['Razon Social'] || row.razon_social || row['RAZON SOCIAL'] || row.Nombre || row.nombre || '');
                     if (!razon_social) throw new Error(`Fila ${i + 2}: No tiene Razón Social o Nombre.`);
 
                     const rut = String(row.RUT || row.rut || row.Rut || row.Cedula || row.cedula || '000000000000');
-                    const nombre_fantasia = row['Nombre Fantasia'] || row.nombre_fantasia || row['FANTASIA'] || row.Fantasia || '';
-                    const direccion = row.Direccion || row.direccion || row.DIRECCION || row['Dirección'] || '-';
-                    const contacto_principal = row.Contacto || row.contacto || row.CONTACTO || '';
+                    const nombre_fantasia = String(row['Nombre Fantasia'] || row.nombre_fantasia || row['FANTASIA'] || row.Fantasia || '');
+                    const direccion = String(row.Direccion || row.direccion || row.DIRECCION || row['Dirección'] || '-');
+                    const contacto_principal = String(row.Contacto || row.contacto || row.CONTACTO || '');
                     const telefono = String(row.Telefono || row.telefono || row.TELEFONO || row['Teléfono'] || '');
-                    const email = row.Email || row.email || row.EMAIL || '';
+                    const email = String(row.Email || row.email || row.EMAIL || '');
 
                     await createCliente.mutateAsync({
                         razon_social,
@@ -93,8 +93,8 @@ export function ClienteBulkImportDialog({ open, onOpenChange }: Props) {
                         estado: 'activo'
                     });
 
-                } catch (err: any) {
-                    newErrors.push(err.message || `Fila ${i + 2}: Error desconocido al procesar cliente`);
+                } catch (err: unknown) {
+                    newErrors.push(err instanceof Error ? err.message : `Fila ${i + 2}: Error desconocido al procesar cliente`);
                 }
 
                 currentProgress++;

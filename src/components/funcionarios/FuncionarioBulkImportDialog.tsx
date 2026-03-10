@@ -55,7 +55,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
             const worksheet = workbook.Sheets[firstSheetName];
 
             // Convert to JSON
-            const data = utils.sheet_to_json<any>(worksheet);
+            const data = utils.sheet_to_json<Record<string, unknown>>(worksheet);
 
             if (!data || data.length === 0) {
                 toast.error("El archivo está vacío o no se pudo leer.");
@@ -78,13 +78,13 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                 try {
                     // Try mapping columns (expected headers)
                     const emailRaw = row.Email || row.email || row.EMAIL || row.Correo || '';
-                    const email = emailRaw ? emailRaw.toString().trim() : '';
+                    const email = emailRaw ? String(emailRaw).trim() : '';
 
-                    const nombre = row.Nombre || row.nombre || row.NOMBRE || '-';
-                    const apellido = row.Apellido || row.apellido || row.APELLIDO || '-';
+                    const nombre = String(row.Nombre || row.nombre || row.NOMBRE || '-');
+                    const apellido = String(row.Apellido || row.apellido || row.APELLIDO || '-');
                     const cedula = String(row.Cedula || row.cedula || row.CEDULA || '0000000');
-                    const cargo = row.Cargo || row.cargo || row.CARGO || 'General';
-                    const direccion = row.Dirección || row.direccion || row.DIRECCION || row.Direccion || '-';
+                    const cargo = String(row.Cargo || row.cargo || row.CARGO || 'General');
+                    const direccion = String(row.Dirección || row.direccion || row.DIRECCION || row.Direccion || '-');
 
                     // Match department by name vaguely, by exact ID, or safely fallback to first one
                     const reqDeptoId = row.departamento_id || row.Departamento_id;
@@ -103,8 +103,8 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                     }
 
                     // Default role for bulk or grab from excel
-                    const rol = (row.rol || row.Rol || row.ROL || 'funcionario').toLowerCase();
-                    const password = row.password || row.Password || row.PASSWORD || cedula; // Default password is the ID
+                    const rol = String(row.rol || row.Rol || row.ROL || 'funcionario').toLowerCase() as 'funcionario' | 'supervisor' | 'admin' | 'facturador' | 'superadmin';
+                    const password = String(row.password || row.Password || row.PASSWORD || cedula); // Default password is the ID
 
                     let parsedFechaIngreso = new Date().toISOString().split('T')[0];
                     const rawFecha = row.fecha_ingreso || row.Fecha_ingreso || row.Fecha_Ingreso || row.FECHA_INGRESO || row.Ingreso || row.ingreso;
@@ -125,8 +125,8 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                     }
 
                     const fecha_ingreso = parsedFechaIngreso;
-                    const tipo_contrato = row.tipo_contrato || row.Tipo_contrato || 'Indefinido';
-                    const estado = (row.estado || row.Estado || 'activo').toLowerCase();
+                    const tipo_contrato = String(row.tipo_contrato || row.Tipo_contrato || 'Indefinido');
+                    const estado = String(row.estado || row.Estado || 'activo').toLowerCase() as 'activo' | 'inactivo' | 'vacaciones' | 'licencia';
 
                     await createFuncionario.mutateAsync({
                         nombre,
@@ -143,8 +143,8 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         estado
                     });
 
-                } catch (err: any) {
-                    newErrors.push(err.message || `Fila ${i + 2}: Error desconocido`);
+                } catch (err: unknown) {
+                    newErrors.push(err instanceof Error ? err.message : `Fila ${i + 2}: Error desconocido`);
                 }
 
                 currentProgress++;

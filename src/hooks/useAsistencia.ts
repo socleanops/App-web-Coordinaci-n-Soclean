@@ -33,12 +33,13 @@ export function useAsistencia(fechaFiltro?: string) {
 
             const { data, error } = await query;
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as unknown as Asistencia[];
         },
     });
 
     const createAsistencia = useMutation({
         mutationFn: async (formData: AsistenciaFormData) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { id, ...dataToInsert } = formData;
             const { data, error } = await supabase
                 .from('asistencia')

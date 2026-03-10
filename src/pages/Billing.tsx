@@ -28,10 +28,10 @@ export default function Billing() {
 
     const handleChangeStatus = async (id: string, nuevoEstado: string) => {
         try {
-            await updateFacturaStatus.mutateAsync({ id, estado: nuevoEstado as any });
+            await updateFacturaStatus.mutateAsync({ id, estado: nuevoEstado as 'borrador' | 'emitida' | 'pagada' | 'vencida' | 'anulada' });
             toast.success(`Factura marcada como ${ESTADOS_MAP[nuevoEstado].label}`);
-        } catch (error: any) {
-            toast.error(error.message || 'Error al actualizar el estado de la factura');
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : 'Error al actualizar el estado de la factura');
         }
     };
 
@@ -69,7 +69,7 @@ export default function Billing() {
                         <CardTitle className="text-lg font-medium opacity-90 text-white">Total Horas Cotizadas (Mes)</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold">{facturas.reduce((acc, current) => acc + current.items.reduce((accItem: any, item: any) => accItem + item.cantidad, 0), 0)} Horas</div>
+                        <div className="text-3xl font-bold">{facturas.reduce((acc, current) => acc + current.items.reduce((accItem: number, item: { cantidad: number }) => accItem + item.cantidad, 0), 0)} Horas</div>
                         <p className="text-sm opacity-80 mt-1">Estimación operativa de carga horaria acumulada</p>
                     </CardContent>
                 </Card>

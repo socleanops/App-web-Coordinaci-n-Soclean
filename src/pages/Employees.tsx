@@ -2,19 +2,18 @@ import { useState } from 'react';
 import { FuncionarioFormDialog } from '@/components/funcionarios/FuncionarioFormDialog';
 import { FuncionarioBulkImportDialog } from '@/components/funcionarios/FuncionarioBulkImportDialog';
 import { useFuncionarios } from '@/hooks/useFuncionarios';
-import type { Funcionario } from '@/types';
 import { FuncionariosHeader } from '@/components/funcionarios/FuncionariosHeader';
 import { FuncionariosTable } from '@/components/funcionarios/FuncionariosTable';
 
 export default function Employees() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [editingFuncionario, setEditingFuncionario] = useState<Funcionario | null>(null);
+    const [editingFuncionario, setEditingFuncionario] = useState<any>(null);
     const [isBulkOpen, setIsBulkOpen] = useState(false);
 
     const { getFuncionarios } = useFuncionarios();
     const { data: employees = [], isLoading } = getFuncionarios;
 
-    const handleEdit = (funcionario: Funcionario) => {
+    const handleEdit = (funcionario: any) => {
         setEditingFuncionario(funcionario);
         setIsDialogOpen(true);
     };

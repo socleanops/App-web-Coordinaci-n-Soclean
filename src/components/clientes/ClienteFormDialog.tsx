@@ -32,7 +32,7 @@ import { useClientes } from '@/hooks/useClientes';
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    clienteToEdit?: any | null; // usually Cliente type
+    clienteToEdit?: (ClienteFormData & { id: string }) | null; // usually Cliente type
 }
 
 export function ClienteFormDialog({ open, onOpenChange, clienteToEdit }: Props) {
@@ -67,7 +67,7 @@ export function ClienteFormDialog({ open, onOpenChange, clienteToEdit }: Props) 
                 contacto_principal: clienteToEdit.contacto_principal || '',
                 frecuencia_visita: clienteToEdit.frecuencia_visita || '',
                 carga_horaria: clienteToEdit.carga_horaria || '',
-                estado: clienteToEdit.estado as any || 'activo',
+                estado: clienteToEdit.estado || 'activo',
             });
         } else {
             form.reset({
@@ -100,10 +100,10 @@ export function ClienteFormDialog({ open, onOpenChange, clienteToEdit }: Props) 
                 toast.success('Cliente registrado exitosamente');
             }
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Form Submit Error:", error);
             toast.dismiss(loadingId);
-            toast.error(`Error al revisar datos: ${error.message || 'No se pudo guardar la información'}`, { duration: 8000 });
+            toast.error(`Error al revisar datos: ${error instanceof Error ? error.message : 'No se pudo guardar la información'}`, { duration: 8000 });
         }
     };
 

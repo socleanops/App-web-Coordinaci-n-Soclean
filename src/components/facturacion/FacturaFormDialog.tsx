@@ -23,6 +23,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+import { useEffect } from 'react';
 import { useFacturas } from '@/hooks/useFacturas';
 import { useClientes } from '@/hooks/useClientes';
 import { facturaSchema, type FacturaFormData } from '@/lib/validations/facturacion';
@@ -43,7 +44,7 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
         resolver: zodResolver(facturaSchema) as any,
         defaultValues: {
             cliente_id: '',
-            numero: `FAC-${Date.now().toString().slice(-6)}`,
+            numero: '',
             fecha_emision: new Date().toISOString().split('T')[0],
             fecha_vencimiento: '',
             estado: 'emitida',
@@ -57,13 +58,11 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
         },
     });
 
-    const { fields, append, remove } = useFieldArray({
-        control: form.control,
-        name: "items"
-    });
-
-
-
+    useEffect(() => {
+        if (open) {
+            form.setValue('numero', `FAC-${Date.now().toString().slice(-6)}`);
+        }
+    }, [open, form]);
 
     const onSubmit = async (data: FacturaFormData) => {
         try {
@@ -73,7 +72,7 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
             // reset form for next time
             form.reset({
                 cliente_id: '',
-                numero: `FAC-${Date.now().toString().slice(-6)}`,
+                numero: '',
                 fecha_emision: new Date().toISOString().split('T')[0],
                 fecha_vencimiento: '',
                 estado: 'emitida',
@@ -85,10 +84,17 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
             });
 
             onOpenChange(false);
-        } catch (error: any) {
-            toast.error(error.message || 'Error al guardar la factura');
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : 'Error al guardar la factura');
         }
     };
+
+    const { fields, append, remove } = useFieldArray({
+        control: form.control,
+        name: "items"
+    });
+
+    const isSubmitDisabled = isPending || fields.length === 0;
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
@@ -276,7 +282,7 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
                             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                                 Cancelar
                             </Button>
-                            <Button type="submit" disabled={isPending || form.watch('items').length === 0}>
+                            <Button type="submit" disabled={isSubmitDisabled}>
                                 {isPending ? 'Procesando...' : 'Guardar Registro de Horas'}
                             </Button>
                         </DialogFooter>

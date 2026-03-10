@@ -9,19 +9,20 @@ vi.mock('@/hooks/useAsistencia');
 describe('Attendance Component', () => {
     it('renders empty state when there are no attendance records', () => {
         // Setup the mock to return an empty array and not loading
-        (useAsistencia as any).mockReturnValue({
+        vi.mocked(useAsistencia).mockReturnValue({
             getAsistencias: {
                 data: [],
                 isLoading: false,
                 refetch: vi.fn(),
-            },
+            } as any,
+            createAsistencia: {} as any,
             updateAsistencia: {
                 mutateAsync: vi.fn(),
-            },
+            } as any,
             generarPlanillaDia: {
                 mutateAsync: vi.fn(),
                 isPending: false,
-            },
+            } as any,
         });
 
         render(<Attendance />);

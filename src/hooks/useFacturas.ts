@@ -27,7 +27,7 @@ export function useFacturas() {
                 .order('fecha_emision', { ascending: false });
 
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as unknown as (Factura & { items: FacturaItem[] })[];
         },
     });
 

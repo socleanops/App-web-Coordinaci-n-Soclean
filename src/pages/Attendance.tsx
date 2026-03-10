@@ -35,17 +35,17 @@ export default function Attendance() {
             } else {
                 toast.info('No se encontraron horarios teóricos activos para aplicar en esta fecha, o los registros ya estaban creados.');
             }
-        } catch (error: any) {
-            toast.error(error.message || 'Error al intentar generar la planilla');
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : 'Error al intentar generar la planilla');
         }
     };
 
     const handleActualizarEstado = async (id: string, nuevoEstado: string) => {
         try {
-            await updateAsistencia.mutateAsync({ id, data: { estado: nuevoEstado as any } });
+            await updateAsistencia.mutateAsync({ id, data: { estado: nuevoEstado as 'presente' | 'ausente' | 'tardanza' | 'salida_anticipada' | 'pendiente' | 'justificado' } });
             toast.success(`Estado actualizado a ${ESTADOS_MAP[nuevoEstado].label}`);
-        } catch (error: any) {
-            toast.error(error.message || 'No se pudo actualizar el estado de asistencia');
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : 'No se pudo actualizar el estado de asistencia');
         }
     };
 
@@ -195,9 +195,9 @@ export default function Attendance() {
                                                         const newVal = e.target.value;
                                                         if (newVal !== a.observaciones) {
                                                             try {
-                                                                await updateAsistencia.mutateAsync({ id: a.id, data: { observaciones: newVal } as any });
+                                                                await updateAsistencia.mutateAsync({ id: a.id, data: { observaciones: newVal } });
                                                                 toast.success('Observación guardada');
-                                                            } catch (err) {
+                                                            } catch {
                                                                 toast.error('Error al guardar observación');
                                                             }
                                                         }

@@ -27,12 +27,13 @@ export function useHorarios() {
                 .order('hora_entrada', { ascending: true });
 
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as unknown as Horario[];
         },
     });
 
     const createHorario = useMutation({
         mutationFn: async (formData: HorarioFormData) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { id, ...dataToInsert } = formData;
             const payload = {
                 ...dataToInsert,

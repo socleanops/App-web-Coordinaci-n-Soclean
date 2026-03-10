@@ -106,8 +106,8 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                 toast.success('Horario asignado exitosamente');
             }
             onOpenChange(false);
-        } catch (error: any) {
-            toast.error(error.message || 'Error al guardar el horario');
+        } catch (error: unknown) {
+            toast.error(error instanceof Error ? error.message : 'Error al guardar el horario');
         }
     };
 

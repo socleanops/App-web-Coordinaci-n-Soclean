@@ -27,7 +27,7 @@ export function useFuncionarios() {
                 .order('fecha_ingreso', { ascending: false });
 
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as unknown as Funcionario[];
         },
     });
 
@@ -77,7 +77,7 @@ export function useFuncionarios() {
                         .maybeSingle();
 
                     if (existingFunc) {
-                        const prof = existingFunc.profiles as any;
+                        const prof = existingFunc.profiles as unknown as { nombre: string, apellido: string } | null;
                         const fullName = prof ? `${prof.nombre} ${prof.apellido}` : 'un funcionario activo';
                         throw new Error(`Este correo/cédula ya está registrado y asignado a ${fullName}.`);
                     }

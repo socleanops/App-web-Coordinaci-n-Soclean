@@ -34,7 +34,7 @@ import { useClientes } from '@/hooks/useClientes';
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    servicioToEdit?: any | null; // usually Servicio type
+    servicioToEdit?: (ServicioFormData & { id: string }) | null;
 }
 
 export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props) {
@@ -61,7 +61,7 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
                 cliente_id: servicioToEdit.cliente_id || '',
                 descripcion: servicioToEdit.descripcion || '',
                 direccion: servicioToEdit.direccion || '',
-                estado: servicioToEdit.estado as any || 'activo',
+                estado: servicioToEdit.estado || 'activo',
             });
         } else {
             form.reset({
@@ -89,10 +89,10 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
                 toast.success('Servicio registrado exitosamente en el cliente');
             }
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Form Submit Error:", error);
             toast.dismiss(loadingId);
-            toast.error(`Error al revisar datos: ${error.message || 'No se pudo guardar la información'}`, { duration: 8000 });
+            toast.error(`Error al revisar datos: ${error instanceof Error ? error.message : 'No se pudo guardar la información'}`, { duration: 8000 });
         }
     };
 

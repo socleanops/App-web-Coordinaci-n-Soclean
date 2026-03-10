@@ -5,16 +5,24 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Pencil } from 'lucide-react';
 
+import type { Funcionario } from '@/types';
+
+interface EmployeeWithDetails extends Omit<Funcionario, 'departamento_id' | 'departamentos' | 'profiles'> {
+    departamento_id?: string;
+    departamentos?: { nombre: string, id?: string };
+    profiles?: { nombre: string, apellido: string, email: string, rol: string };
+}
+
 interface FuncionariosTableProps {
-    employees: any[];
+    employees: EmployeeWithDetails[];
     isLoading: boolean;
-    onEdit: (funcionario: any) => void;
+    onEdit: (funcionario: EmployeeWithDetails) => void;
 }
 
 export function FuncionariosTable({ employees, isLoading, onEdit }: FuncionariosTableProps) {
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredEmployees = employees.filter((emp: any) => {
+    const filteredEmployees = employees.filter((emp: EmployeeWithDetails) => {
         const search = searchTerm.toLowerCase();
         const n = emp?.profiles?.nombre?.toLowerCase() || '';
         const a = emp?.profiles?.apellido?.toLowerCase() || '';
@@ -67,7 +75,7 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredEmployees.map((emp: any) => (
+                                filteredEmployees.map((emp: EmployeeWithDetails) => (
                                     <TableRow key={emp.id} className="group hover:bg-muted/30 transition-colors">
                                         <TableCell>
                                             <div className="font-medium">{emp.profiles?.nombre} {emp.profiles?.apellido}</div>
