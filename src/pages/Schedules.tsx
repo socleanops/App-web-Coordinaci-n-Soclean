@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, Pencil, Search, CalendarClock, Trash2, Smartphone, Printer } from 'lucide-react';
+import { PlusCircle, Pencil, Search, CalendarClock, Trash2, Smartphone, Printer, Calendar, ListFilter } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { HorarioFormDialog } from '@/components/horarios/HorarioFormDialog';
@@ -20,14 +20,36 @@ const DIAS_MAP: Record<number, string> = {
     6: 'Sábado'
 };
 
+// Default to tomorrow's date
+function getTomorrowStr(): string {
+    const d = new Date();
+    d.setDate(d.getDate() + 1);
+    return d.toISOString().split('T')[0]; // YYYY-MM-DD
+}
+
 export default function Schedules() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
     const [editingHorario, setEditingHorario] = useState<Horario | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [fechaFiltro, setFechaFiltro] = useState<string>(getTomorrowStr());
+    const [showAll, setShowAll] = useState(false);
 
     const { getHorarios, deleteHorario } = useHorarios();
     const { data: horarios = [], isLoading } = getHorarios;
+
+    // Get day of week from selected date (0=Sun ... 6=Sat)
+    const diaSemanaFiltro = useMemo(() => {
+        if (showAll || !fechaFiltro) return null;
+        const d = new Date(fechaFiltro + 'T12:00:00');
+        return d.getDay();
+    }, [fechaFiltro, showAll]);
+
+    const fechaLabel = useMemo(() => {
+        if (!fechaFiltro) return '';
+        const d = new Date(fechaFiltro + 'T12:00:00');
+        return d.toLocaleDateString('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+    }, [fechaFiltro]);
 
     const handleEdit = (horario: Horario) => {
         setEditingHorario(horario);
@@ -51,6 +73,15 @@ export default function Schedules() {
     };
 
     const filteredHorarios = horarios.filter((h: Horario) => {
+        // Filter by day of week if a date is selected
+        if (diaSemanaFiltro !== null && h.dia_semana !== diaSemanaFiltro) return false;
+
+        // Filter by vigencia: must be active on the selected date
+        if (!showAll && fechaFiltro) {
+            if (h.vigente_desde && fechaFiltro < h.vigente_desde) return false;
+            if (h.vigente_hasta && fechaFiltro > h.vigente_hasta) return false;
+        }
+
         const search = searchTerm.toLowerCase();
         const func = h.funcionarios?.profiles?.nombre?.toLowerCase() + ' ' + h.funcionarios?.profiles?.apellido?.toLowerCase();
         const serv = h.servicios?.clientes?.razon_social?.toLowerCase() + ' ' + h.servicios?.nombre?.toLowerCase();
@@ -91,7 +122,7 @@ export default function Schedules() {
             </div>
 
             <Card className="border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
-                <CardHeader className="pb-4">
+                <CardHeader className="pb-4 space-y-4">
                     <div className="flex flex-col sm:flex-row justify-between w-full items-center gap-4">
                         <CardTitle className="text-lg flex-1">Cronograma de Asignaciones</CardTitle>
                         <div className="relative w-full sm:w-72">
@@ -112,10 +143,38 @@ export default function Schedules() {
                             <Printer className="h-4 w-4 mr-2" /> Imprimir
                         </Button>
                     </div>
+
+                    {/* Date filter row */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 pt-2 border-t border-slate-100 dark:border-slate-800">
+                        <div className="flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-coreops-primary" />
+                            <span className="text-sm font-semibold text-slate-700 dark:text-slate-300">Filtrar por fecha:</span>
+                        </div>
+                        <input
+                            type="date"
+                            value={fechaFiltro}
+                            onChange={(e) => { setFechaFiltro(e.target.value); setShowAll(false); }}
+                            className="flex h-9 rounded-md border border-slate-300 bg-white px-3 py-1 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-coreops-primary dark:bg-slate-800 dark:text-white dark:border-slate-600"
+                        />
+                        <Button
+                            variant={showAll ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setShowAll(!showAll)}
+                            className={showAll ? 'bg-coreops-primary hover:bg-coreops-secondary text-white' : ''}
+                        >
+                            <ListFilter className="h-4 w-4 mr-1" />
+                            {showAll ? 'Mostrando Todos' : 'Ver Todos'}
+                        </Button>
+                        {!showAll && fechaFiltro && (
+                            <span className="text-sm text-muted-foreground capitalize">
+                                📅 Mostrando horarios del <strong>{fechaLabel}</strong> ({filteredHorarios.length} asignaciones)
+                            </span>
+                        )}
+                    </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-background/50 overflow-hidden">
-                        <Table>
+                    <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-background/50 overflow-x-auto overflow-y-hidden">
+                        <Table className="min-w-[800px]">
                             <TableHeader className="bg-muted/50">
                                 <TableRow>
                                     <TableHead>Día y Franja</TableHead>
