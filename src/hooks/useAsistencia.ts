@@ -3,12 +3,11 @@ import { supabase } from '@/lib/supabase';
 import type { Asistencia } from '@/types';
 import type { AsistenciaFormData } from '@/lib/validations/asistencia';
 
-export function useAsistencia(fechaFiltro?: string) {
+export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
     const queryClient = useQueryClient();
 
     const getAsistencias = useQuery({
-        // Si hay una fecha de filtro, la agregamos a la key para que refetchee cuando cambie
-        queryKey: ['asistencia', fechaFiltro],
+        queryKey: ['asistencia', fechaDesde, fechaHasta],
         queryFn: async (): Promise<Asistencia[]> => {
             let query = supabase
                 .from('asistencia')
@@ -25,10 +24,13 @@ export function useAsistencia(fechaFiltro?: string) {
                         servicios(nombre, direccion, clientes(razon_social))
                     )
                 `)
-                .order('fecha', { ascending: false });
+                .order('fecha', { ascending: true })
+                .order('funcionario_id', { ascending: true });
 
-            if (fechaFiltro) {
-                query = query.eq('fecha', fechaFiltro);
+            if (fechaDesde && fechaHasta) {
+                query = query.gte('fecha', fechaDesde).lte('fecha', fechaHasta);
+            } else if (fechaDesde) {
+                query = query.eq('fecha', fechaDesde);
             }
 
             const { data, error } = await query;
@@ -73,21 +75,18 @@ export function useAsistencia(fechaFiltro?: string) {
 
     const generarPlanillaDia = useMutation({
         mutationFn: async (fecha: string) => {
-            // 1. Determine day of week (0 = Sunday, 1 = Monday ...)
-            const dateObj = new Date(fecha + 'T12:00:00Z'); // noon UTC
+            const dateObj = new Date(fecha + 'T12:00:00Z');
             const diaSemana = dateObj.getUTCDay();
 
-            // 2. Fetch all active schedules for this day of week
             const { data: horarios, error: horariosErr } = await supabase
                 .from('horarios')
                 .select('*')
                 .eq('dia_semana', diaSemana)
-                .is('vigente_hasta', null); // only active schedules
+                .is('vigente_hasta', null);
 
             if (horariosErr) throw new Error(horariosErr.message);
             if (!horarios || horarios.length === 0) return { count: 0 };
 
-            // 3. Fetch existing attendance records for this date
             const { data: existentes, error: extErr } = await supabase
                 .from('asistencia')
                 .select('horario_id')
@@ -97,7 +96,6 @@ export function useAsistencia(fechaFiltro?: string) {
 
             const existingHorariosMap = new Set(existentes?.map(e => e.horario_id));
 
-            // 4. Create new attendance records for missing schedules
             const nuevosRegistros = horarios
                 .filter(h => !existingHorariosMap.has(h.id))
                 .map(h => ({
@@ -109,7 +107,6 @@ export function useAsistencia(fechaFiltro?: string) {
 
             if (nuevosRegistros.length === 0) return { count: 0 };
 
-            // 5. Bulk insert
             const { error: insErr } = await supabase
                 .from('asistencia')
                 .insert(nuevosRegistros);
@@ -123,10 +120,62 @@ export function useAsistencia(fechaFiltro?: string) {
         }
     });
 
+    // Generate sheets for an entire week range
+    const generarPlanillaSemana = useMutation({
+        mutationFn: async ({ desde, hasta }: { desde: string; hasta: string }) => {
+            let totalCreated = 0;
+            const current = new Date(desde + 'T12:00:00');
+            const end = new Date(hasta + 'T12:00:00');
+
+            while (current <= end) {
+                const fechaStr = current.toISOString().split('T')[0];
+                const dateObj = new Date(fechaStr + 'T12:00:00Z');
+                const diaSemana = dateObj.getUTCDay();
+
+                const { data: horarios } = await supabase
+                    .from('horarios')
+                    .select('*')
+                    .eq('dia_semana', diaSemana)
+                    .is('vigente_hasta', null);
+
+                if (horarios && horarios.length > 0) {
+                    const { data: existentes } = await supabase
+                        .from('asistencia')
+                        .select('horario_id')
+                        .eq('fecha', fechaStr);
+
+                    const existingSet = new Set(existentes?.map(e => e.horario_id));
+
+                    const nuevos = horarios
+                        .filter(h => !existingSet.has(h.id))
+                        .map(h => ({
+                            funcionario_id: h.funcionario_id,
+                            horario_id: h.id,
+                            fecha: fechaStr,
+                            estado: 'pendiente'
+                        }));
+
+                    if (nuevos.length > 0) {
+                        await supabase.from('asistencia').insert(nuevos);
+                        totalCreated += nuevos.length;
+                    }
+                }
+
+                current.setDate(current.getDate() + 1);
+            }
+
+            return { count: totalCreated };
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['asistencia'] });
+        }
+    });
+
     return {
         getAsistencias,
         createAsistencia,
         updateAsistencia,
         generarPlanillaDia,
+        generarPlanillaSemana,
     };
 }
