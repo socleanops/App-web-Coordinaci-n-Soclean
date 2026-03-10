@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+import { APP_VERSION, APP_COPYRIGHT, APP_DEVELOPER } from '@/lib/appInfo';
 import {
     Dialog,
     DialogContent,
@@ -202,6 +203,16 @@ export default function Login() {
                     </form>
                 </DialogContent>
             </Dialog>
+
+            {/* Developer Credit */}
+            <div className="fixed bottom-4 left-0 right-0 text-center z-10">
+                <p className="text-xs text-muted-foreground/60">
+                    Desarrollado por <span className="font-semibold text-muted-foreground/80">{APP_DEVELOPER}</span>
+                </p>
+                <p className="text-[10px] text-muted-foreground/40 mt-0.5">
+                    {APP_COPYRIGHT} · v{APP_VERSION}
+                </p>
+            </div>
         </div>
     );
 }

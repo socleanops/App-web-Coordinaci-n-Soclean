@@ -14,6 +14,7 @@ import {
     Map
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { APP_VERSION, APP_COPYRIGHT, APP_DEVELOPER } from '@/lib/appInfo';
 import { Button } from '@/components/ui/button';
 
 import { useAuthStore } from '@/stores/authStore';
@@ -85,6 +86,21 @@ export function Sidebar({ forceExpand = false }: { forceExpand?: boolean }) {
                     );
                 })}
             </nav>
+
+            {/* Developer Credit & Version */}
+            {!isCollapsed && (
+                <div className="px-4 py-3 shrink-0 border-t border-dashed border-muted-foreground/10">
+                    <p className="text-[10px] text-muted-foreground/50 text-center leading-tight">
+                        Desarrollado por <span className="font-semibold text-muted-foreground/70">{APP_DEVELOPER}</span>
+                    </p>
+                    <p className="text-[9px] text-muted-foreground/40 text-center mt-1 leading-tight">
+                        {APP_COPYRIGHT}
+                    </p>
+                    <p className="text-[9px] text-muted-foreground/30 text-center mt-0.5">
+                        v{APP_VERSION}
+                    </p>
+                </div>
+            )}
 
             {/* Collapse Toggle */}
             {!forceExpand && (
