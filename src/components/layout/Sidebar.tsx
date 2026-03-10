@@ -51,7 +51,7 @@ export function Sidebar({ forceExpand = false }: { forceExpand?: boolean }) {
             {/* Brand logo / title */}
             <div className="flex h-16 items-center justify-between px-4 py-4 border-b shrink-0">
                 {!isCollapsed && (
-                    <img src="/soclean-logo.png" alt="Soclean" className="h-8 object-contain drop-shadow-sm" />
+                    <img src="/soclean-logo.png" alt="Soclean" className="h-10 max-w-[180px] object-contain drop-shadow-sm" />
                 )}
                 {isCollapsed && (
                     <span className="text-xl font-extrabold text-primary mx-auto">SC</span>

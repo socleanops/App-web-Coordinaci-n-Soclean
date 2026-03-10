@@ -104,7 +104,7 @@ export default function Login() {
             <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-background to-secondary/20 pointer-events-none" />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
                 <div className="text-center mb-8 animate-in slide-in-from-bottom-5 duration-500">
-                    <img src="/soclean-logo.png" alt="Soclean Logo" className="mx-auto h-28 mb-2 object-contain drop-shadow-md" />
+                    <img src="/soclean-logo.png" alt="Soclean Logo" className="mx-auto h-24 max-w-[320px] mb-2 object-contain drop-shadow-md rounded-2xl" />
                 </div>
                 <Card className="shadow-2xl border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md animate-in zoom-in-95 duration-500 delay-150 fill-mode-backwards w-full">
                     <CardHeader className="space-y-1">
