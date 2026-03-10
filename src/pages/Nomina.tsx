@@ -227,8 +227,8 @@ export default function Nomina() {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-hidden">
-                        <Table>
+                    <div className="overflow-x-auto">
+                        <Table className="min-w-[800px]">
                             <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
                                 <TableRow>
                                     <TableHead className="pl-6">Funcionario (CI)</TableHead>

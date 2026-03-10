@@ -1,4 +1,4 @@
-import { UserCircle } from 'lucide-react';
+import { UserCircle, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,8 @@ import {
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { NotificationDropdown } from './NotificationDropdown';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sidebar } from './Sidebar';
 
 export function Header() {
     const navigate = useNavigate();
@@ -21,11 +23,27 @@ export function Header() {
     };
 
     return (
-        <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background px-6">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background px-4 md:px-6">
             <div className="flex flex-1 items-center justify-between">
-                {/* Placeholder for Search or Breadcrumbs */}
-                <div className="text-xl font-semibold uppercase tracking-wider text-muted-foreground">
-                    Panel de Control
+                <div className="flex items-center gap-2">
+                    {/* Mobile Menu Trigger */}
+                    <div className="md:hidden">
+                        <Sheet>
+                            <SheetTrigger asChild>
+                                <Button variant="ghost" size="icon" className="mr-0.5">
+                                    <Menu className="h-6 w-6" />
+                                </Button>
+                            </SheetTrigger>
+                            <SheetContent side="left" className="p-0 w-64">
+                                <Sidebar forceExpand />
+                            </SheetContent>
+                        </Sheet>
+                    </div>
+
+                    {/* Placeholder for Search or Breadcrumbs */}
+                    <div className="text-lg md:text-xl font-semibold uppercase tracking-wider text-muted-foreground line-clamp-1">
+                        Panel de Control
+                    </div>
                 </div>
 
                 {/* Right Nav */}

@@ -18,9 +18,12 @@ import { Button } from '@/components/ui/button';
 
 import { useAuthStore } from '@/stores/authStore';
 
-export function Sidebar() {
+export function Sidebar({ forceExpand = false }: { forceExpand?: boolean }) {
     const [collapsed, setCollapsed] = useState(false);
     const { role } = useAuthStore();
+
+    // If mobile menu forces expansion, ignore collapsed state
+    const isCollapsed = forceExpand ? false : collapsed;
 
     const isManager = role === 'superadmin' || role === 'admin';
 
@@ -42,15 +45,15 @@ export function Sidebar() {
 
     return (
         <div className={cn(
-            "relative flex flex-col border-r bg-background transition-all duration-300",
-            collapsed ? "w-20" : "w-64"
+            "relative flex flex-col border-r bg-background transition-all duration-300 h-full",
+            isCollapsed ? "w-20" : "w-64"
         )}>
             {/* Brand logo / title */}
-            <div className="flex h-16 items-center justify-between px-4 py-4 border-b">
-                {!collapsed && (
+            <div className="flex h-16 items-center justify-between px-4 py-4 border-b shrink-0">
+                {!isCollapsed && (
                     <img src="/soclean-logo.png" alt="Soclean" className="h-8 object-contain drop-shadow-sm" />
                 )}
-                {collapsed && (
+                {isCollapsed && (
                     <span className="text-xl font-extrabold text-primary mx-auto">SC</span>
                 )}
             </div>
@@ -71,30 +74,32 @@ export function Sidebar() {
                                         : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                 )
                             }
-                            title={collapsed ? item.name : undefined}
+                            title={isCollapsed ? item.name : undefined}
                         >
                             <Icon className={cn(
                                 "flex-shrink-0",
-                                collapsed ? "h-6 w-6 mx-auto" : "mr-3 h-5 w-5"
+                                isCollapsed ? "h-6 w-6 mx-auto" : "mr-3 h-5 w-5"
                             )} />
-                            {!collapsed && <span>{item.name}</span>}
+                            {!isCollapsed && <span>{item.name}</span>}
                         </NavLink>
                     );
                 })}
             </nav>
 
             {/* Collapse Toggle */}
-            <div className="p-4 border-t flex justify-end">
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => setCollapsed(!collapsed)}
-                    className="mx-auto flex w-full justify-center"
-                    aria-label={collapsed ? "Expandir menú" : "Colapsar menú"}
-                >
-                    {collapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
-                </Button>
-            </div>
+            {!forceExpand && (
+                <div className="p-4 border-t flex justify-end shrink-0">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => setCollapsed(!isCollapsed)}
+                        className="mx-auto flex w-full justify-center"
+                        aria-label={isCollapsed ? "Expandir menú" : "Colapsar menú"}
+                    >
+                        {isCollapsed ? <ChevronRight className="h-5 w-5" /> : <ChevronLeft className="h-5 w-5" />}
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }

@@ -60,8 +60,8 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-background/50 overflow-hidden">
-                    <Table>
+                <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-background/50 overflow-x-auto overflow-y-hidden">
+                    <Table className="min-w-[800px]">
                         <TableHeader className="bg-muted/50">
                             <TableRow>
                                 <TableHead className="w-[200px]">Funcionario</TableHead>
