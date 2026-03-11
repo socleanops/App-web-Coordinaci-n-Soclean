@@ -4,7 +4,9 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter }
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { User, Shield, Bell, Key, Store, Moon, Sun } from 'lucide-react';
+import { User, Shield, Bell, Key, Store, Moon, Sun, Database, Download } from 'lucide-react';
+import * as XLSX from 'xlsx';
+import { format } from 'date-fns';
 import { useAuthStore } from '@/stores/authStore';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
@@ -133,6 +135,104 @@ export default function Settings() {
         }
     };
 
+    const [backups, setBackups] = useState<any[]>([]);
+    const [isGeneratingBackup, setIsGeneratingBackup] = useState(false);
+
+    const loadBackups = async () => {
+        if (role !== 'superadmin') return;
+        const { data } = await supabase.from('backups_log').select('*, profiles(nombre, apellido)').order('created_at', { ascending: false });
+        if (data) setBackups(data);
+    };
+
+    useEffect(() => {
+        if (activeTab === 'backups') {
+            loadBackups();
+        }
+    }, [activeTab]);
+
+    const handleGenerateBackup = async () => {
+        if (role !== 'superadmin') return;
+        setIsGeneratingBackup(true);
+        try {
+            toast.info("Recopilando datos para el respaldo...");
+            
+            const [asistencia, horarios, facturas, clientes, perfiles] = await Promise.all([
+                supabase.from('asistencia').select('*'),
+                supabase.from('horarios').select('*'),
+                supabase.from('facturas').select('*'),
+                supabase.from('clientes').select('*'),
+                supabase.from('profiles').select('*')
+            ]);
+            
+            const wb = XLSX.utils.book_new();
+            
+            const addSheet = (data: any, name: string) => {
+                if (data && data.data && data.data.length > 0) {
+                    const ws = XLSX.utils.json_to_sheet(data.data);
+                    XLSX.utils.book_append_sheet(wb, ws, name);
+                }
+            };
+            
+            addSheet(asistencia, 'Asistencia');
+            addSheet(horarios, 'Horarios');
+            addSheet(facturas, 'Facturas');
+            addSheet(clientes, 'Clientes');
+            addSheet(perfiles, 'Usuarios');
+            
+            const excelBuffer = XLSX.write(wb, { bookType: 'xlsx', type: 'array' });
+            
+            const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm-ss');
+            const fileName = `backup_soclean_${timestamp}.xlsx`;
+            
+            const { data: uploadData, error: uploadError } = await supabase.storage
+                .from('backups')
+                .upload(fileName, excelBuffer, {
+                    contentType: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    upsert: false
+                });
+                
+            if (uploadError) throw uploadError;
+            
+            const savedPath = uploadData.path;
+            
+            const { error: logError } = await supabase.from('backups_log').insert([{
+                tipo: 'MANUAL',
+                estado: 'COMPLETADO',
+                archivo_url: savedPath,
+                realizado_por: user?.id
+            }]);
+            
+            if (logError) throw logError;
+            
+            toast.success("Respaldo completado y guardado en la nube.");
+            loadBackups();
+        } catch (error: any) {
+            console.error("Error generating backup:", error);
+            toast.error("Error al generar el respaldo: " + error.message);
+        } finally {
+            setIsGeneratingBackup(false);
+        }
+    };
+    
+    const downloadBackup = async (path: string) => {
+        try {
+            toast.info("Descargando archivo...");
+            const { data, error } = await supabase.storage.from('backups').download(path);
+            if (error) throw error;
+            
+            const url = window.URL.createObjectURL(data);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = path.split('/').pop() || 'backup.xlsx';
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (error: any) {
+            toast.error("No se pudo descargar el archivo: " + error.message);
+        }
+    };
+
     const handleChangePassword = async () => {
         if (!newPass || newPass.length < 6) {
             toast.error("La contraseña debe tener al menos 6 caracteres.");
@@ -183,6 +283,11 @@ export default function Settings() {
                     <button onClick={() => setActiveTab('seguridad')} className={`text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors ${activeTab === 'seguridad' ? 'bg-white dark:bg-slate-900 shadow-sm font-semibold' : 'hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}>
                         <Shield className="h-5 w-5" /> Seguridad
                     </button>
+                    {role === 'superadmin' && (
+                        <button onClick={() => setActiveTab('backups')} className={`text-left px-4 py-3 rounded-lg flex items-center gap-3 transition-colors ${activeTab === 'backups' ? 'bg-white dark:bg-slate-900 shadow-sm font-semibold' : 'hover:bg-slate-200 dark:hover:bg-slate-700/50'}`}>
+                            <Database className="h-5 w-5" /> Backups en Nube
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex-1">
@@ -313,6 +418,54 @@ export default function Settings() {
                                     {isChangingPass ? 'Actualizando...' : 'Actualizar Credenciales'}
                                 </Button>
                             </CardFooter>
+                        </Card>
+                    )}
+
+                    {activeTab === 'backups' && role === 'superadmin' && (
+                        <Card className="border-slate-200 dark:border-slate-800 shadow-sm bg-white/60 dark:bg-slate-900/60 backdrop-blur-md">
+                            <CardHeader>
+                                <CardTitle className="flex items-center justify-between">
+                                    <span className="flex items-center gap-2">
+                                        <Database className="h-6 w-6 text-coreops-primary" />
+                                        Respaldos en la Nube (Supabase Storage)
+                                    </span>
+                                    <Button onClick={handleGenerateBackup} disabled={isGeneratingBackup} className="bg-coreops-primary hover:bg-coreops-secondary">
+                                        {isGeneratingBackup ? 'Generando y Subiendo...' : 'Generar Backup Ahora'}
+                                    </Button>
+                                </CardTitle>
+                                <CardDescription>Historial de respaldos extraídos y almacenados de forma segura en la nube. Los datos incluyen nómina, facturas, clientes, usuarios y horarios.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {backups.length === 0 ? (
+                                    <div className="text-center py-8 text-slate-500">
+                                        No hay respaldos registrados. Toca el botón para crear el primero.
+                                    </div>
+                                ) : (
+                                    <div className="space-y-3">
+                                        {backups.map((bk) => (
+                                            <div key={bk.id} className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-100 dark:border-slate-800">
+                                                <div>
+                                                    <div className="font-semibold flex items-center gap-2">
+                                                        {bk.tipo === 'MANUAL' ? 'Respaldo Manual' : 'Respaldo Automático'}
+                                                        <span className={`text-xs px-2 py-0.5 rounded-full ${bk.estado === 'COMPLETADO' ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700'}`}>
+                                                            {bk.estado}
+                                                        </span>
+                                                    </div>
+                                                    <div className="text-sm text-slate-500 mt-1">
+                                                        {format(new Date(bk.created_at), "dd 'de' MMMM, yyyy - HH:mm")} hs
+                                                        {bk.profiles && ` • Por: ${bk.profiles.nombre} ${bk.profiles.apellido}`}
+                                                    </div>
+                                                </div>
+                                                {bk.archivo_url && (
+                                                    <Button variant="outline" size="sm" onClick={() => downloadBackup(bk.archivo_url)} className="flex gap-2">
+                                                        <Download className="h-4 w-4" /> Descargar Excel
+                                                    </Button>
+                                                )}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </CardContent>
                         </Card>
                     )}
                 </div>
