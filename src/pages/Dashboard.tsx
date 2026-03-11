@@ -1,24 +1,63 @@
-import { Users, Calendar, ClipboardList, Briefcase, HelpCircle, Building2, Map, FileText, Clock } from 'lucide-react';
+import { Users, Calendar, ClipboardList, Briefcase, HelpCircle, Building2, Map, FileText, Clock, AlertTriangle, UserCheck } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { ModuleCard } from '@/components/dashboard/ModuleCard';
 import { DashboardSupportSection } from '@/components/dashboard/DashboardSupportSection';
+import { useDashboardKpis } from '@/hooks/useDashboardKpis';
+import { KPICard } from '@/components/dashboard/KPICard';
 
 export default function Dashboard() {
     const { role } = useAuthStore();
     const isManager = role === 'superadmin' || role === 'admin';
+    const { data: kpis, isLoading: isLoadingKpis } = useDashboardKpis();
 
     return (
-        <main className="max-w-7xl mx-auto py-8 animate-in fade-in duration-500">
+        <main className="max-w-7xl mx-auto py-8 animate-in fade-in duration-500 space-y-8">
             {/* Title Section */}
-            <section className="mb-12">
+            <section className="mb-4">
                 <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white sm:text-4xl">Panel Principal</h2>
-                <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-3xl">
+                <p className="mt-2 text-lg text-slate-600 dark:text-slate-400 max-w-3xl">
                     Selecciona un módulo para gestionar tu personal, asistencia, operaciones de limpieza y finanzas de la empresa.
                 </p>
             </section>
 
+            {/* Real-time KPIs Row */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <KPICard
+                    title="Empleados Activos"
+                    value={kpis?.empleadosActivos ?? 0}
+                    Icon={Users}
+                    colorTheme="blue"
+                    description="Personal total activo"
+                    isLoading={isLoadingKpis}
+                />
+                <KPICard
+                    title="Servicios Activos"
+                    value={kpis?.serviciosActivos ?? 0}
+                    Icon={Briefcase}
+                    colorTheme="green"
+                    description="Sitios de clientes actuales"
+                    isLoading={isLoadingKpis}
+                />
+                <KPICard
+                    title="Ausencias Hoy"
+                    value={kpis?.ausenciasHoy ?? 0}
+                    Icon={UserCheck}
+                    colorTheme="purple"
+                    description="Registros de ausencias del día"
+                    isLoading={isLoadingKpis}
+                />
+                <KPICard
+                    title="Alertas de Asistencia"
+                    value={kpis?.alertasIncumplimiento ?? 0}
+                    Icon={AlertTriangle}
+                    colorTheme="red"
+                    description="Tardanzas y salidas anticipadas hoy"
+                    isLoading={isLoadingKpis}
+                />
+            </div>
+
             {/* Grid based on the Stitch exported design aesthetic */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-4">
                 <ModuleCard
                     title="Módulo de Personal"
                     description="Gestiona la información de todos los empleados, contratos, salarios, y asignaciones a departamentos."
