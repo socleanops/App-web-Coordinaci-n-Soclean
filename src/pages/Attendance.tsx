@@ -188,14 +188,14 @@ export default function Attendance() {
                     {viewMode === 'semana' ? (
                         <div className="flex flex-col sm:flex-row items-center gap-3 justify-between">
                             <div className="flex items-center gap-2">
-                                <Button variant="outline" size="icon" onClick={() => navigateWeek(-1)} className="h-9 w-9">
+                                <Button variant="outline" size="icon" onClick={() => navigateWeek(-1)} className="h-9 w-9" aria-label="Semana anterior">
                                     <ChevronLeft className="h-4 w-4" />
                                 </Button>
                                 <div className="text-center min-w-[220px]">
                                     <div className="font-semibold text-sm text-slate-800 dark:text-slate-200">📅 Semana</div>
                                     <div className="text-sm text-muted-foreground capitalize">{weekLabel}</div>
                                 </div>
-                                <Button variant="outline" size="icon" onClick={() => navigateWeek(1)} className="h-9 w-9">
+                                <Button variant="outline" size="icon" onClick={() => navigateWeek(1)} className="h-9 w-9" aria-label="Siguiente semana">
                                     <ChevronRight className="h-4 w-4" />
                                 </Button>
                                 <Button variant="ghost" size="sm" onClick={goToCurrentWeek} className="text-xs text-coreops-primary">
@@ -207,7 +207,7 @@ export default function Attendance() {
                                     <CalendarPlus className="h-4 w-4 mr-2" />
                                     {generarPlanillaSemana.isPending ? 'Generando...' : 'Generar Planilla Semanal'}
                                 </Button>
-                                <Button onClick={() => { refetch(); toast.info("Actualizando..."); }} variant="outline" size="icon" className="h-10 w-10">
+                                <Button onClick={() => { refetch(); toast.info("Actualizando..."); }} variant="outline" size="icon" className="h-10 w-10" aria-label="Actualizar datos">
                                     <RefreshCw className="h-4 w-4" />
                                 </Button>
                             </div>
@@ -229,7 +229,7 @@ export default function Attendance() {
                                     <CalendarPlus className="h-4 w-4 mr-2" />
                                     {generarPlanillaDia.isPending ? 'Generando...' : 'Generar Planilla del Día'}
                                 </Button>
-                                <Button onClick={() => { refetch(); toast.info("Actualizando..."); }} variant="outline" size="icon" className="h-10 w-10">
+                                <Button onClick={() => { refetch(); toast.info("Actualizando..."); }} variant="outline" size="icon" className="h-10 w-10" aria-label="Actualizar datos">
                                     <RefreshCw className="h-4 w-4" />
                                 </Button>
                             </div>
