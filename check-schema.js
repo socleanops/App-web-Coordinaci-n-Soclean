@@ -8,7 +8,8 @@ const supabaseKey = envFile.match(/VITE_SUPABASE_ANON_KEY=(.*)/)?.[1]?.trim() ||
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function check() {
-    const { data, error } = await supabase.from('asistencia').select('*').limit(1);
-    console.log(data);
+    console.log("Fetching...");
+    const { data, error } = await supabase.from('asistencia').select('hora_entrada_registrada').limit(1);
+    console.log(error || data);
 }
 check();
