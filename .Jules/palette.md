@@ -1,3 +1,3 @@
-## 2025-03-10 - ARIA Labels for Icon-only Buttons
-**Learning:** Icon-only buttons (like the notification bell and sidebar toggle) across the layout components lacked `aria-label` attributes, which makes them inaccessible to screen readers as their purpose isn't conveyed through text content.
-**Action:** Always ensure any `<Button>` or `<button>` that solely uses an `<Icon />` child has a descriptive `aria-label` prop. For dynamic states (like collapsed/expanded), the label should update accordingly to reflect the current action.
+## 2024-03-11 - Adding ARIA labels to Attendance components
+**Learning:** Icon-only buttons in complex data tables or calendars (like week navigators or refresh actions) often lack programmatic names in this project, which severely degrades screen-reader experiences. While `lucide-react` icons are visual indicators, they lack text alternatives by default.
+**Action:** When working on navigation or action buttons without visible text, always add a localized `aria-label` (e.g., in Spanish like "Semana anterior" or "Actualizar datos") to `<Button size="icon">` components to ensure parity between visual and programmatic meaning.
