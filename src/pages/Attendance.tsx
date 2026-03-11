@@ -105,10 +105,12 @@ export default function Attendance() {
             // Auto-rellenar hora real si se marca presente y están en blanco
             if (nuevoEstado === 'presente' && a.horarios) {
                 if (!a.hora_entrada_registrada && a.horarios.hora_entrada) {
-                    dataToUpdate.hora_entrada_registrada = a.horarios.hora_entrada;
+                    const timeStr = a.horarios.hora_entrada.substring(0, 5);
+                    dataToUpdate.hora_entrada_registrada = new Date(`${a.fecha}T${timeStr}:00`).toISOString();
                 }
                 if (!a.hora_salida_registrada && a.horarios.hora_salida) {
-                    dataToUpdate.hora_salida_registrada = a.horarios.hora_salida;
+                    const timeStr = a.horarios.hora_salida.substring(0, 5);
+                    dataToUpdate.hora_salida_registrada = new Date(`${a.fecha}T${timeStr}:00`).toISOString();
                 }
             }
 
@@ -119,9 +121,14 @@ export default function Attendance() {
         }
     };
 
-    const handleGuardarHora = async (id: string, field: 'hora_entrada_registrada' | 'hora_salida_registrada', value: string) => {
+    const handleGuardarHora = async (a: Asistencia, field: 'hora_entrada_registrada' | 'hora_salida_registrada', timeValue: string) => {
         try {
-            await updateAsistencia.mutateAsync({ id, data: { [field]: value || null } as any });
+            let finalValue = null;
+            if (timeValue) {
+                // timeValue is "HH:mm" - Combine with a.fecha
+                finalValue = new Date(`${a.fecha}T${timeValue}:00`).toISOString();
+            }
+            await updateAsistencia.mutateAsync({ id: a.id, data: { [field]: finalValue } as any });
             toast.success(field === 'hora_entrada_registrada' ? 'Entrada real guardada' : 'Salida real guardada');
         } catch {
             toast.error('Error al guardar hora real');
@@ -348,17 +355,17 @@ export default function Attendance() {
                                                             <Input
                                                                 key={`ent-${a.id}-${a.hora_entrada_registrada}`}
                                                                 type="time"
-                                                                defaultValue={a.hora_entrada_registrada?.substring(0, 5) || ''}
+                                                                defaultValue={a.hora_entrada_registrada ? new Date(a.hora_entrada_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
                                                                 className="h-8 w-[90px] text-xs font-mono"
-                                                                onBlur={(e) => handleGuardarHora(a.id, 'hora_entrada_registrada', e.target.value)}
+                                                                onBlur={(e) => handleGuardarHora(a, 'hora_entrada_registrada', e.target.value)}
                                                             />
                                                             <span className="text-xs text-muted-foreground">-</span>
                                                             <Input
                                                                 key={`sal-${a.id}-${a.hora_salida_registrada}`}
                                                                 type="time"
-                                                                defaultValue={a.hora_salida_registrada?.substring(0, 5) || ''}
+                                                                defaultValue={a.hora_salida_registrada ? new Date(a.hora_salida_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
                                                                 className="h-8 w-[90px] text-xs font-mono"
-                                                                onBlur={(e) => handleGuardarHora(a.id, 'hora_salida_registrada', e.target.value)}
+                                                                onBlur={(e) => handleGuardarHora(a, 'hora_salida_registrada', e.target.value)}
                                                             />
                                                         </div>
                                                     </TableCell>
@@ -424,17 +431,17 @@ export default function Attendance() {
                                                     <Input
                                                         key={`ent-d-${a.id}-${a.hora_entrada_registrada}`}
                                                         type="time"
-                                                        defaultValue={a.hora_entrada_registrada?.substring(0, 5) || ''}
+                                                        defaultValue={a.hora_entrada_registrada ? new Date(a.hora_entrada_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
                                                         className="h-8 w-[90px] text-xs font-mono"
-                                                        onBlur={(e) => handleGuardarHora(a.id, 'hora_entrada_registrada', e.target.value)}
+                                                        onBlur={(e) => handleGuardarHora(a, 'hora_entrada_registrada', e.target.value)}
                                                     />
                                                     <span className="text-xs text-muted-foreground">-</span>
                                                     <Input
                                                         key={`sal-d-${a.id}-${a.hora_salida_registrada}`}
                                                         type="time"
-                                                        defaultValue={a.hora_salida_registrada?.substring(0, 5) || ''}
+                                                        defaultValue={a.hora_salida_registrada ? new Date(a.hora_salida_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
                                                         className="h-8 w-[90px] text-xs font-mono"
-                                                        onBlur={(e) => handleGuardarHora(a.id, 'hora_salida_registrada', e.target.value)}
+                                                        onBlur={(e) => handleGuardarHora(a, 'hora_salida_registrada', e.target.value)}
                                                     />
                                                 </div>
                                             </TableCell>
