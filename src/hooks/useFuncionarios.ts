@@ -56,7 +56,7 @@ export function useFuncionarios() {
             let profileId = formData.id; // if it already exists
 
             const randomSuffix = Math.random().toString(36).substring(2, 8);
-            const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.business`;
+            const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@app.soclean.business`;
             const safePassword = formData.password?.trim() || `SC${formData.cedula.replace(/\D/g, '')}#2026`;
 
             // 1. Create Auth User if it's new
