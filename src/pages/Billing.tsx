@@ -19,6 +19,8 @@ const ESTADOS_MAP: Record<string, { label: string, color: string }> = {
     'anulada': { label: 'Anulada', color: 'bg-slate-100 text-slate-800 opacity-50' },
 };
 
+const dateFormatter = new Intl.DateTimeFormat('es-UY');
+
 export default function Billing() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
@@ -134,7 +136,7 @@ export default function Billing() {
                                                     {f.numero}
                                                 </div>
                                                 <div className="text-xs text-muted-foreground">
-                                                    {f.periodo ? `Período: ${f.periodo}` : `Emisión: ${new Date(f.fecha_emision).toLocaleDateString()}`}
+                                                    {f.periodo ? `Período: ${f.periodo}` : `Emisión: ${dateFormatter.format(new Date(f.fecha_emision))}`}
                                                 </div>
                                             </TableCell>
                                             <TableCell>

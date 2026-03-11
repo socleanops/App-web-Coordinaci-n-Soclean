@@ -27,6 +27,8 @@ function getTomorrowStr(): string {
     return d.toISOString().split('T')[0]; // YYYY-MM-DD
 }
 
+const dateFormatter = new Intl.DateTimeFormat('es-UY');
+
 export default function Schedules() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
@@ -222,8 +224,8 @@ export default function Schedules() {
                                             </TableCell>
                                             <TableCell>
                                                 <div className="text-xs text-muted-foreground">
-                                                    Desde: {new Date(h.vigente_desde).toLocaleDateString()}
-                                                    {h.vigente_hasta ? <><br />Hasta: {new Date(h.vigente_hasta).toLocaleDateString()}</> : ''}
+                                                    Desde: {dateFormatter.format(new Date(h.vigente_desde))}
+                                                    {h.vigente_hasta ? <><br />Hasta: {dateFormatter.format(new Date(h.vigente_hasta))}</> : ''}
                                                 </div>
                                                 {!h.vigente_hasta && <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Activo Indefinido</span>}
                                             </TableCell>
