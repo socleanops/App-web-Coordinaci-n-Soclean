@@ -67,7 +67,11 @@ function App() {
         }
       } catch (err) {
         console.error("Critical Auth Init Error:", err);
-        await supabase.auth.signOut();
+        try {
+            await supabase.auth.signOut();
+        } catch (signOutErr) {
+            console.error("SignOut error during critical failure:", signOutErr);
+        }
       } finally {
         if (mounted) setLoading(false);
       }
