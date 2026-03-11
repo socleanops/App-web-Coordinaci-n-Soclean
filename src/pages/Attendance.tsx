@@ -98,9 +98,21 @@ export default function Attendance() {
         }
     };
 
-    const handleActualizarEstado = async (id: string, nuevoEstado: string) => {
+    const handleActualizarEstado = async (a: Asistencia, nuevoEstado: string) => {
         try {
-            await updateAsistencia.mutateAsync({ id, data: { estado: nuevoEstado as any } });
+            const dataToUpdate: any = { estado: nuevoEstado as any };
+            
+            // Auto-rellenar hora real si se marca presente y están en blanco
+            if (nuevoEstado === 'presente' && a.horarios) {
+                if (!a.hora_entrada_registrada && a.horarios.hora_entrada) {
+                    dataToUpdate.hora_entrada_registrada = a.horarios.hora_entrada;
+                }
+                if (!a.hora_salida_registrada && a.horarios.hora_salida) {
+                    dataToUpdate.hora_salida_registrada = a.horarios.hora_salida;
+                }
+            }
+
+            await updateAsistencia.mutateAsync({ id: a.id, data: dataToUpdate });
             toast.success(`Estado actualizado a ${ESTADOS_MAP[nuevoEstado].label}`);
         } catch (error: any) {
             toast.error(error.message || 'No se pudo actualizar el estado de asistencia');
@@ -334,6 +346,7 @@ export default function Attendance() {
                                                     <TableCell>
                                                         <div className="flex gap-1 items-center">
                                                             <Input
+                                                                key={`ent-${a.id}-${a.hora_entrada_registrada}`}
                                                                 type="time"
                                                                 defaultValue={a.hora_entrada_registrada?.substring(0, 5) || ''}
                                                                 className="h-8 w-[90px] text-xs font-mono"
@@ -341,6 +354,7 @@ export default function Attendance() {
                                                             />
                                                             <span className="text-xs text-muted-foreground">-</span>
                                                             <Input
+                                                                key={`sal-${a.id}-${a.hora_salida_registrada}`}
                                                                 type="time"
                                                                 defaultValue={a.hora_salida_registrada?.substring(0, 5) || ''}
                                                                 className="h-8 w-[90px] text-xs font-mono"
@@ -349,7 +363,7 @@ export default function Attendance() {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
-                                                        <Select defaultValue={a.estado} onValueChange={(val) => handleActualizarEstado(a.id, val)}>
+                                                        <Select defaultValue={a.estado} onValueChange={(val) => handleActualizarEstado(a, val)}>
                                                             <SelectTrigger className={`h-9 w-[150px] text-xs font-semibold border ${ESTADOS_MAP[a.estado].color}`}>
                                                                 <SelectValue />
                                                             </SelectTrigger>
@@ -408,6 +422,7 @@ export default function Attendance() {
                                             <TableCell>
                                                 <div className="flex gap-1 items-center">
                                                     <Input
+                                                        key={`ent-d-${a.id}-${a.hora_entrada_registrada}`}
                                                         type="time"
                                                         defaultValue={a.hora_entrada_registrada?.substring(0, 5) || ''}
                                                         className="h-8 w-[90px] text-xs font-mono"
@@ -415,6 +430,7 @@ export default function Attendance() {
                                                     />
                                                     <span className="text-xs text-muted-foreground">-</span>
                                                     <Input
+                                                        key={`sal-d-${a.id}-${a.hora_salida_registrada}`}
                                                         type="time"
                                                         defaultValue={a.hora_salida_registrada?.substring(0, 5) || ''}
                                                         className="h-8 w-[90px] text-xs font-mono"
@@ -423,7 +439,7 @@ export default function Attendance() {
                                                 </div>
                                             </TableCell>
                                             <TableCell>
-                                                <Select defaultValue={a.estado} onValueChange={(val) => handleActualizarEstado(a.id, val)}>
+                                                <Select defaultValue={a.estado} onValueChange={(val) => handleActualizarEstado(a, val)}>
                                                     <SelectTrigger className={`h-9 w-[150px] text-xs font-semibold border ${ESTADOS_MAP[a.estado].color}`}>
                                                         <SelectValue />
                                                     </SelectTrigger>
