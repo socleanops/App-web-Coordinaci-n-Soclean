@@ -38,6 +38,18 @@ function formatShortDate(dateStr: string): string {
     return d.toLocaleDateString('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
 }
 
+function formatTimeVal(dateStr?: string | null): string {
+    if (!dateStr) return '';
+    try {
+        const d = new Date(dateStr);
+        if (isNaN(d.getTime())) return '';
+        // input type="time" requires strictly "HH:mm" in 24h format
+        return d.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+    } catch {
+        return '';
+    }
+}
+
 export default function Attendance() {
     const today = new Date();
     const [weekStart, setWeekStart] = useState<Date>(getMonday(today));
@@ -355,7 +367,7 @@ export default function Attendance() {
                                                             <Input
                                                                 key={`ent-${a.id}-${a.hora_entrada_registrada}`}
                                                                 type="time"
-                                                                defaultValue={a.hora_entrada_registrada ? new Date(a.hora_entrada_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
+                                                                defaultValue={formatTimeVal(a.hora_entrada_registrada)}
                                                                 className="h-8 w-[90px] text-xs font-mono"
                                                                 onBlur={(e) => handleGuardarHora(a, 'hora_entrada_registrada', e.target.value)}
                                                             />
@@ -363,7 +375,7 @@ export default function Attendance() {
                                                             <Input
                                                                 key={`sal-${a.id}-${a.hora_salida_registrada}`}
                                                                 type="time"
-                                                                defaultValue={a.hora_salida_registrada ? new Date(a.hora_salida_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
+                                                                defaultValue={formatTimeVal(a.hora_salida_registrada)}
                                                                 className="h-8 w-[90px] text-xs font-mono"
                                                                 onBlur={(e) => handleGuardarHora(a, 'hora_salida_registrada', e.target.value)}
                                                             />
@@ -431,7 +443,7 @@ export default function Attendance() {
                                                     <Input
                                                         key={`ent-d-${a.id}-${a.hora_entrada_registrada}`}
                                                         type="time"
-                                                        defaultValue={a.hora_entrada_registrada ? new Date(a.hora_entrada_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
+                                                        defaultValue={formatTimeVal(a.hora_entrada_registrada)}
                                                         className="h-8 w-[90px] text-xs font-mono"
                                                         onBlur={(e) => handleGuardarHora(a, 'hora_entrada_registrada', e.target.value)}
                                                     />
@@ -439,7 +451,7 @@ export default function Attendance() {
                                                     <Input
                                                         key={`sal-d-${a.id}-${a.hora_salida_registrada}`}
                                                         type="time"
-                                                        defaultValue={a.hora_salida_registrada ? new Date(a.hora_salida_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
+                                                        defaultValue={formatTimeVal(a.hora_salida_registrada)}
                                                         className="h-8 w-[90px] text-xs font-mono"
                                                         onBlur={(e) => handleGuardarHora(a, 'hora_salida_registrada', e.target.value)}
                                                     />
