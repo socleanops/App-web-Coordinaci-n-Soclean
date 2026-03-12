@@ -36,7 +36,8 @@ export default function Nomina() {
                     horasNocturnas: 0,
                     horasFeriado: 0,
                     diasTrabajados: 0,
-                    faltas: 0
+                    faltas: 0,
+                    certificados: 0
                 };
             }
 
@@ -104,6 +105,8 @@ export default function Nomina() {
 
             } else if (a.estado === 'ausente') {
                 agrupar[funcId].faltas += 1;
+            } else if (a.estado === 'certificado') {
+                agrupar[funcId].certificados += 1;
             }
         });
 
@@ -120,7 +123,8 @@ export default function Nomina() {
             horas: acc.horas + curr.totalHoras,
             dias: acc.dias + curr.diasTrabajados,
             faltas: acc.faltas + curr.faltas,
-        }), { horas: 0, dias: 0, faltas: 0 });
+            certificados: acc.certificados + curr.certificados,
+        }), { horas: 0, dias: 0, faltas: 0, certificados: 0 });
     }, [horasPorFuncionario]);
 
     const generarReporteExcel = () => {
@@ -135,6 +139,7 @@ export default function Nomina() {
                     'Nombre Empleado': f.nombreCompleto,
                     'Días Asistidos': f.diasTrabajados,
                     'Faltas': f.faltas,
+                    'Certificados (Días)': f.certificados,
                     'Horas Normales': hrNormales > 0 ? parseFloat(hrNormales.toFixed(2)) : 0,
                     'Horas Nocturnas (22-06)': f.horasNocturnas > 0 ? parseFloat(f.horasNocturnas.toFixed(2)) : 0,
                     'Horas Feriado': f.horasFeriado > 0 ? parseFloat(f.horasFeriado.toFixed(2)) : 0,
@@ -150,6 +155,7 @@ export default function Nomina() {
                 { wch: 30 }, // Nombre
                 { wch: 15 }, // Días Asistidos
                 { wch: 10 }, // Faltas
+                { wch: 20 }, // Certificados
                 { wch: 15 }, // Horas Normales
                 { wch: 25 }, // Horas Nocturnas
                 { wch: 15 }, // Horas Feriado
@@ -195,7 +201,7 @@ export default function Nomina() {
             </div>
 
             {/* Metricas de Horas */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <Card className="bg-gradient-to-br from-coreops-primary to-blue-800 text-white shadow-md border-0">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-white/90">Total Horas Mensuales</CardTitle>
@@ -220,6 +226,15 @@ export default function Nomina() {
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold text-red-600 dark:text-red-400">{totales.faltas} Ausencias</div>
+                        <p className="text-xs text-slate-400 mt-1">Acumulado general</p>
+                    </CardContent>
+                </Card>
+                <Card className="bg-white/60 dark:bg-slate-900/60 shadow-sm border border-slate-200 dark:border-slate-800">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-cyan-600/90 dark:text-cyan-400">Certificaciones Medicas</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{totales.certificados} Días</div>
                         <p className="text-xs text-slate-400 mt-1">Acumulado general</p>
                     </CardContent>
                 </Card>
@@ -250,6 +265,7 @@ export default function Nomina() {
                                     <TableHead className="pl-6">Funcionario (CI)</TableHead>
                                     <TableHead className="text-center">Días Asistidos</TableHead>
                                     <TableHead className="text-center text-red-500">Ausencias</TableHead>
+                                    <TableHead className="text-center text-cyan-500">Certificados</TableHead>
                                     <TableHead className="text-right">Horas Nocturnas <br /><span className="text-[10px] font-normal text-slate-400">(22 a 06 hs)</span></TableHead>
                                     <TableHead className="text-right">Horas Feriado <br /><span className="text-[10px] font-normal text-slate-400">Irrenunciable</span></TableHead>
                                     <TableHead className="text-right pr-6 font-bold text-coreops-primary">Suma Total Mensual</TableHead>
@@ -284,6 +300,9 @@ export default function Nomina() {
                                             </TableCell>
                                             <TableCell className="text-center font-medium text-red-400">
                                                 {f.faltas > 0 ? f.faltas : '-'}
+                                            </TableCell>
+                                            <TableCell className="text-center font-medium text-cyan-500">
+                                                {f.certificados > 0 ? f.certificados : '-'}
                                             </TableCell>
                                             <TableCell className="text-right font-medium text-indigo-500 dark:text-indigo-400">
                                                 {f.horasNocturnas > 0 ? `${f.horasNocturnas.toFixed(1)} Hrs` : '-'}
