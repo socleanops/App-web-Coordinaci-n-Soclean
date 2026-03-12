@@ -22,6 +22,7 @@ export default function LogisticsMap() {
     const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult | null>(null);
     const [distance, setDistance] = useState('');
     const [duration, setDuration] = useState('');
+    const [serviceMarkers, setServiceMarkers] = useState<{id: string, lat: number, lng: number, title: string}[]>([]);
 
     const { isLoaded, loadError } = useJsApiLoader({
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
@@ -33,6 +34,32 @@ export default function LogisticsMap() {
 
     const activeServices = servicios.filter(s => s.estado === 'activo');
     const activeFuncionarios = funcionarios.filter(f => f.estado === 'activo');
+
+    // Geocode active services to place green markers on the map
+    useEffect(() => {
+        if (!isLoaded || activeServices.length === 0 || serviceMarkers.length > 0) return;
+        const geocoder = new window.google.maps.Geocoder();
+        const fetchGeocodes = async () => {
+            const newMarkers: any[] = [];
+            for (const s of activeServices) {
+                try {
+                    const res = await geocoder.geocode({ address: `${s.direccion}, Montevideo, Uruguay` });
+                    if (res.results && res.results[0]) {
+                        newMarkers.push({
+                            id: s.id,
+                            title: `${s.clientes?.razon_social || ''} - ${s.nombre}`,
+                            lat: res.results[0].geometry.location.lat(),
+                            lng: res.results[0].geometry.location.lng()
+                        });
+                    }
+                } catch (error) {
+                    console.log(`Geocoding error for ${s.direccion}`, error);
+                }
+            }
+            setServiceMarkers(newMarkers);
+        };
+        fetchGeocodes();
+    }, [isLoaded, activeServices, serviceMarkers.length]);
 
     const handleGenerateRoute = async () => {
         if (!selectedService || !selectedFuncionario || !isLoaded) return;
@@ -58,9 +85,9 @@ export default function LogisticsMap() {
 
     const handleOpenExternalRoute = () => {
         if (!selectedService || !selectedFuncionario) return;
-        const origin = encodeURIComponent(selectedFuncionario.direccion);
-        const destination = encodeURIComponent(selectedService.direccion);
-        // Open google maps directions specifying transit (buses)
+        const origin = encodeURIComponent(`${selectedFuncionario.direccion}, Montevideo`);
+        const destination = encodeURIComponent(`${selectedService.direccion}, Montevideo`);
+        // Open google maps directions specifying transit (buses) to show full transit options
         window.open(`https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${destination}&travelmode=transit`, '_blank');
     };
 
@@ -190,6 +217,14 @@ export default function LogisticsMap() {
                                                 polylineOptions: { strokeColor: '#10b981', strokeWeight: 5 }
                                             }}
                                         />
+                                        {serviceMarkers.map(m => (
+                                            <Marker 
+                                                key={m.id} 
+                                                position={{lat: m.lat, lng: m.lng}} 
+                                                title={m.title}
+                                                icon="http://maps.google.com/mapfiles/ms/icons/green-dot.png" 
+                                            />
+                                        ))}
                                     </GoogleMap>
 
                                     {/* Overlay Helper */}
@@ -208,7 +243,7 @@ export default function LogisticsMap() {
                                                 <span className="text-emerald-600 dark:text-emerald-400">{duration}</span>
                                             </p>
                                         </div>
-                                        <div className="flex gap-2">
+                                        <div className="flex gap-2 mt-3">
                                             <Button
                                                 size="sm"
                                                 variant={directionsMode === 'TRANSIT' ? 'default' : 'outline'}
@@ -226,6 +261,14 @@ export default function LogisticsMap() {
                                                 Auto
                                             </Button>
                                         </div>
+                                        <Button
+                                            size="sm"
+                                            variant="secondary"
+                                            onClick={handleOpenExternalRoute}
+                                            className="w-full mt-3 font-semibold"
+                                        >
+                                            Comparar todos los Ómnibus
+                                        </Button>
                                     </div>
                                 </div>
                             ) : (
@@ -233,10 +276,19 @@ export default function LogisticsMap() {
                                     <GoogleMap
                                         center={MVD_CENTER}
                                         zoom={12}
-                                        mapContainerStyle={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 0, opacity: 0.3 }}
+                                        mapContainerStyle={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 0 }}
                                         options={{ disableDefaultUI: true }}
-                                    />
-                                    <div className="z-10 bg-white/80 dark:bg-slate-900/80 p-6 rounded-2xl backdrop-blur-md">
+                                    >
+                                        {serviceMarkers.map(m => (
+                                            <Marker 
+                                                key={m.id} 
+                                                position={{lat: m.lat, lng: m.lng}} 
+                                                title={m.title}
+                                                icon="http://maps.google.com/mapfiles/ms/icons/green-dot.png" 
+                                            />
+                                        ))}
+                                    </GoogleMap>
+                                    <div className="z-10 bg-white/90 dark:bg-slate-900/90 p-6 rounded-2xl shadow-xl backdrop-blur-md">
                                         <Map className="h-16 w-16 mb-4 opacity-40 mx-auto" />
                                         <h3 className="text-xl font-semibold mb-2">Visualizador Operativo</h3>
                                         <p className="max-w-sm text-sm">
