@@ -79,20 +79,24 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
 
     const onSubmit = async (data: FuncionarioFormData) => {
         const isEditing = !!funcionarioToEdit;
-        const loadingId = toast.loading(isEditing ? 'Actualizando funcionario...' : 'Creando perfil y registrando funcionario...');
+        const loadingId = toast.loading(isEditing ? 'Actualizando funcionario...' : '1/3 Validando datos...');
 
         try {
+            // Force a timeout so it never hangs infinitely
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado tras 20 segundos.')), 20000));
+            
             if (isEditing) {
-                await updateFuncionario.mutateAsync({ id: funcionarioToEdit!.id, data });
+                await Promise.race([updateFuncionario.mutateAsync({ id: funcionarioToEdit!.id, data }), timeoutPromise]);
                 toast.success('Funcionario actualizado correctamente', { id: loadingId });
             } else {
-                await createFuncionario.mutateAsync(data);
-                toast.success('Usuario y funcionario creados correctamente', { id: loadingId });
+                toast.loading('2/3 Creando credenciales en Supabase...', { id: loadingId });
+                await Promise.race([createFuncionario.mutateAsync(data), timeoutPromise]);
+                toast.success('3/3 Usuario y funcionario creados correctamente', { id: loadingId });
             }
             onOpenChange(false);
         } catch (error: any) {
             console.error("Form Submit Error:", error);
-            toast.error(`Error: ${error.message || 'No se pudo guardar la información'}`, { id: loadingId, duration: 8000 });
+            toast.error(`Error: ${error.message || 'No se pudo guardar la información'}`, { id: loadingId, duration: 10000 });
         }
     };
 
