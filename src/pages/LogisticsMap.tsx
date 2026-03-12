@@ -1,10 +1,14 @@
-import { useState } from 'react';
+import { useState, useCallback, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Map, MapPin, User, Navigation } from 'lucide-react';
+import { Map, MapPin, User, Navigation, Loader2 } from 'lucide-react';
 import { useServicios } from '@/hooks/useServicios';
 import { useFuncionarios } from '@/hooks/useFuncionarios';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { GoogleMap, useJsApiLoader, DirectionsRenderer, Marker } from '@react-google-maps/api';
+
+const LIBRARIES: ("places" | "geometry" | "drawing" | "visualization" | "routes")[] = ['places', 'routes'];
+const MVD_CENTER = { lat: -34.9011, lng: -56.1645 };
 
 export default function LogisticsMap() {
     const { getServicios } = useServicios();
@@ -14,7 +18,15 @@ export default function LogisticsMap() {
 
     const [selectedServiceId, setSelectedServiceId] = useState<string>('');
     const [selectedFuncionarioId, setSelectedFuncionarioId] = useState<string>('');
-    const [mapUrl, setMapUrl] = useState<string>('');
+    const [directionsMode, setDirectionsMode] = useState<'DRIVING' | 'TRANSIT'>('TRANSIT');
+    const [directionsResponse, setDirectionsResponse] = useState<google.maps.DirectionsResult | null>(null);
+    const [distance, setDistance] = useState('');
+    const [duration, setDuration] = useState('');
+
+    const { isLoaded, loadError } = useJsApiLoader({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY || '',
+        libraries: LIBRARIES,
+    });
 
     const selectedService = servicios.find(s => s.id === selectedServiceId);
     const selectedFuncionario = funcionarios.find(f => f.id === selectedFuncionarioId);
@@ -22,16 +34,26 @@ export default function LogisticsMap() {
     const activeServices = servicios.filter(s => s.estado === 'activo');
     const activeFuncionarios = funcionarios.filter(f => f.estado === 'activo');
 
-    const handleGenerateRoute = () => {
-        if (!selectedService || !selectedFuncionario) return;
+    const handleGenerateRoute = async () => {
+        if (!selectedService || !selectedFuncionario || !isLoaded) return;
+        
+        const google = window.google;
+        const directionsService = new google.maps.DirectionsService();
 
-        // Use standard Google Maps directions link as fallback or Embed style
-        const destination = encodeURIComponent(selectedService.direccion);
-        // Using Maps Embed is cleaner. 
-        // We set src for iframe. Usually directions embed needs API key, but we can do a hacky embed using standard query if simple, or just a direct link to Maps.
-        // Actually, the easiest is to just open a direct link in a new tab for "Buses", or embed a search of the destination only and display the link externally. Let's do a basic map for the service location, and an external link for the full navigation route to see buses.
-        const url = `https://maps.google.com/maps?q=${destination}&output=embed`;
-        setMapUrl(url);
+        try {
+            const results = await directionsService.route({
+                origin: `${selectedFuncionario.direccion}, Montevideo, Uruguay`,
+                destination: `${selectedService.direccion}, Montevideo, Uruguay`,
+                travelMode: google.maps.TravelMode[directionsMode] || google.maps.TravelMode.TRANSIT,
+            });
+            setDirectionsResponse(results);
+            if (results.routes[0]?.legs[0]) {
+                setDistance(results.routes[0].legs[0].distance?.text || '');
+                setDuration(results.routes[0].legs[0].duration?.text || '');
+            }
+        } catch (error) {
+            console.error("Error al calcular ruta:", error);
+        }
     };
 
     const handleOpenExternalRoute = () => {
@@ -132,48 +154,95 @@ export default function LogisticsMap() {
 
                 {/* Right Panel - Map Display */}
                 <div className="lg:col-span-2">
-                    <Card className="border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm h-full flex flex-col min-h-[500px]">
-                        <CardContent className="p-1 flex-grow relative">
-                            {mapUrl ? (
-                                <div className="h-full w-full rounded-lg overflow-hidden relative group">
-                                    {/* Google Maps Embed iframe */}
-                                    <iframe
-                                        title="Ubicación de Logística"
-                                        src={mapUrl}
-                                        width="100%"
-                                        height="100%"
-                                        className="h-[550px]"
-                                        style={{ border: 0 }}
-                                        allowFullScreen={false}
-                                        loading="lazy"
-                                        referrerPolicy="no-referrer-when-downgrade"
-                                    ></iframe>
+                    <Card className="border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm h-[600px] flex flex-col">
+                        <CardContent className="p-2 flex-grow relative overflow-hidden h-full rounded-b-lg">
+                            {!isLoaded ? (
+                                <div className="h-full w-full flex flex-col items-center justify-center text-muted-foreground p-12 text-center bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+                                    {loadError ? (
+                                        <>
+                                            <Map className="h-16 w-16 mb-4 text-red-500 opacity-50" />
+                                            <h3 className="text-xl font-semibold mb-2">Error de Google Maps</h3>
+                                            <p className="max-w-sm">No se pudo cargar la API Key. Configura <code>VITE_GOOGLE_MAPS_API_KEY</code> en tu Vercel / .env</p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Loader2 className="h-16 w-16 mb-4 opacity-50 animate-spin" />
+                                            <h3 className="text-xl font-semibold mb-2">Cargando Mapas...</h3>
+                                        </>
+                                    )}
+                                </div>
+                            ) : directionsResponse ? (
+                                <div className="h-full w-full relative">
+                                    <GoogleMap
+                                        center={MVD_CENTER}
+                                        zoom={12}
+                                        mapContainerStyle={{ width: '100%', height: '100%', borderRadius: '0.5rem' }}
+                                        options={{
+                                            zoomControl: true,
+                                            streetViewControl: false,
+                                            mapTypeControl: false,
+                                            fullscreenControl: true,
+                                        }}
+                                    >
+                                        <DirectionsRenderer
+                                            directions={directionsResponse}
+                                            options={{
+                                                polylineOptions: { strokeColor: '#10b981', strokeWeight: 5 }
+                                            }}
+                                        />
+                                    </GoogleMap>
 
                                     {/* Overlay Helper */}
                                     <div className="absolute top-4 right-4 bg-white/95 dark:bg-slate-900/95 p-4 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 w-72 backdrop-blur-md animate-in fade-in slide-in-from-right-4">
                                         <h4 className="font-bold flex items-center gap-2 text-slate-900 dark:text-white mb-2">
                                             <Navigation className="h-4 w-4 text-emerald-500" />
-                                            Asistencia de Ruta
+                                            Información de Ruta
                                         </h4>
-                                        <p className="text-xs text-slate-500 dark:text-slate-400 mb-4">
-                                            Calcula la mejor ruta de transporte público o privado para que tu empleado llegue al servicio a tiempo.
-                                        </p>
-                                        <Button
-                                            size="sm"
-                                            onClick={handleOpenExternalRoute}
-                                            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white"
-                                        >
-                                            Ver Rutas de Ómnibus
-                                        </Button>
+                                        <div className="space-y-2 mb-4">
+                                            <p className="text-sm font-semibold flex justify-between">
+                                                <span className="text-slate-500">Distancia:</span> 
+                                                <span>{distance}</span>
+                                            </p>
+                                            <p className="text-sm font-semibold flex justify-between">
+                                                <span className="text-slate-500">Tiempo estimado:</span> 
+                                                <span className="text-emerald-600 dark:text-emerald-400">{duration}</span>
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <Button
+                                                size="sm"
+                                                variant={directionsMode === 'TRANSIT' ? 'default' : 'outline'}
+                                                onClick={() => { setDirectionsMode('TRANSIT'); handleGenerateRoute(); }}
+                                                className={`flex-1 ${directionsMode === 'TRANSIT' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}`}
+                                            >
+                                                Ómnibus
+                                            </Button>
+                                            <Button
+                                                size="sm"
+                                                variant={directionsMode === 'DRIVING' ? 'default' : 'outline'}
+                                                onClick={() => { setDirectionsMode('DRIVING'); handleGenerateRoute(); }}
+                                                className={`flex-1 ${directionsMode === 'DRIVING' ? 'bg-coreops-primary text-white' : ''}`}
+                                            >
+                                                Auto
+                                            </Button>
+                                        </div>
                                     </div>
                                 </div>
                             ) : (
-                                <div className="h-full w-full flex flex-col items-center justify-center text-muted-foreground p-12 text-center h-[550px] bg-slate-50 dark:bg-slate-900/50 rounded-lg">
-                                    <Map className="h-16 w-16 mb-4 opacity-20" />
-                                    <h3 className="text-xl font-semibold mb-2">Visualizador Operativo</h3>
-                                    <p className="max-w-sm">
-                                        Selecciona un servicio a realizar y el funcionario designado en el panel lateral para cargar la información de traslado.
-                                    </p>
+                                <div className="h-full w-full flex flex-col items-center justify-center text-muted-foreground p-12 text-center bg-slate-50 dark:bg-slate-900/50 rounded-lg">
+                                    <GoogleMap
+                                        center={MVD_CENTER}
+                                        zoom={12}
+                                        mapContainerStyle={{ width: '100%', height: '100%', position: 'absolute', top: 0, left: 0, zIndex: 0, opacity: 0.3 }}
+                                        options={{ disableDefaultUI: true }}
+                                    />
+                                    <div className="z-10 bg-white/80 dark:bg-slate-900/80 p-6 rounded-2xl backdrop-blur-md">
+                                        <Map className="h-16 w-16 mb-4 opacity-40 mx-auto" />
+                                        <h3 className="text-xl font-semibold mb-2">Visualizador Operativo</h3>
+                                        <p className="max-w-sm text-sm">
+                                            Selecciona un servicio y el funcionario designado en el panel lateral para calcular la mejor ruta.
+                                        </p>
+                                    </div>
                                 </div>
                             )}
                         </CardContent>
