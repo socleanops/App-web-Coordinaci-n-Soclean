@@ -11,6 +11,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Printer } from 'lucide-react';
+import { escapeHtml } from '@/lib/utils';
 
 interface Props {
     open: boolean;
@@ -81,17 +82,17 @@ export function FuncionarioPrintDialog({ open, onOpenChange, employees }: Props)
         `;
 
         employees.forEach(emp => {
-            const nombre = `${emp.profiles?.nombre || ''} ${emp.profiles?.apellido || ''}`;
+            const nombre = escapeHtml(`${emp.profiles?.nombre || ''} ${emp.profiles?.apellido || ''}`);
             tableHtml += `
               <tr>
                 ${selectedColumns.nombre ? `<td>${nombre}</td>` : ''}
-                ${selectedColumns.cedula ? `<td>${emp.cedula || ''}</td>` : ''}
-                ${selectedColumns.cargo ? `<td>${emp.cargo || ''}</td>` : ''}
-                ${selectedColumns.departamento ? `<td>${emp.departamentos?.nombre || ''}</td>` : ''}
-                ${selectedColumns.fecha_ingreso ? `<td>${emp.fecha_ingreso ? new Date(emp.fecha_ingreso).toLocaleDateString() : ''}</td>` : ''}
-                ${selectedColumns.direccion ? `<td>${emp.direccion || ''}</td>` : ''}
-                ${selectedColumns.email ? `<td>${emp.profiles?.email || ''}</td>` : ''}
-                ${selectedColumns.estado ? `<td>${emp.estado || ''}</td>` : ''}
+                ${selectedColumns.cedula ? `<td>${escapeHtml(emp.cedula)}</td>` : ''}
+                ${selectedColumns.cargo ? `<td>${escapeHtml(emp.cargo)}</td>` : ''}
+                ${selectedColumns.departamento ? `<td>${escapeHtml(emp.departamentos?.nombre)}</td>` : ''}
+                ${selectedColumns.fecha_ingreso ? `<td>${escapeHtml(emp.fecha_ingreso ? new Date(emp.fecha_ingreso).toLocaleDateString() : '')}</td>` : ''}
+                ${selectedColumns.direccion ? `<td>${escapeHtml(emp.direccion)}</td>` : ''}
+                ${selectedColumns.email ? `<td>${escapeHtml(emp.profiles?.email)}</td>` : ''}
+                ${selectedColumns.estado ? `<td>${escapeHtml(emp.estado)}</td>` : ''}
               </tr>
             `;
         });
