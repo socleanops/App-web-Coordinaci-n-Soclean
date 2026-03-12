@@ -54,6 +54,7 @@ export function useFuncionarios() {
 
     const createFuncionario = useMutation({
         mutationFn: async (formData: FuncionarioFormData) => {
+            console.log("[useFuncionarios] Starting createFuncionario at", new Date().toISOString(), "Data:", formData);
             let profileId = formData.id; // if it already exists
 
             const randomSuffix = generateSecureRandomString(6);
@@ -62,6 +63,7 @@ export function useFuncionarios() {
 
             // 1. Create Auth User if it's new
             if (!profileId) {
+                console.log("[useFuncionarios] No profileId, creating Auth. SafeEmail:", safeEmail);
                 // Check if profile exists (recovery mode)
                 const { data: existingProfile } = await supabase
                     .from('profiles')
@@ -69,13 +71,18 @@ export function useFuncionarios() {
                     .eq('email', safeEmail)
                     .maybeSingle();
 
+                console.log("[useFuncionarios] existingProfile check done:", existingProfile);
+
                 if (existingProfile) {
+                    console.log("[useFuncionarios] Profile exists, checking funcionario...");
                     // Check if they already have a funcionario
                     const { data: existingFunc } = await supabase
                         .from('funcionarios')
                         .select('id, profiles(nombre, apellido)')
                         .eq('profile_id', existingProfile.id)
                         .maybeSingle();
+
+                    console.log("[useFuncionarios] existingFunc check done:", existingFunc);
 
                     if (existingFunc) {
                         const prof = existingFunc.profiles as any;
@@ -86,6 +93,7 @@ export function useFuncionarios() {
                     // Recover the existing profile ID
                     profileId = existingProfile.id;
                 } else {
+                    console.log("[useFuncionarios] Calling authClient.auth.signUp...");
                     const { data: authData, error: authError } = await authClient.auth.signUp({
                         email: safeEmail,
                         password: safePassword,
@@ -97,6 +105,7 @@ export function useFuncionarios() {
                         }
                     });
 
+                    console.log("[useFuncionarios] authClient.auth.signUp finished. Error:", authError?.message, "Data:", !!authData?.user);
                     if (authError) throw new Error(`Auth Error: ${authError.message}`);
                     if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
                         throw new Error('La cuenta ya existe o está en estado de protección (Intente de nuevo en unos minutos o reintente).');
@@ -108,6 +117,7 @@ export function useFuncionarios() {
 
             if (!profileId) throw new Error('Fallo al crear ID de perfil');
 
+            console.log("[useFuncionarios] Calling profiles upsert for ID:", profileId);
             // 2. Upsert Role securely (Creates it if the DB trigger failed or doesn't exist)
             const { error: profileError } = await supabase
                 .from('profiles')
@@ -119,8 +129,10 @@ export function useFuncionarios() {
                     apellido: formData.apellido
                 }, { onConflict: 'id' });
 
+            console.log("[useFuncionarios] profiles upsert finished. Error:", profileError?.message);
             if (profileError) throw new Error(`Profile Error: ${profileError.message}`);
 
+            console.log("[useFuncionarios] Calling funcionarios insert");
             // 3. Create Funcionario record
             const { data: funcData, error: funcError } = await supabase
                 .from('funcionarios')
@@ -138,6 +150,7 @@ export function useFuncionarios() {
                 .select()
                 .single();
 
+            console.log("[useFuncionarios] funcionarios insert finished. Error:", funcError?.message, "Result OK:", !!funcData);
             if (funcError) throw new Error(funcError.message);
             return funcData;
         },
