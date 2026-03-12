@@ -79,7 +79,7 @@ export type Asistencia = {
     hora_salida_registrada?: string; // ISO DB string
     distancia_entrada_metros?: number;
     distancia_salida_metros?: number;
-    estado: 'presente' | 'ausente' | 'tardanza' | 'salida_anticipada' | 'pendiente' | 'justificado' | 'no_citado';
+    estado: 'presente' | 'ausente' | 'tardanza' | 'salida_anticipada' | 'pendiente' | 'justificado' | 'no_citado' | 'certificado';
     observaciones?: string;
     created_at?: string;
     funcionarios?: Funcionario; // Joined data
