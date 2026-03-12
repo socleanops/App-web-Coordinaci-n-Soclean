@@ -162,7 +162,7 @@ export default function Billing() {
                                             <TableCell className="text-center">
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon" className="h-8 w-8 p-0">
+                                                        <Button variant="ghost" size="icon" className="h-8 w-8 p-0" aria-label="Opciones de factura">
                                                             <MoreVertical className="h-4 w-4" />
                                                         </Button>
                                                     </DropdownMenuTrigger>
