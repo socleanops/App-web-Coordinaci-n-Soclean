@@ -6,8 +6,8 @@ import { createClient } from '@supabase/supabase-js';
 
 // Special client that doesn't persist session, so admin can create users without being logged out
 const authClient = createClient(
-    import.meta.env.VITE_SUPABASE_URL || '',
-    import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+    import.meta.env.VITE_SUPABASE_URL || 'https://placeholder-url.supabase.co',
+    import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key',
     { auth: { persistSession: false, autoRefreshToken: false } }
 );
 
