@@ -20,6 +20,13 @@ const ESTADOS_MAP: Record<string, { label: string, color: string }> = {
 
 const DIAS_NOMBRE = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
+const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
+const weekLabelFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short' });
+const weekLabelYearFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short', year: 'numeric' });
+const singleDayTitleFormatter = new Intl.DateTimeFormat('es-UY');
+const dayMonthFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
+const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit' });
+
 // Get Monday of the week containing the given date
 function getMonday(d: Date): Date {
     const date = new Date(d);
@@ -35,7 +42,7 @@ function formatDateStr(d: Date): string {
 
 function formatShortDate(dateStr: string): string {
     const d = new Date(dateStr + 'T12:00:00');
-    return d.toLocaleDateString('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
+    return shortDateFormatter.format(d);
 }
 
 export default function Attendance() {
@@ -158,7 +165,7 @@ export default function Attendance() {
 
     const pendingCount = asistencias.filter((a: Asistencia) => ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado)).length;
 
-    const weekLabel = `${weekStart.toLocaleDateString('es-UY', { day: 'numeric', month: 'short' })} — ${weekEnd.toLocaleDateString('es-UY', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    const weekLabel = `${weekLabelFormatter.format(weekStart)} — ${weekLabelYearFormatter.format(weekEnd)}`;
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -264,7 +271,7 @@ export default function Attendance() {
                         <CardTitle className="text-lg flex-1">
                             {viewMode === 'semana'
                                 ? `Registros de la Semana (${filteredAsistencias.length} entradas)`
-                                : `Registros del Día: ${new Date(singleDate + 'T12:00:00').toLocaleDateString('es-UY')}`
+                                : `Registros del Día: ${singleDayTitleFormatter.format(new Date(singleDate + 'T12:00:00'))}`
                             }
                         </CardTitle>
                         <div className="relative w-full sm:w-72">
@@ -320,7 +327,7 @@ export default function Attendance() {
                                                     <span className="font-bold text-coreops-primary dark:text-blue-400 capitalize">
                                                         {(() => {
                                                             const d = new Date(fecha + 'T12:00:00');
-                                                            return `${DIAS_NOMBRE[d.getDay()]} ${d.toLocaleDateString('es-UY', { day: 'numeric', month: 'long' })}`;
+                                                            return `${DIAS_NOMBRE[d.getDay()]} ${dayMonthFormatter.format(d)}`;
                                                         })()}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground ml-2">({records.length} registros)</span>
@@ -355,7 +362,7 @@ export default function Attendance() {
                                                             <Input
                                                                 key={`ent-${a.id}-${a.hora_entrada_registrada}`}
                                                                 type="time"
-                                                                defaultValue={a.hora_entrada_registrada ? new Date(a.hora_entrada_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
+                                                                defaultValue={a.hora_entrada_registrada ? timeFormatter.format(new Date(a.hora_entrada_registrada)) : ''}
                                                                 className="h-8 w-[90px] text-xs font-mono"
                                                                 onBlur={(e) => handleGuardarHora(a, 'hora_entrada_registrada', e.target.value)}
                                                             />
@@ -363,7 +370,7 @@ export default function Attendance() {
                                                             <Input
                                                                 key={`sal-${a.id}-${a.hora_salida_registrada}`}
                                                                 type="time"
-                                                                defaultValue={a.hora_salida_registrada ? new Date(a.hora_salida_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
+                                                                defaultValue={a.hora_salida_registrada ? timeFormatter.format(new Date(a.hora_salida_registrada)) : ''}
                                                                 className="h-8 w-[90px] text-xs font-mono"
                                                                 onBlur={(e) => handleGuardarHora(a, 'hora_salida_registrada', e.target.value)}
                                                             />
@@ -431,7 +438,7 @@ export default function Attendance() {
                                                     <Input
                                                         key={`ent-d-${a.id}-${a.hora_entrada_registrada}`}
                                                         type="time"
-                                                        defaultValue={a.hora_entrada_registrada ? new Date(a.hora_entrada_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
+                                                        defaultValue={a.hora_entrada_registrada ? timeFormatter.format(new Date(a.hora_entrada_registrada)) : ''}
                                                         className="h-8 w-[90px] text-xs font-mono"
                                                         onBlur={(e) => handleGuardarHora(a, 'hora_entrada_registrada', e.target.value)}
                                                     />
@@ -439,7 +446,7 @@ export default function Attendance() {
                                                     <Input
                                                         key={`sal-d-${a.id}-${a.hora_salida_registrada}`}
                                                         type="time"
-                                                        defaultValue={a.hora_salida_registrada ? new Date(a.hora_salida_registrada).toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit' }) : ''}
+                                                        defaultValue={a.hora_salida_registrada ? timeFormatter.format(new Date(a.hora_salida_registrada)) : ''}
                                                         className="h-8 w-[90px] text-xs font-mono"
                                                         onBlur={(e) => handleGuardarHora(a, 'hora_salida_registrada', e.target.value)}
                                                     />
