@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Printer } from 'lucide-react';
 import type { Horario } from '@/types';
+import { escapeHtml } from '@/lib/utils';
 
 interface Props {
     open: boolean;
@@ -103,9 +104,9 @@ export function HorarioPrintDialog({ open, onOpenChange, horarios }: Props) {
               <tr>
                 ${selectedColumns.dia ? `<td>${dia}</td>` : ''}
                 ${selectedColumns.franja ? `<td>${horario}</td>` : ''}
-                ${selectedColumns.funcionario ? `<td>${funcionario}</td>` : ''}
-                ${selectedColumns.cliente ? `<td>${cliente} (${servicio})</td>` : ''}
-                ${selectedColumns.ubicacion ? `<td>${ubicacion}</td>` : ''}
+                ${selectedColumns.funcionario ? `<td>${escapeHtml(funcionario)}</td>` : ''}
+                ${selectedColumns.cliente ? `<td>${escapeHtml(cliente)} (${escapeHtml(servicio)})</td>` : ''}
+                ${selectedColumns.ubicacion ? `<td>${escapeHtml(ubicacion)}</td>` : ''}
                 ${selectedColumns.vigencia ? `<td>${vigencia}</td>` : ''}
               </tr>
             `;

@@ -1,0 +1,4 @@
+## 2024-05-24 - Fix XSS vulnerability in Document Print Dialogs
+**Vulnerability:** XSS via `document.write` in `HorarioPrintDialog.tsx` and `FuncionarioPrintDialog.tsx`. User input injected into HTML strings wasn't escaped, leading to potential Cross-Site Scripting (XSS).
+**Learning:** React escapes input when rendering to the DOM, but using raw HTML string concatenation and `document.write()` circumvents these protections. Always sanitize when generating HTML strings manually.
+**Prevention:** Implement and use an `escapeHtml` utility in `src/lib/utils.ts` for any manually constructed HTML, specifically when preparing documents for printing or using `dangerouslySetInnerHTML`.
