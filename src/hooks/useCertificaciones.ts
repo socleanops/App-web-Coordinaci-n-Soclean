@@ -22,6 +22,19 @@ export function useCertificaciones(funcionarioId?: string) {
         enabled: !!funcionarioId
     });
 
+    const getAllCertificaciones = useQuery({
+        queryKey: ['certificaciones', 'all'],
+        queryFn: async (): Promise<Certificacion[]> => {
+            const { data, error } = await supabase
+                .from('certificaciones')
+                .select('*')
+                .order('fecha_inicio', { ascending: false });
+
+            if (error) throw new Error(error.message);
+            return data;
+        }
+    });
+
     const createCertificacion = useMutation({
         mutationFn: async (formData: CertificacionFormData) => {
             // 1. Insert into certificaciones
@@ -70,6 +83,7 @@ export function useCertificaciones(funcionarioId?: string) {
 
     return {
         getCertificaciones,
+        getAllCertificaciones,
         createCertificacion,
         deleteCertificacion
     };
