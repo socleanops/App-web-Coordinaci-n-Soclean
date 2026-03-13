@@ -3,7 +3,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Pencil, Printer, KeyRound } from 'lucide-react';
+import { Search, Pencil, Printer, KeyRound, Stethoscope } from 'lucide-react';
 import { FuncionarioPrintDialog } from './FuncionarioPrintDialog';
 
 interface FuncionariosTableProps {
@@ -11,9 +11,10 @@ interface FuncionariosTableProps {
     isLoading: boolean;
     onEdit: (funcionario: any) => void;
     onResetPassword: (funcionario: any) => void;
+    onCertificaciones: (funcionario: any) => void;
 }
 
-export function FuncionariosTable({ employees, isLoading, onEdit, onResetPassword }: FuncionariosTableProps) {
+export function FuncionariosTable({ employees, isLoading, onEdit, onResetPassword, onCertificaciones }: FuncionariosTableProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
 
@@ -113,6 +114,15 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right whitespace-nowrap">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => onCertificaciones(emp)}
+                                                className="text-muted-foreground hover:text-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Certificaciones Médicas"
+                                            >
+                                                <Stethoscope className="h-4 w-4" />
+                                            </Button>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"

@@ -113,3 +113,12 @@ export type FacturaItem = {
     total: number;
     servicios?: Servicio; // Joined Data
 };
+
+export type Certificacion = {
+    id: string;
+    funcionario_id: string;
+    fecha_inicio: string; // date string
+    fecha_fin: string; // date string
+    motivo?: string;
+    created_at?: string;
+};

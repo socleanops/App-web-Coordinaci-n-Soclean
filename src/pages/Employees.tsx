@@ -5,6 +5,7 @@ import { useFuncionarios } from '@/hooks/useFuncionarios';
 import type { Funcionario } from '@/types';
 import { FuncionariosHeader } from '@/components/funcionarios/FuncionariosHeader';
 import { FuncionariosTable } from '@/components/funcionarios/FuncionariosTable';
+import { FuncionarioCertificacionesDialog } from '@/components/funcionarios/FuncionarioCertificacionesDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -17,6 +18,9 @@ export default function Employees() {
     const [resetDialogOpen, setResetDialogOpen] = useState(false);
     const [funcionarioToReset, setFuncionarioToReset] = useState<Funcionario | null>(null);
 
+    const [certDialogOpen, setCertDialogOpen] = useState(false);
+    const [funcionarioToCert, setFuncionarioToCert] = useState<Funcionario | null>(null);
+
     const { getFuncionarios, resetPassword } = useFuncionarios();
     const { data: employees = [], isLoading } = getFuncionarios;
 
@@ -28,6 +32,11 @@ export default function Employees() {
     const handleResetPasswordClick = (funcionario: Funcionario) => {
         setFuncionarioToReset(funcionario);
         setResetDialogOpen(true);
+    };
+
+    const handleCertificacionesClick = (funcionario: Funcionario) => {
+        setFuncionarioToCert(funcionario);
+        setCertDialogOpen(true);
     };
 
     const confirmResetPassword = async () => {
@@ -68,6 +77,7 @@ export default function Employees() {
                 isLoading={isLoading}
                 onEdit={handleEdit}
                 onResetPassword={handleResetPasswordClick}
+                onCertificaciones={handleCertificacionesClick}
             />
 
             <FuncionarioFormDialog
@@ -79,6 +89,12 @@ export default function Employees() {
             <FuncionarioBulkImportDialog
                 open={isBulkOpen}
                 onOpenChange={setIsBulkOpen}
+            />
+
+            <FuncionarioCertificacionesDialog 
+                open={certDialogOpen}
+                onOpenChange={setCertDialogOpen}
+                funcionario={funcionarioToCert}
             />
 
             {/* Dialogo de Confirmación de Reseteo de Clave */}

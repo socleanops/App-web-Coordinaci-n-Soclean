@@ -96,13 +96,22 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
             const existingHorariosMap = new Set(existentes?.map(e => e.horario_id));
 
+            // Fetch certificaciones para esa fecha
+            const { data: certs } = await supabase
+                .from('certificaciones')
+                .select('funcionario_id')
+                .lte('fecha_inicio', fecha)
+                .gte('fecha_fin', fecha);
+
+            const certsSet = new Set(certs?.map(c => c.funcionario_id) || []);
+
             const nuevosRegistros = horarios
                 .filter(h => !existingHorariosMap.has(h.id))
                 .map(h => ({
                     funcionario_id: h.funcionario_id,
                     horario_id: h.id,
                     fecha: fecha,
-                    estado: 'pendiente'
+                    estado: certsSet.has(h.funcionario_id) ? 'certificado' : 'pendiente'
                 }));
 
             if (nuevosRegistros.length === 0) return { count: 0 };
@@ -146,13 +155,21 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
                     const existingSet = new Set(existentes?.map(e => e.horario_id));
 
+                    // Check certificaciones para esa fecha
+                    const { data: certs } = await supabase
+                        .from('certificaciones')
+                        .select('funcionario_id')
+                        .lte('fecha_inicio', fechaStr)
+                        .gte('fecha_fin', fechaStr);
+                    const certsSet = new Set(certs?.map(c => c.funcionario_id) || []);
+
                     const nuevos = horarios
                         .filter(h => !existingSet.has(h.id))
                         .map(h => ({
                             funcionario_id: h.funcionario_id,
                             horario_id: h.id,
                             fecha: fechaStr,
-                            estado: 'pendiente'
+                            estado: certsSet.has(h.funcionario_id) ? 'certificado' : 'pendiente'
                         }));
 
                     if (nuevos.length > 0) {
