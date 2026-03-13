@@ -119,6 +119,7 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
                                                 onClick={() => onResetPassword(emp)}
                                                 className="text-muted-foreground hover:text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity"
                                                 title="Forzar Reseteo de Contraseña"
+                                                aria-label="Restablecer contraseña"
                                             >
                                                 <KeyRound className="h-4 w-4" />
                                             </Button>
@@ -128,6 +129,7 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
                                                 onClick={() => onEdit(emp)}
                                                 className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
                                                 title="Editar Ficha"
+                                                aria-label="Editar funcionario"
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
