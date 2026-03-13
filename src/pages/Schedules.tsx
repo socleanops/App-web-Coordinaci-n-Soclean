@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { HorarioFormDialog } from '@/components/horarios/HorarioFormDialog';
 import { HorarioPrintDialog } from '@/components/horarios/HorarioPrintDialog';
 import { useHorarios } from '@/hooks/useHorarios';
+import { useCertificaciones } from '@/hooks/useCertificaciones';
 import type { Horario } from '@/types';
 import { toast } from 'sonner';
 
@@ -38,7 +39,12 @@ export default function Schedules() {
     const [showAll, setShowAll] = useState(false);
 
     const { getHorarios, deleteHorario } = useHorarios();
-    const { data: horarios = [], isLoading } = getHorarios;
+    const { data: horarios = [], isLoading: isLoadingHorarios } = getHorarios;
+
+    const { getAllCertificaciones } = useCertificaciones();
+    const { data: certificaciones = [] } = getAllCertificaciones;
+
+    const isLoading = isLoadingHorarios;
 
     // Get day of week from selected date (0=Sun ... 6=Sat)
     const diaSemanaFiltro = useMemo(() => {
@@ -227,7 +233,23 @@ export default function Schedules() {
                                                     Desde: {dateFormatter.format(new Date(h.vigente_desde))}
                                                     {h.vigente_hasta ? <><br />Hasta: {dateFormatter.format(new Date(h.vigente_hasta))}</> : ''}
                                                 </div>
-                                                {!h.vigente_hasta && <span className="text-xs text-emerald-600 dark:text-emerald-400 font-medium">Activo Indefinido</span>}
+                                                {!h.vigente_hasta && <span className="block mt-1 text-xs text-emerald-600 dark:text-emerald-400 font-medium">Activo Indefinido</span>}
+                                                
+                                                {/* Check Certificación */}
+                                                {!showAll && fechaFiltro && (
+                                                    (() => {
+                                                        const isCertificated = certificaciones.some(c => 
+                                                            c.funcionario_id === h.funcionario_id && 
+                                                            fechaFiltro >= c.fecha_inicio && 
+                                                            fechaFiltro <= c.fecha_fin
+                                                        );
+                                                        return isCertificated ? (
+                                                            <div className="mt-1.5 inline-flex items-center gap-1 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-800 dark:text-cyan-400 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border border-cyan-200 dark:border-cyan-800">
+                                                                Certificado Médico
+                                                            </div>
+                                                        ) : null;
+                                                    })()
+                                                )}
                                             </TableCell>
                                             <TableCell className="text-right">
                                                 <div className="flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
