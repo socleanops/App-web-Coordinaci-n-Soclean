@@ -28,6 +28,7 @@ function getTomorrowStr(): string {
 }
 
 const dateFormatter = new Intl.DateTimeFormat('es-UY');
+const longDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
 export default function Schedules() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -50,7 +51,7 @@ export default function Schedules() {
     const fechaLabel = useMemo(() => {
         if (!fechaFiltro) return '';
         const d = new Date(fechaFiltro + 'T12:00:00');
-        return d.toLocaleDateString('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        return !isNaN(d.getTime()) ? longDateFormatter.format(d) : 'Fecha Inválida';
     }, [fechaFiltro]);
 
     const handleEdit = (horario: Horario) => {
