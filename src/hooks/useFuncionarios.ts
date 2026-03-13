@@ -55,10 +55,10 @@ export function useFuncionarios() {
     const createFuncionario = useMutation({
         mutationFn: async (formData: FuncionarioFormData) => {
             console.log("[useFuncionarios] Starting createFuncionario at", new Date().toISOString(), "Data:", formData);
+            import { toast } from 'sonner';
+            const tid = toast.loading('1/5 Iniciando creación...');
             let profileId = formData.id; // if it already exists
 
-            const randomSuffix = Math.random().toString(36).substring(2, 8);
-            const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@app.soclean.business`;
             const randomSuffix = generateSecureRandomString(6);
             const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
             const safePassword = formData.password?.trim() || `SC${formData.cedula.replace(/\D/g, '')}#2026`;
@@ -95,6 +95,7 @@ export function useFuncionarios() {
                     // Recover the existing profile ID
                     profileId = existingProfile.id;
                 } else {
+                    toast.loading('2/5 Registrando cuenta (Auth)...', { id: tid });
                     console.log("[useFuncionarios] Calling authClient.auth.signUp...");
                     const { data: authData, error: authError } = await authClient.auth.signUp({
                         email: safeEmail,
@@ -117,8 +118,12 @@ export function useFuncionarios() {
                 }
             }
 
-            if (!profileId) throw new Error('Fallo al crear ID de perfil');
+            if (!profileId) {
+                 toast.error('Fallo al crear ID de perfil', { id: tid });
+                 throw new Error('Fallo al crear ID de perfil');
+            }
 
+            toast.loading('3/5 Sincronizando Perfil de usuario...', { id: tid });
             console.log("[useFuncionarios] Calling profiles upsert for ID:", profileId);
             // 2. Upsert Role securely (Creates it if the DB trigger failed or doesn't exist)
             const { error: profileError } = await supabase
@@ -132,8 +137,12 @@ export function useFuncionarios() {
                 }, { onConflict: 'id' });
 
             console.log("[useFuncionarios] profiles upsert finished. Error:", profileError?.message);
-            if (profileError) throw new Error(`Profile Error: ${profileError.message}`);
+            if (profileError) {
+                toast.error(`Error Perfil: ${profileError.message}`, { id: tid });
+                throw new Error(`Profile Error: ${profileError.message}`);
+            }
 
+            toast.loading('4/5 Creando Ficha de Funcionario...', { id: tid });
             console.log("[useFuncionarios] Calling funcionarios insert");
             // 3. Create Funcionario record
             const { data: funcData, error: funcError } = await supabase
@@ -153,7 +162,12 @@ export function useFuncionarios() {
                 .single();
 
             console.log("[useFuncionarios] funcionarios insert finished. Error:", funcError?.message, "Result OK:", !!funcData);
-            if (funcError) throw new Error(funcError.message);
+            if (funcError) {
+                toast.error(`Error Funcionario: ${funcError.message}`, { id: tid });
+                throw new Error(funcError.message);
+            }
+            
+            toast.success('5/5 Operación exitosa!', { id: tid });
             return funcData;
         },
         onSuccess: () => {
