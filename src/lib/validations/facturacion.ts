@@ -15,6 +15,7 @@ export const facturaSchema = z.object({
     numero: z.string().min(1, 'El número de factura es obligatorio'),
     fecha_emision: z.string().min(1, 'La fecha de emisión es obligatoria'),
     fecha_vencimiento: z.string().optional().nullable(),
+    periodo: z.string().optional(),
     estado: z.enum(['borrador', 'emitida', 'pagada', 'vencida', 'anulada']).default('borrador'),
     subtotal: z.coerce.number().min(0),
     impuesto: z.coerce.number().min(0),

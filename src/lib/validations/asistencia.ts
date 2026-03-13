@@ -9,7 +9,7 @@ export const asistenciaSchema = z.object({
     hora_salida_registrada: z.string().optional().nullable(),
     distancia_entrada_metros: z.number().optional().nullable(),
     distancia_salida_metros: z.number().optional().nullable(),
-    estado: z.enum(['presente', 'ausente', 'tardanza', 'salida_anticipada', 'pendiente', 'justificado']).default('pendiente'),
+    estado: z.enum(['presente', 'ausente', 'tardanza', 'salida_anticipada', 'pendiente', 'justificado', 'no_citado', 'certificado']).default('pendiente'),
     observaciones: z.string().optional(),
 });
 

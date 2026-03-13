@@ -71,7 +71,6 @@ export default function Dashboard() {
                     colorTheme="orange"
                     linkTo="/logistica"
                     linkText="Abrir Logística"
-                    isNew={true}
                 />
 
                 {isManager && (

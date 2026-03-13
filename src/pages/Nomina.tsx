@@ -6,6 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { useAsistencia } from '@/hooks/useAsistencia';
 import { toast } from 'sonner';
+import * as XLSX from 'xlsx';
 
 export default function Nomina() {
     const [mes, setMes] = useState<string>(new Date().toISOString().substring(0, 7)); // YYYY-MM
@@ -35,7 +36,8 @@ export default function Nomina() {
                     horasNocturnas: 0,
                     horasFeriado: 0,
                     diasTrabajados: 0,
-                    faltas: 0
+                    faltas: 0,
+                    certificados: 0
                 };
             }
 
@@ -52,11 +54,12 @@ export default function Nomina() {
 
                     hours = Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60));
 
+                    // Precision: iterate in 15-minute blocks for accurate nocturnal calculation
                     let current = new Date(start.getTime());
                     while (current < end) {
                         const h = current.getHours();
-                        if (h >= 22 || h < 6) nightHours += 1;
-                        current.setHours(current.getHours() + 1);
+                        if (h >= 22 || h < 6) nightHours += 0.25;
+                        current.setTime(current.getTime() + 15 * 60 * 1000); // +15 min
                     }
                 } else if (a.horarios?.hora_entrada && a.horarios?.hora_salida) {
                     const [hIn, mIn] = a.horarios.hora_entrada.split(':').map(Number);
@@ -68,25 +71,42 @@ export default function Nomina() {
                     if (endHours < startHours) endHours += 24;
                     hours = endHours - startHours;
 
-                    for (let i = Math.floor(startHours); i < Math.floor(endHours); i++) {
-                        const actualHour = i % 24;
-                        if (actualHour >= 22 || actualHour < 6) nightHours++;
+                    // 15-minute precision for schedule-based calculation
+                    for (let mins = startHours * 60; mins < endHours * 60; mins += 15) {
+                        const actualHour = Math.floor(mins / 60) % 24;
+                        if (actualHour >= 22 || actualHour < 6) nightHours += 0.25;
                     }
                 }
 
                 agrupar[funcId].totalHoras += Math.max(0, hours);
                 agrupar[funcId].horasNocturnas += Math.max(0, nightHours);
 
-                // Add to Feriados if applicable
-                const isFeriado = a.fecha.endsWith('-01-01') || a.fecha.endsWith('-05-01') ||
-                    a.fecha.endsWith('-07-18') || a.fecha.endsWith('-08-25') ||
-                    a.fecha.endsWith('-12-25');
-                if (isFeriado) {
+                // Feriados de Uruguay (fijos + móviles 2026)
+                // Fijos: 1/1, 1/5, 18/7, 25/8, 25/12
+                // Móviles aprox: Carnaval, Semana Turismo, etc.
+                const FERIADOS_UY = [
+                    '01-01', '01-06', // Año Nuevo, Día de Reyes
+                    '02-16', '02-17', // Carnaval (aprox)
+                    '04-06', '04-07', '04-08', '04-09', '04-10', // Semana de Turismo
+                    '04-19', // Desembarco de los 33
+                    '05-01', // Día del Trabajador
+                    '05-18', // Batalla de las Piedras
+                    '06-19', // Natalicio de Artigas
+                    '07-18', // Jura de la Constitución
+                    '08-25', // Declaratoria de Independencia
+                    '10-12', // Día de la Diversidad Cultural
+                    '11-02', // Día de los Difuntos
+                    '12-25', // Navidad
+                ];
+                const mmdd = a.fecha.substring(5); // YYYY-MM-DD → MM-DD
+                if (FERIADOS_UY.includes(mmdd)) {
                     agrupar[funcId].horasFeriado += Math.max(0, hours);
                 }
 
             } else if (a.estado === 'ausente') {
                 agrupar[funcId].faltas += 1;
+            } else if (a.estado === 'certificado') {
+                agrupar[funcId].certificados += 1;
             }
         });
 
@@ -103,32 +123,52 @@ export default function Nomina() {
             horas: acc.horas + curr.totalHoras,
             dias: acc.dias + curr.diasTrabajados,
             faltas: acc.faltas + curr.faltas,
-        }), { horas: 0, dias: 0, faltas: 0 });
+            certificados: acc.certificados + curr.certificados,
+        }), { horas: 0, dias: 0, faltas: 0, certificados: 0 });
     }, [horasPorFuncionario]);
 
-    const generarReporteCSV = () => {
+    const generarReporteExcel = () => {
         setIsExporting(true);
-        toast.info("Generando reporte de horas consolidadas para RRHH...");
+        toast.info("Generando reporte Excel de horas consolidadas para RRHH...");
 
         setTimeout(() => {
-            let csv = 'CEDULA,NOMBRE_FUNCIONARIO,TOTAL_HORAS,HORAS_NORMALES,HORAS_NOCTURNAS(22-06),HORAS_FERIADO,CANTIDAD_DIAS,FALTAS\n';
-
-            horasPorFuncionario.forEach(f => {
+            const dataToExport = horasPorFuncionario.map(f => {
                 const hrNormales = f.totalHoras - f.horasNocturnas;
-                csv += `${f.cedula},"${f.nombreCompleto}",${f.totalHoras.toFixed(2)},${hrNormales.toFixed(2)},${f.horasNocturnas.toFixed(2)},${f.horasFeriado.toFixed(2)},${f.diasTrabajados},${f.faltas}\n`;
+                return {
+                    'Cédula': f.cedula,
+                    'Nombre Empleado': f.nombreCompleto,
+                    'Días Asistidos': f.diasTrabajados,
+                    'Faltas': f.faltas,
+                    'Certificados (Días)': f.certificados,
+                    'Horas Normales': hrNormales > 0 ? parseFloat(hrNormales.toFixed(2)) : 0,
+                    'Horas Nocturnas (22-06)': f.horasNocturnas > 0 ? parseFloat(f.horasNocturnas.toFixed(2)) : 0,
+                    'Horas Feriado': f.horasFeriado > 0 ? parseFloat(f.horasFeriado.toFixed(2)) : 0,
+                    'Total Horas': parseFloat(f.totalHoras.toFixed(2))
+                };
             });
 
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = url;
-            link.setAttribute('download', `Reporte_Mensual_Horas_${mes}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            const worksheet = XLSX.utils.json_to_sheet(dataToExport);
+
+            // Set column widths matching the style seen in `Reports.tsx`
+            const wscols = [
+                { wch: 15 }, // Cédula
+                { wch: 30 }, // Nombre
+                { wch: 15 }, // Días Asistidos
+                { wch: 10 }, // Faltas
+                { wch: 20 }, // Certificados
+                { wch: 15 }, // Horas Normales
+                { wch: 25 }, // Horas Nocturnas
+                { wch: 15 }, // Horas Feriado
+                { wch: 15 }, // Total Horas
+            ];
+            worksheet['!cols'] = wscols;
+
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Nómina_RRHH");
+            XLSX.writeFile(workbook, `Reporte_Mensual_Horas_${mes}.xlsx`);
 
             setIsExporting(false);
-            toast.success("Reporte de horas exportado correctamente.");
+            toast.success("Reporte Excel exportado correctamente.");
         }, 1200);
     };
 
@@ -150,18 +190,18 @@ export default function Nomina() {
                         className="w-auto h-11 border-slate-300 shadow-sm"
                     />
                     <Button
-                        onClick={generarReporteCSV}
+                        onClick={generarReporteExcel}
                         disabled={isExporting || horasPorFuncionario.length === 0}
                         className="bg-primary group hover:bg-primary/90 text-white rounded-xl shadow-lg transition-all h-11 shrink-0 px-6"
                     >
                         <FileSpreadsheet className="mr-2 h-5 w-5 group-hover:-translate-y-1 transition-transform" />
-                        Descargar a CSV
+                        Descargar Excel
                     </Button>
                 </div>
             </div>
 
             {/* Metricas de Horas */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6">
                 <Card className="bg-gradient-to-br from-coreops-primary to-blue-800 text-white shadow-md border-0">
                     <CardHeader className="pb-2">
                         <CardTitle className="text-sm font-medium text-white/90">Total Horas Mensuales</CardTitle>
@@ -189,6 +229,15 @@ export default function Nomina() {
                         <p className="text-xs text-slate-400 mt-1">Acumulado general</p>
                     </CardContent>
                 </Card>
+                <Card className="bg-white/60 dark:bg-slate-900/60 shadow-sm border border-slate-200 dark:border-slate-800">
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-sm font-medium text-cyan-600/90 dark:text-cyan-400">Certificaciones Medicas</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold text-cyan-600 dark:text-cyan-400">{totales.certificados} Días</div>
+                        <p className="text-xs text-slate-400 mt-1">Acumulado general</p>
+                    </CardContent>
+                </Card>
             </div>
 
             <Card className="border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
@@ -209,13 +258,14 @@ export default function Nomina() {
                     </div>
                 </CardHeader>
                 <CardContent className="p-0">
-                    <div className="overflow-hidden">
-                        <Table>
+                    <div className="overflow-x-auto">
+                        <Table className="min-w-[800px]">
                             <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
                                 <TableRow>
                                     <TableHead className="pl-6">Funcionario (CI)</TableHead>
                                     <TableHead className="text-center">Días Asistidos</TableHead>
                                     <TableHead className="text-center text-red-500">Ausencias</TableHead>
+                                    <TableHead className="text-center text-cyan-500">Certificados</TableHead>
                                     <TableHead className="text-right">Horas Nocturnas <br /><span className="text-[10px] font-normal text-slate-400">(22 a 06 hs)</span></TableHead>
                                     <TableHead className="text-right">Horas Feriado <br /><span className="text-[10px] font-normal text-slate-400">Irrenunciable</span></TableHead>
                                     <TableHead className="text-right pr-6 font-bold text-coreops-primary">Suma Total Mensual</TableHead>
@@ -250,6 +300,9 @@ export default function Nomina() {
                                             </TableCell>
                                             <TableCell className="text-center font-medium text-red-400">
                                                 {f.faltas > 0 ? f.faltas : '-'}
+                                            </TableCell>
+                                            <TableCell className="text-center font-medium text-cyan-500">
+                                                {f.certificados > 0 ? f.certificados : '-'}
                                             </TableCell>
                                             <TableCell className="text-right font-medium text-indigo-500 dark:text-indigo-400">
                                                 {f.horasNocturnas > 0 ? `${f.horasNocturnas.toFixed(1)} Hrs` : '-'}

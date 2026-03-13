@@ -5,18 +5,50 @@ import { useFuncionarios } from '@/hooks/useFuncionarios';
 import type { Funcionario } from '@/types';
 import { FuncionariosHeader } from '@/components/funcionarios/FuncionariosHeader';
 import { FuncionariosTable } from '@/components/funcionarios/FuncionariosTable';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 export default function Employees() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
     const [editingFuncionario, setEditingFuncionario] = useState<Funcionario | null>(null);
     const [isBulkOpen, setIsBulkOpen] = useState(false);
 
-    const { getFuncionarios } = useFuncionarios();
+    const [resetDialogOpen, setResetDialogOpen] = useState(false);
+    const [funcionarioToReset, setFuncionarioToReset] = useState<Funcionario | null>(null);
+
+    const { getFuncionarios, resetPassword } = useFuncionarios();
     const { data: employees = [], isLoading } = getFuncionarios;
 
     const handleEdit = (funcionario: Funcionario) => {
         setEditingFuncionario(funcionario);
         setIsDialogOpen(true);
+    };
+
+    const handleResetPasswordClick = (funcionario: Funcionario) => {
+        setFuncionarioToReset(funcionario);
+        setResetDialogOpen(true);
+    };
+
+    const confirmResetPassword = async () => {
+        if (!funcionarioToReset || !funcionarioToReset.profile_id) return;
+
+        try {
+            // Se usa la cédula como nueva clave estándar (limpiando puntos y guiones por seguridad básica)
+            const cleanCedula = funcionarioToReset.cedula.replace(/[^0-9]/g, '');
+            const newPassword = `SC${cleanCedula}#2026`; // Ej: SC12345678#2026
+
+            await resetPassword.mutateAsync({
+                profileId: funcionarioToReset.profile_id,
+                newPassword: newPassword
+            });
+
+            toast.success(`Contraseña de ${funcionarioToReset.profiles?.nombre} reseteada a: ${newPassword}`);
+            setResetDialogOpen(false);
+            setFuncionarioToReset(null);
+        } catch (error: any) {
+            toast.error(error.message || 'No se pudo resetear la contraseña');
+        }
     };
 
     const handleAddNew = () => {
@@ -35,6 +67,7 @@ export default function Employees() {
                 employees={employees}
                 isLoading={isLoading}
                 onEdit={handleEdit}
+                onResetPassword={handleResetPasswordClick}
             />
 
             <FuncionarioFormDialog
@@ -47,6 +80,36 @@ export default function Employees() {
                 open={isBulkOpen}
                 onOpenChange={setIsBulkOpen}
             />
+
+            {/* Dialogo de Confirmación de Reseteo de Clave */}
+            <Dialog open={resetDialogOpen} onOpenChange={setResetDialogOpen}>
+                <DialogContent className="sm:max-w-md">
+                    <DialogHeader>
+                        <DialogTitle>Forzar Reseteo de Contraseña</DialogTitle>
+                        <DialogDescription>
+                            Estás a punto de resetear la contraseña de <strong>{funcionarioToReset?.profiles?.nombre} {funcionarioToReset?.profiles?.apellido}</strong>.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 p-4 border border-amber-200 dark:border-amber-800 rounded-md text-sm mt-2 mb-4">
+                        Esto invalidará su sesión actual y su contraseña pasará a ser el estándar de alta inicial basada en su documento (ej. <strong>SC12345678#2026</strong>). Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
+                    </div>
+
+                    <DialogFooter className="sm:justify-end gap-2">
+                        <Button type="button" variant="outline" onClick={() => setResetDialogOpen(false)}>
+                            Cancelar Operación
+                        </Button>
+                        <Button
+                            type="button"
+                            className="bg-amber-600 hover:bg-amber-700 text-white"
+                            onClick={confirmResetPassword}
+                            disabled={resetPassword.isPending}
+                        >
+                            {resetPassword.isPending ? 'Aplicando...' : 'Confirmar Reseteo'}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
