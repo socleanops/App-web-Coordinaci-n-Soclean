@@ -63,11 +63,19 @@ function App() {
 
           if (!profileErr && data && mounted) {
             setRole(data.rol);
+          } else if (profileErr && mounted) {
+             console.error("Failed to fetch profile role:", profileErr);
+             // Default to lowest priviledge if failed but session exists to prevent infinite load
+             setRole('funcionario');
           }
         }
       } catch (err) {
         console.error("Critical Auth Init Error:", err);
-        await supabase.auth.signOut();
+        try {
+            await supabase.auth.signOut();
+        } catch (signOutErr) {
+            console.error("SignOut error during critical failure:", signOutErr);
+        }
       } finally {
         if (mounted) setLoading(false);
       }
@@ -100,6 +108,9 @@ function App() {
 
           if (!error && data && mounted) {
             setRole(data.rol);
+          } else if (error && mounted) {
+             console.error("Failed to fetch profile role on change:", error);
+             setRole('funcionario');
           }
         }
       } catch (err) {

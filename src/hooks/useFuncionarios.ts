@@ -7,8 +7,8 @@ import { generateSecureRandomString } from '@/lib/utils';
 
 // Special client that doesn't persist session, so admin can create users without being logged out
 const authClient = createClient(
-    import.meta.env.VITE_SUPABASE_URL || '',
-    import.meta.env.VITE_SUPABASE_ANON_KEY || '',
+    import.meta.env.VITE_SUPABASE_URL || 'https://placeholder-url.supabase.co',
+    import.meta.env.VITE_SUPABASE_ANON_KEY || 'placeholder-key',
     { auth: { persistSession: false, autoRefreshToken: false } }
 );
 
@@ -57,6 +57,8 @@ export function useFuncionarios() {
             console.log("[useFuncionarios] Starting createFuncionario at", new Date().toISOString(), "Data:", formData);
             let profileId = formData.id; // if it already exists
 
+            const randomSuffix = Math.random().toString(36).substring(2, 8);
+            const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@app.soclean.business`;
             const randomSuffix = generateSecureRandomString(6);
             const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
             const safePassword = formData.password?.trim() || `SC${formData.cedula.replace(/\D/g, '')}#2026`;
