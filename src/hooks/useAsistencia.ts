@@ -82,7 +82,8 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
                 .from('horarios')
                 .select('*')
                 .eq('dia_semana', diaSemana)
-                .is('vigente_hasta', null);
+                .lte('vigente_desde', fecha)
+                .or(`vigente_hasta.is.null,vigente_hasta.gte.${fecha}`);
 
             if (horariosErr) throw new Error(horariosErr.message);
             if (!horarios || horarios.length === 0) return { count: 0 };
@@ -145,7 +146,8 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
                     .from('horarios')
                     .select('*')
                     .eq('dia_semana', diaSemana)
-                    .is('vigente_hasta', null);
+                    .lte('vigente_desde', fechaStr)
+                    .or(`vigente_hasta.is.null,vigente_hasta.gte.${fechaStr}`);
 
                 if (horarios && horarios.length > 0) {
                     const { data: existentes } = await supabase
