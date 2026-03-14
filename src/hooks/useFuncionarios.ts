@@ -55,7 +55,7 @@ export function useFuncionarios() {
     const createFuncionario = useMutation({
         mutationFn: async (formData: FuncionarioFormData) => {
             console.log("[useFuncionarios] Starting createFuncionario at", new Date().toISOString(), "Data:", formData);
-            import { toast } from 'sonner';
+
             const tid = toast.loading('1/5 Iniciando creación...');
             let profileId = formData.id; // if it already exists
 
