@@ -2,7 +2,9 @@
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
-import { PlusCircle, Trash2 } from 'lucide-react';
+import { PlusCircle, Trash2, Wand2, Loader2 } from 'lucide-react';
+import { supabase } from '@/lib/supabase';
+import { useState } from 'react';
 
 import {
     Dialog,
@@ -58,10 +60,93 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
         },
     });
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, replace } = useFieldArray({
         control: form.control,
         name: "items"
     });
+
+    const watchCliente = form.watch("cliente_id");
+    const watchDesde = form.watch("fecha_emision");
+    const watchHasta = form.watch("fecha_vencimiento");
+
+    const [isAutoGenerating, setIsAutoGenerating] = useState(false);
+
+    const handleAutoGenerate = async () => {
+        if (!watchCliente || !watchDesde || !watchHasta) {
+            toast.error('Debe seleccionar cliente, y rango de fechas (Desde y Hasta) para calcular.');
+            return;
+        }
+
+        setIsAutoGenerating(true);
+        try {
+            // Buscamos todas las asistencias en el rango para el cliente
+            const { data, error } = await supabase
+                .from('asistencia')
+                .select(`
+                    id,
+                    estado,
+                    horarios!inner (
+                        hora_entrada,
+                        hora_salida,
+                        servicios!inner (
+                            nombre,
+                            cliente_id
+                        )
+                    )
+                `)
+                .eq('horarios.servicios.cliente_id', watchCliente)
+                .gte('fecha', watchDesde)
+                .lte('fecha', watchHasta);
+
+            if (error) throw error;
+
+            if (!data || data.length === 0) {
+                toast.info('No se encontraron registros de turnos en ese período para este cliente.');
+                setIsAutoGenerating(false);
+                return;
+            }
+
+            // Agrupamos por servicio y sumamos las horas de los que estuvieron "presente", "justificado" o "tardanza"
+            const horasPorServicio: Record<string, number> = {};
+
+            data.forEach((a: any) => {
+                const est = a.estado;
+                // Calculamos solo de los que existieron realmente o están justificados
+                if (est === 'presente' || est === 'tardanza' || est === 'salida_anticipada' || est === 'justificado') {
+                    const servicioNombre = a.horarios.servicios.nombre;
+                    const hEntrada = a.horarios.hora_entrada;
+                    const hSalida = a.horarios.hora_salida;
+                    
+                    if (hEntrada && hSalida) {
+                        const [eh, em] = hEntrada.split(':').map(Number);
+                        const [sh, sm] = hSalida.split(':').map(Number);
+                        
+                        let totalHoras = (sh + sm / 60) - (eh + em / 60);
+                        if (totalHoras < 0) totalHoras += 24; // Turnos que cruzan la medianoche
+                        
+                        horasPorServicio[servicioNombre] = (horasPorServicio[servicioNombre] || 0) + totalHoras;
+                    }
+                }
+            });
+
+            const newItems = Object.entries(horasPorServicio).map(([nombre, horas]) => ({
+                descripcion: `Servicio: ${nombre} (${watchDesde} al ${watchHasta})`,
+                cantidad: parseFloat(horas.toFixed(2)),
+                precio_unitario: 0
+            }));
+
+            if (newItems.length > 0) {
+                replace(newItems);
+                toast.success('Horas calculadas y añadidas automáticamente');
+            } else {
+                toast.info('Hay registros en fecha, pero ninguno con estado "Presente".');
+            }
+        } catch (err: any) {
+            toast.error(err.message || 'Error al calcular horas automáticas');
+        } finally {
+            setIsAutoGenerating(false);
+        }
+    };
 
 
 
@@ -210,7 +295,20 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
 
                         {/* Line Items */}
                         <div className="border border-slate-200 dark:border-slate-800 rounded-lg p-4 bg-slate-50 dark:bg-slate-900/50">
-                            <h3 className="font-semibold text-lg mb-4">Conceptos o Ítems</h3>
+                            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                                <h3 className="font-semibold text-lg">Conceptos o Ítems</h3>
+                                <Button 
+                                    type="button" 
+                                    variant="secondary" 
+                                    size="sm" 
+                                    className="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 border-indigo-200"
+                                    onClick={handleAutoGenerate}
+                                    disabled={isAutoGenerating || !watchCliente || !watchDesde || !watchHasta}
+                                >
+                                    {isAutoGenerating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Wand2 className="h-4 w-4 mr-2" />}
+                                    Auto-Completar desde Asistencia
+                                </Button>
+                            </div>
 
                             <div className="space-y-4">
                                 {fields.map((field, index) => (
