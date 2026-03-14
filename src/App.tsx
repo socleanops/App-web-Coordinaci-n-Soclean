@@ -17,6 +17,7 @@ const Billing = lazy(() => import('./pages/Billing'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Nomina = lazy(() => import('./pages/Nomina'));
 const Settings = lazy(() => import('./pages/Settings'));
+const SupervisorMobile = lazy(() => import('./pages/SupervisorMobile'));
 
 const PageLoader = () => (
   <div className="flex flex-col h-screen w-full items-center justify-center bg-background/50 backdrop-blur-sm">
@@ -28,7 +29,7 @@ import { supabase } from './lib/supabase';
 import { useAuthStore } from './stores/authStore';
 
 function App() {
-  const { setUser, setRole, setLoading, user } = useAuthStore();
+  const { setUser, setRole, setLoading, user, role } = useAuthStore();
 
   useEffect(() => {
     let mounted = true;
@@ -137,7 +138,8 @@ function App() {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
+              <Route index element={role === 'supervisor' ? <SupervisorMobile /> : <Dashboard />} />
+              <Route path="supervisor" element={role === 'supervisor' ? <SupervisorMobile /> : <Navigate to="/" replace />} />
               <Route path="funcionarios" element={<Employees />} />
               <Route path="horarios" element={<Schedules />} />
               <Route path="clientes" element={<Clients />} />

@@ -14,7 +14,11 @@ import { NotificationDropdown } from './NotificationDropdown';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Sidebar } from './Sidebar';
 
-export function Header() {
+interface HeaderProps {
+    isSupervisor?: boolean;
+}
+
+export function Header({ isSupervisor = false }: HeaderProps) {
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -27,22 +31,24 @@ export function Header() {
             <div className="flex flex-1 items-center justify-between">
                 <div className="flex items-center gap-2">
                     {/* Mobile Menu Trigger */}
-                    <div className="md:hidden">
-                        <Sheet>
-                            <SheetTrigger asChild>
-                                <Button variant="ghost" size="icon" className="mr-0.5">
-                                    <Menu className="h-6 w-6" />
-                                </Button>
-                            </SheetTrigger>
-                            <SheetContent side="left" className="p-0 w-64">
-                                <Sidebar forceExpand />
-                            </SheetContent>
-                        </Sheet>
-                    </div>
+                    {!isSupervisor && (
+                        <div className="md:hidden">
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="mr-0.5">
+                                        <Menu className="h-6 w-6" />
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="left" className="p-0 w-64">
+                                    <Sidebar forceExpand />
+                                </SheetContent>
+                            </Sheet>
+                        </div>
+                    )}
 
                     {/* Placeholder for Search or Breadcrumbs */}
                     <div className="text-lg md:text-xl font-semibold uppercase tracking-wider text-muted-foreground line-clamp-1">
-                        Panel de Control
+                        {isSupervisor ? 'Mis Asignaciones' : 'Panel de Control'}
                     </div>
                 </div>
 
