@@ -79,24 +79,25 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
 
     const onSubmit = async (data: FuncionarioFormData) => {
         const isEditing = !!funcionarioToEdit;
-        const loadingId = toast.loading(isEditing ? 'Actualizando funcionario...' : '1/3 Validando datos...');
+        const loadingId = toast.loading(isEditing ? 'Actualizando funcionario...' : 'Validando datos...');
 
         try {
-            // Force a timeout so it never hangs infinitely
-            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado tras 20 segundos.')), 20000));
+            // Let the mutation handle its own timeout if we want, or do it here
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado en Supabase al procesar.')), 20000));
             
             if (isEditing) {
                 await Promise.race([updateFuncionario.mutateAsync({ id: funcionarioToEdit!.id, data }), timeoutPromise]);
                 toast.success('Funcionario actualizado correctamente', { id: loadingId });
             } else {
-                toast.loading('2/3 Creando credenciales en Supabase...', { id: loadingId });
+                toast.loading('Iniciando guardado remoto...', { id: loadingId });
                 await Promise.race([createFuncionario.mutateAsync(data), timeoutPromise]);
-                toast.success('3/3 Usuario y funcionario creados correctamente', { id: loadingId });
+                // the mutation itself shows a success toast for "5/5" and hides "Iniciando guardado remoto..."
             }
             onOpenChange(false);
         } catch (error: any) {
             console.error("Form Submit Error:", error);
-            toast.error(`Error: ${error.message || 'No se pudo guardar la información'}`, { id: loadingId, duration: 10000 });
+            const msg = error.message || 'No se pudo guardar la información';
+            toast.error(`Error: ${msg}`, { id: loadingId, duration: 10000 });
         }
     };
 
