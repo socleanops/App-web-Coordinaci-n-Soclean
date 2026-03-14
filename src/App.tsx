@@ -138,8 +138,8 @@ function App() {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<DashboardLayout />}>
-              <Route index element={role === 'supervisor' ? <SupervisorMobile /> : <Dashboard />} />
-              <Route path="supervisor" element={role === 'supervisor' ? <SupervisorMobile /> : <Navigate to="/" replace />} />
+              <Route index element={role?.toLowerCase() === 'supervisor' ? <SupervisorMobile /> : <Dashboard />} />
+              <Route path="supervisor" element={role?.toLowerCase() === 'supervisor' ? <SupervisorMobile /> : <Navigate to="/" replace />} />
               <Route path="funcionarios" element={<Employees />} />
               <Route path="horarios" element={<Schedules />} />
               <Route path="clientes" element={<Clients />} />

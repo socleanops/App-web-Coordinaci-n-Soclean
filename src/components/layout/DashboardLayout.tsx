@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/authStore';
 export function DashboardLayout() {
     const role = useAuthStore(s => s.role);
 
-    if (role === 'supervisor') {
+    if (role?.toLowerCase() === 'supervisor') {
         return (
             <div className="flex h-screen w-full bg-slate-50/50 dark:bg-slate-900/50 flex-col overflow-hidden">
                 <Header isSupervisor />

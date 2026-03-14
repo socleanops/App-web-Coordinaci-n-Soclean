@@ -106,7 +106,7 @@ export default function Billing() {
                         <Table>
                             <TableHeader className="bg-muted/50">
                                 <TableRow>
-                                    <TableHead>Número y Fecha</TableHead>
+                                    <TableHead>Referencia y Período</TableHead>
                                     <TableHead>Cliente a Facturar</TableHead>
                                     <TableHead>Estado</TableHead>
                                     <TableHead className="w-[80px]"></TableHead>
@@ -136,7 +136,9 @@ export default function Billing() {
                                                     {f.numero}
                                                 </div>
                                                 <div className="text-xs text-muted-foreground">
-                                                    {f.periodo ? `Período: ${f.periodo}` : `Emisión: ${dateFormatter.format(new Date(f.fecha_emision))}`}
+                                                    {f.periodo && <span className="font-semibold block">{f.periodo}</span>}
+                                                    {`Desde: ${dateFormatter.format(new Date(f.fecha_emision))}`}
+                                                    {f.fecha_vencimiento && ` - Hasta: ${dateFormatter.format(new Date(f.fecha_vencimiento))}`}
                                                 </div>
                                             </TableCell>
                                             <TableCell>

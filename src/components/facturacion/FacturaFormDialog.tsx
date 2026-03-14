@@ -184,7 +184,7 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
                                 name="fecha_emision"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Fecha del Servicio</FormLabel>
+                                        <FormLabel>Fecha Inicio del Período (Desde)</FormLabel>
                                         <FormControl>
                                             <Input type="date" {...field} />
                                         </FormControl>
@@ -198,7 +198,7 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
                                 name="fecha_vencimiento"
                                 render={({ field }) => (
                                     <FormItem>
-                                        <FormLabel>Vencimiento (Opcional)</FormLabel>
+                                        <FormLabel>Fecha Fin del Período (Hasta)</FormLabel>
                                         <FormControl>
                                             <Input type="date" {...field} value={field.value || ''} />
                                         </FormControl>
