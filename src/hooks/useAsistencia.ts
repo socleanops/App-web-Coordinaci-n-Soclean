@@ -78,12 +78,16 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
             const dateObj = new Date(fecha + 'T12:00:00Z');
             const diaSemana = dateObj.getUTCDay();
 
-            const { data: horarios, error: horariosErr } = await supabase
+            const { data: horariosRaw, error: horariosErr } = await supabase
                 .from('horarios')
                 .select('*')
                 .eq('dia_semana', diaSemana)
-                .lte('vigente_desde', fecha)
-                .or(`vigente_hasta.is.null,vigente_hasta.gte.${fecha}`);
+                .lte('vigente_desde', fecha);
+
+            const horarios = horariosRaw?.filter(h => !h.vigente_hasta || h.vigente_hasta >= fecha);
+
+            console.log("[generarPlanillaDia] Fecha:", fecha, "diaSemana:", diaSemana);
+            console.log("[generarPlanillaDia] Horarios found from DB:", horarios?.length, horarios);
 
             if (horariosErr) throw new Error(horariosErr.message);
             if (!horarios || horarios.length === 0) return { count: 0 };
@@ -115,6 +119,8 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
                     estado: certsSet.has(h.funcionario_id) ? 'certificado' : 'pendiente'
                 }));
 
+            console.log("[generarPlanillaDia] Nuevos a insertar:", nuevosRegistros.length, nuevosRegistros);
+
             if (nuevosRegistros.length === 0) return { count: 0 };
 
             const { error: insErr } = await supabase
@@ -142,12 +148,13 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
                 const dateObj = new Date(fechaStr + 'T12:00:00Z');
                 const diaSemana = dateObj.getUTCDay();
 
-                const { data: horarios } = await supabase
+                const { data: horariosRaw } = await supabase
                     .from('horarios')
                     .select('*')
                     .eq('dia_semana', diaSemana)
-                    .lte('vigente_desde', fechaStr)
-                    .or(`vigente_hasta.is.null,vigente_hasta.gte.${fechaStr}`);
+                    .lte('vigente_desde', fechaStr);
+
+                const horarios = horariosRaw?.filter(h => !h.vigente_hasta || h.vigente_hasta >= fechaStr);
 
                 if (horarios && horarios.length > 0) {
                     const { data: existentes } = await supabase
