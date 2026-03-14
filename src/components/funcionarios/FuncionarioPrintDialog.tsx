@@ -11,6 +11,7 @@ import {
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Printer } from 'lucide-react';
+import { escapeHtml } from '@/lib/utils';
 
 interface Props {
     open: boolean;
@@ -81,17 +82,25 @@ export function FuncionarioPrintDialog({ open, onOpenChange, employees }: Props)
         `;
 
         employees.forEach(emp => {
-            const nombre = `${emp.profiles?.nombre || ''} ${emp.profiles?.apellido || ''}`;
+            const nombre = escapeHtml(`${emp.profiles?.nombre || ''} ${emp.profiles?.apellido || ''}`);
+            const cedula = escapeHtml(emp.cedula || '');
+            const cargo = escapeHtml(emp.cargo || '');
+            const departamento = escapeHtml(emp.departamentos?.nombre || '');
+            const fecha_ingreso = escapeHtml(emp.fecha_ingreso ? new Date(emp.fecha_ingreso).toLocaleDateString() : '');
+            const direccion = escapeHtml(emp.direccion || '');
+            const email = escapeHtml(emp.profiles?.email || '');
+            const estado = escapeHtml(emp.estado || '');
+
             tableHtml += `
               <tr>
                 ${selectedColumns.nombre ? `<td>${nombre}</td>` : ''}
-                ${selectedColumns.cedula ? `<td>${emp.cedula || ''}</td>` : ''}
-                ${selectedColumns.cargo ? `<td>${emp.cargo || ''}</td>` : ''}
-                ${selectedColumns.departamento ? `<td>${emp.departamentos?.nombre || ''}</td>` : ''}
-                ${selectedColumns.fecha_ingreso ? `<td>${emp.fecha_ingreso ? new Date(emp.fecha_ingreso).toLocaleDateString() : ''}</td>` : ''}
-                ${selectedColumns.direccion ? `<td>${emp.direccion || ''}</td>` : ''}
-                ${selectedColumns.email ? `<td>${emp.profiles?.email || ''}</td>` : ''}
-                ${selectedColumns.estado ? `<td>${emp.estado || ''}</td>` : ''}
+                ${selectedColumns.cedula ? `<td>${cedula}</td>` : ''}
+                ${selectedColumns.cargo ? `<td>${cargo}</td>` : ''}
+                ${selectedColumns.departamento ? `<td>${departamento}</td>` : ''}
+                ${selectedColumns.fecha_ingreso ? `<td>${fecha_ingreso}</td>` : ''}
+                ${selectedColumns.direccion ? `<td>${direccion}</td>` : ''}
+                ${selectedColumns.email ? `<td>${email}</td>` : ''}
+                ${selectedColumns.estado ? `<td>${estado}</td>` : ''}
               </tr>
             `;
         });
