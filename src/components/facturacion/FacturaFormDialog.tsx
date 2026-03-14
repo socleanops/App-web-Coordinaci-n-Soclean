@@ -267,6 +267,7 @@ export function FacturaFormDialog({ open, onOpenChange }: Props) {
                                             className="text-red-500 shrink-0 mb-0.5"
                                             onClick={() => remove(index)}
                                             disabled={fields.length === 1}
+                                            aria-label="Eliminar concepto"
                                         >
                                             <Trash2 className="h-4 w-4" />
                                         </Button>
