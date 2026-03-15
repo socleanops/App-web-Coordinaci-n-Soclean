@@ -13,17 +13,20 @@ export default function Nomina() {
     const [searchTerm, setSearchTerm] = useState('');
     const [isExporting, setIsExporting] = useState(false);
 
-    const { getAsistencias } = useAsistencia();
+    const fechaDesde = `${mes}-01`;
+    const fechaHasta = new Date(parseInt(mes.split('-')[0]), parseInt(mes.split('-')[1]), 0).toISOString().split('T')[0];
+
+    const { getAsistencias } = useAsistencia(fechaDesde, fechaHasta);
     const { data: asistencias = [], isLoading } = getAsistencias;
 
-    // Filter by month
+    // Filter by month (ya filtrado por backend, pero por seguridad lo dejamos)
     const asistenciasMes = useMemo(() => {
-        return asistencias.filter(a => a.fecha.startsWith(mes));
-    }, [asistencias, mes]);
+        return asistencias;
+    }, [asistencias]);
 
     // Group hours by employee
     const horasPorFuncionario = useMemo(() => {
-        const agrupar: Record<string, { id: string, nombreCompleto: string, cedula: string, totalHoras: number, horasNocturnas: number, horasFeriado: number, diasTrabajados: number, faltas: number }> = {};
+        const agrupar: Record<string, { id: string, nombreCompleto: string, cedula: string, totalHoras: number, horasNocturnas: number, horasFeriado: number, diasTrabajados: number, faltas: number, certificados: number }> = {};
 
         asistenciasMes.forEach(a => {
             const funcId = a.funcionario_id;
