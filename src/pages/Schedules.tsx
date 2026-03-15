@@ -53,11 +53,12 @@ export default function Schedules() {
         return d.getDay();
     }, [fechaFiltro, showAll]);
 
+    const longDateFormatter = useMemo(() => new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), []);
     const fechaLabel = useMemo(() => {
         if (!fechaFiltro) return '';
         const d = new Date(fechaFiltro + 'T12:00:00');
-        return d.toLocaleDateString('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    }, [fechaFiltro]);
+        return longDateFormatter.format(d);
+    }, [fechaFiltro, longDateFormatter]);
 
     const handleEdit = (horario: Horario) => {
         setEditingHorario(horario);
@@ -74,8 +75,8 @@ export default function Schedules() {
             try {
                 await deleteHorario.mutateAsync(id);
                 toast.success('Horario eliminado');
-            } catch (error: any) {
-                toast.error(error.message || 'Error al eliminar');
+            } catch (error: unknown) {
+                toast.error((error as Error).message || 'Error al eliminar');
             }
         }
     };
