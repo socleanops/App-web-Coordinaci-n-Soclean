@@ -12,6 +12,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Printer } from 'lucide-react';
 import type { Horario } from '@/types';
+import { escapeHtml } from '@/lib/utils';
 
 interface Props {
     open: boolean;
@@ -91,13 +92,13 @@ export function HorarioPrintDialog({ open, onOpenChange, horarios }: Props) {
         const sortedHorarios = [...horarios].sort((a, b) => a.dia_semana - b.dia_semana);
 
         sortedHorarios.forEach(h => {
-            const funcionario = `${h.funcionarios?.profiles?.nombre || ''} ${h.funcionarios?.profiles?.apellido || ''}`;
-            const cliente = h.servicios?.clientes?.razon_social || '';
-            const servicio = h.servicios?.nombre || '';
-            const ubicacion = h.servicios?.direccion || '';
+            const funcionario = escapeHtml(`${h.funcionarios?.profiles?.nombre || ''} ${h.funcionarios?.profiles?.apellido || ''}`);
+            const cliente = escapeHtml(h.servicios?.clientes?.razon_social || '');
+            const servicio = escapeHtml(h.servicios?.nombre || '');
+            const ubicacion = escapeHtml(h.servicios?.direccion || '');
             const dia = DIAS_MAP[h.dia_semana] || '';
-            const horario = `${h.hora_entrada.substring(0, 5)} - ${h.hora_salida.substring(0, 5)}`;
-            const vigencia = `Desde: ${new Date(h.vigente_desde).toLocaleDateString()} ${h.vigente_hasta ? `Hasta: ${new Date(h.vigente_hasta).toLocaleDateString()}` : ' (Indefinido)'}`;
+            const horario = escapeHtml(`${h.hora_entrada.substring(0, 5)} - ${h.hora_salida.substring(0, 5)}`);
+            const vigencia = escapeHtml(`Desde: ${new Date(h.vigente_desde).toLocaleDateString()} ${h.vigente_hasta ? `Hasta: ${new Date(h.vigente_hasta).toLocaleDateString()}` : ' (Indefinido)'}`);
 
             tableHtml += `
               <tr>
