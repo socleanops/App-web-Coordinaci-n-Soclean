@@ -8,7 +8,8 @@ import * as XLSX from 'xlsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function Reports() {
-    const [mes, setMes] = useState<string>(new Date().toISOString().substring(0, 7)); // YYYY-MM
+    const [desde, setDesde] = useState<string>(new Date().toISOString().substring(0, 8) + '01');
+    const [hasta, setHasta] = useState<string>(new Date().toISOString().substring(0, 10));
     const [loadingReport, setLoadingReport] = useState(false);
     const [filtroFuncionario, setFiltroFuncionario] = useState<string>('todos');
     const [filtroServicio, setFiltroServicio] = useState<string>('todos');
@@ -46,10 +47,12 @@ export default function Reports() {
         toast.info(`Generando reporte de ${tipo}...`);
 
         setTimeout(() => {
-            // Filtrar asistencias por mes seleccionado o quincena
-            const registrosMes = asistencias.filter((a: any) => a.fecha.startsWith(mes));
+            // Filtrar asistencias por rango de fechas
+            const registrosRango = asistencias.filter((a: any) => {
+                 return a.fecha >= desde && a.fecha <= hasta;
+            });
 
-            let registrosAUsar = registrosMes;
+            let registrosAUsar = registrosRango;
 
             // Aplicar filtros adicionales si están seleccionados
             if (filtroFuncionario !== 'todos') {
@@ -60,7 +63,7 @@ export default function Reports() {
             }
 
             if (tipo === 'quincena1') {
-                registrosAUsar = registrosMes.filter(a => parseInt(a.fecha.split('-')[2]) <= 15);
+                registrosAUsar = registrosAUsar.filter(a => parseInt(a.fecha.split('-')[2]) <= 15);
             }
 
             if (registrosAUsar.length === 0) {
@@ -196,7 +199,7 @@ export default function Reports() {
             const worksheet = XLSX.utils.json_to_sheet(dataToExport);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, "Reporte");
-            XLSX.writeFile(workbook, `reporte_soclean_${tipo}_${mes}.xlsx`);
+            XLSX.writeFile(workbook, `reporte_soclean_${tipo}_${desde}_al_${hasta}.xlsx`);
 
             toast.success('Reporte exportado exitosamente con ruta de auditoría adjunta');
             setLoadingReport(false);
@@ -225,11 +228,20 @@ export default function Reports() {
                 <CardContent className="pt-6">
                     <div className="flex flex-col md:flex-row gap-4 mb-8">
                         <div className="w-full md:w-48 space-y-2">
-                            <label className="text-sm font-semibold text-slate-700">Mes Objetivo</label>
+                            <label className="text-sm font-semibold text-slate-700">Fecha Desde</label>
                             <input
-                                type="month"
-                                value={mes}
-                                onChange={(e) => setMes(e.target.value)}
+                                type="date"
+                                value={desde}
+                                onChange={(e) => setDesde(e.target.value)}
+                                className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-coreops-primary"
+                            />
+                        </div>
+                        <div className="w-full md:w-48 space-y-2">
+                            <label className="text-sm font-semibold text-slate-700">Fecha Hasta</label>
+                            <input
+                                type="date"
+                                value={hasta}
+                                onChange={(e) => setHasta(e.target.value)}
                                 className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-coreops-primary"
                             />
                         </div>
