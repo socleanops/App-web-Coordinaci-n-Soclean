@@ -195,10 +195,20 @@ export function ClienteFormDialog({ open, onOpenChange, clienteToEdit }: Props) 
                                 name="frecuencia_visita"
                                 render={({ field }) => (
                                     <FormItem className="col-span-2 sm:col-span-1">
-                                        <FormLabel>Frecuencia de las Visitas</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Ej. Lunes a Viernes" {...field} />
-                                        </FormControl>
+                                        <FormLabel>Período de Asistencia</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value || undefined} value={field.value || undefined}>
+                                            <FormControl>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Seleccionar período" />
+                                                </SelectTrigger>
+                                            </FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="diaria">Diaria</SelectItem>
+                                                <SelectItem value="semanal">Semanal</SelectItem>
+                                                <SelectItem value="quincenal">Quincenal</SelectItem>
+                                                <SelectItem value="anual">Anual</SelectItem>
+                                            </SelectContent>
+                                        </Select>
                                         <FormMessage />
                                     </FormItem>
                                 )}

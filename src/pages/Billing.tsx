@@ -169,8 +169,18 @@ export default function Billing() {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem>Descargar PDF</DropdownMenuItem>
-                                                        <DropdownMenuItem>Enviar por Email</DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => {
+                                                            import('@/lib/pdfGenerator').then((module) => {
+                                                                module.generateRegistroPDF(f);
+                                                            });
+                                                        }}>
+                                                            Descargar PDF
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => {
+                                                            toast.success(`Simulando envío por email para ${f.clientes?.razon_social}`);
+                                                        }}>
+                                                            Enviar por Email
+                                                        </DropdownMenuItem>
                                                         <DropdownMenuSeparator />
                                                         <DropdownMenuItem onClick={() => handleChangeStatus(f.id, 'pagada')} className="text-emerald-600">
                                                             Marcar Pagada
