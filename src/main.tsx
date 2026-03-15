@@ -11,7 +11,10 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
+      refetchOnMount: false, // Prevents large datasets from blocking the main thread on every navigation
       retry: 1,
+      staleTime: 1000 * 60 * 5, // Data is considered fresh for 5 minutes
+      gcTime: 1000 * 60 * 15, // Garbage collect unused queries after 15 minutes to save memory
     },
   },
 });
