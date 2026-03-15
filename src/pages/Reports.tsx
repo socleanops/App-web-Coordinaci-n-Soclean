@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, Calendar, ArrowRightCircle, Filter } from 'lucide-react';
@@ -14,33 +14,39 @@ export default function Reports() {
     const [filtroFuncionario, setFiltroFuncionario] = useState<string>('todos');
     const [filtroServicio, setFiltroServicio] = useState<string>('todos');
 
-    // Using useAsistencia without filter to get everything (simplified for prototype)
-    const { getAsistencias } = useAsistencia();
+    // Pass date filters to avoid massive overfetching
+    const { getAsistencias } = useAsistencia(desde, hasta);
     const { data: asistencias = [], isLoading } = getAsistencias;
 
-    // Obtener listas únicas para los selectores base de datos cargados
-    const uniqueEmpleados = asistencias.reduce((acc: any[], current: any) => {
-        if (!acc.find(item => item.funcionario_id === current.funcionario_id) && current.funcionario_id) {
-            acc.push(current);
-        }
-        return acc;
-    }, []).sort((a: any, b: any) => {
-        const nameA = a.funcionarios?.profiles?.nombre || '';
-        const nameB = b.funcionarios?.profiles?.nombre || '';
-        return nameA.localeCompare(nameB);
-    });
+    // Obtener listas únicas con map y useMemo para evitar loops O(N^2) que congelan la UI
+    const uniqueEmpleados = useMemo(() => {
+        const map = new Map();
+        asistencias.forEach((current: any) => {
+            if (current.funcionario_id && !map.has(current.funcionario_id)) {
+                map.set(current.funcionario_id, current);
+            }
+        });
+        return Array.from(map.values()).sort((a: any, b: any) => {
+            const nameA = a.funcionarios?.profiles?.nombre || '';
+            const nameB = b.funcionarios?.profiles?.nombre || '';
+            return nameA.localeCompare(nameB);
+        });
+    }, [asistencias]);
 
-    const uniqueServicios = asistencias.reduce((acc: any[], current: any) => {
-        const servicioId = current.horarios?.servicio_id;
-        if (!acc.find(item => item.horarios?.servicio_id === servicioId) && servicioId) {
-            acc.push(current);
-        }
-        return acc;
-    }, []).sort((a: any, b: any) => {
-        const nameA = a.horarios?.servicios?.nombre || '';
-        const nameB = b.horarios?.servicios?.nombre || '';
-        return nameA.localeCompare(nameB);
-    });
+    const uniqueServicios = useMemo(() => {
+        const map = new Map();
+        asistencias.forEach((current: any) => {
+            const servicioId = current.horarios?.servicio_id;
+            if (servicioId && !map.has(servicioId)) {
+                map.set(servicioId, current);
+            }
+        });
+        return Array.from(map.values()).sort((a: any, b: any) => {
+            const nameA = a.horarios?.servicios?.nombre || '';
+            const nameB = b.horarios?.servicios?.nombre || '';
+            return nameA.localeCompare(nameB);
+        });
+    }, [asistencias]);
 
     const generarReporteCSV = (tipo: 'empleados' | 'clientes' | 'quincena1') => {
         setLoadingReport(true);
