@@ -29,7 +29,11 @@ import { supabase } from './lib/supabase';
 import { useAuthStore } from './stores/authStore';
 
 function App() {
-  const { setUser, setRole, setLoading, user, role } = useAuthStore();
+  const setUser = useAuthStore((s) => s.setUser);
+  const setRole = useAuthStore((s) => s.setRole);
+  const setLoading = useAuthStore((s) => s.setLoading);
+  const user = useAuthStore((s) => s.user);
+  const role = useAuthStore((s) => s.role);
 
   useEffect(() => {
     let mounted = true;

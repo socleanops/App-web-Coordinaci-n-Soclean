@@ -21,7 +21,7 @@ import { useAuthStore } from '@/stores/authStore';
 
 export function Sidebar({ forceExpand = false }: { forceExpand?: boolean }) {
     const [collapsed, setCollapsed] = useState(false);
-    const { role } = useAuthStore();
+    const role = useAuthStore(s => s.role);
 
     // If mobile menu forces expansion, ignore collapsed state
     const isCollapsed = forceExpand ? false : collapsed;
