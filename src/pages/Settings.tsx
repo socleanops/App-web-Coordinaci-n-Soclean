@@ -83,8 +83,8 @@ export default function Settings() {
 
             if (error) throw error;
             toast.success("Perfil actualizado correctamente en la base de datos.");
-        } catch (err: any) {
-            toast.error(err.message || "No se pudo guardar el perfil.");
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "No se pudo guardar el perfil.");
         } finally {
             setIsSaving(false);
         }
@@ -117,8 +117,8 @@ export default function Settings() {
 
             if (err) throw err;
             toast.success("Datos de la empresa actualizados exitosamente.");
-        } catch (error: any) {
-            toast.error(error.message || "Error al guardar los datos de la empresa.");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Error al guardar los datos de la empresa.");
         } finally {
             setIsSavingEmpresa(false);
         }
@@ -206,9 +206,9 @@ export default function Settings() {
             
             toast.success("Respaldo completado y guardado en la nube.");
             loadBackups();
-        } catch (error: any) {
+        } catch (error) {
             console.error("Error generating backup:", error);
-            toast.error("Error al generar el respaldo: " + error.message);
+            toast.error("Error al generar el respaldo: " + (error instanceof Error ? error.message : String(error)));
         } finally {
             setIsGeneratingBackup(false);
         }
@@ -228,8 +228,8 @@ export default function Settings() {
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-        } catch (error: any) {
-            toast.error("No se pudo descargar el archivo: " + error.message);
+        } catch (error) {
+            toast.error("No se pudo descargar el archivo: " + (error instanceof Error ? error.message : String(error)));
         }
     };
 
@@ -250,8 +250,8 @@ export default function Settings() {
             toast.success("Contraseña actualizada exitosamente.");
             setNewPass('');
             setConfirmPass('');
-        } catch (err: any) {
-            toast.error(err.message || "No se pudo cambiar la contraseña.");
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : "No se pudo cambiar la contraseña.");
         } finally {
             setIsChangingPass(false);
         }
