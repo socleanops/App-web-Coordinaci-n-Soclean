@@ -10,3 +10,13 @@ export function generateSecureRandomString(length: number = 6): string {
   window.crypto.getRandomValues(array);
   return Array.from(array, dec => ('0' + dec.toString(36)).slice(-2)).join('').substring(0, length);
 }
+
+export function escapeHtml(unsafe: string): string {
+  if (typeof unsafe !== 'string') return '';
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
