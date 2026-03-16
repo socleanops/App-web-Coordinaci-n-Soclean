@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useTheme } from '@/components/theme-provider';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -138,17 +138,17 @@ export default function Settings() {
     const [backups, setBackups] = useState<any[]>([]);
     const [isGeneratingBackup, setIsGeneratingBackup] = useState(false);
 
-    const loadBackups = async () => {
+    const loadBackups = useCallback(async () => {
         if (role !== 'superadmin') return;
         const { data } = await supabase.from('backups_log').select('*, profiles(nombre, apellido)').order('created_at', { ascending: false });
         if (data) setBackups(data);
-    };
+    }, [role]);
 
     useEffect(() => {
         if (activeTab === 'backups') {
             loadBackups();
         }
-    }, [activeTab]);
+    }, [activeTab, loadBackups]);
 
     const handleGenerateBackup = async () => {
         if (role !== 'superadmin') return;
