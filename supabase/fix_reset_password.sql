@@ -19,9 +19,13 @@ BEGIN
   END IF;
 
   -- Cambiar la contraseña en la tabla oculta y protegida de Supabase Auth
+  -- También exigimos al usuario que cambie su contraseña obligatoriamente y expire sesiones
   UPDATE auth.users
   SET encrypted_password = extensions.crypt(new_password, extensions.gen_salt('bf'))
   WHERE id = target_user_id;
+
+  -- Expirar cualquier sesión existente para ese usuario (lo desloguea)
+  DELETE FROM auth.sessions WHERE user_id = target_user_id;
 
 END;
 $$;
