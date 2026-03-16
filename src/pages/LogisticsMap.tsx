@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Map, MapPin, User, Navigation, Loader2 } from 'lucide-react';
 import { useServicios } from '@/hooks/useServicios';
@@ -32,12 +32,17 @@ export default function LogisticsMap() {
     const selectedService = servicios.find(s => s.id === selectedServiceId);
     const selectedFuncionario = funcionarios.find(f => f.id === selectedFuncionarioId);
 
-    const activeServices = servicios.filter(s => s.estado === 'activo');
-    const activeFuncionarios = funcionarios.filter(f => f.estado === 'activo');
+    const activeServices = useMemo(() => servicios.filter(s => s.estado === 'activo'), [servicios]);
+    const activeFuncionarios = useMemo(() => funcionarios.filter(f => f.estado === 'activo'), [funcionarios]);
+
+    const [hasAttemptedGeocode, setHasAttemptedGeocode] = useState(false);
 
     // Geocode active services to place green markers on the map
     useEffect(() => {
-        if (!isLoaded || activeServices.length === 0 || serviceMarkers.length > 0) return;
+        if (!isLoaded || activeServices.length === 0 || serviceMarkers.length > 0 || hasAttemptedGeocode) return;
+        
+        setHasAttemptedGeocode(true); // Prevent re-runs if it fails or returns empty
+        
         const geocoder = new window.google.maps.Geocoder();
         const fetchGeocodes = async () => {
             const newMarkers: any[] = [];
@@ -56,10 +61,12 @@ export default function LogisticsMap() {
                     console.log(`Geocoding error for ${s.direccion}`, error);
                 }
             }
-            setServiceMarkers(newMarkers);
+            if (newMarkers.length > 0) {
+                setServiceMarkers(newMarkers);
+            }
         };
         fetchGeocodes();
-    }, [isLoaded, activeServices, serviceMarkers.length]);
+    }, [isLoaded, activeServices, serviceMarkers.length, hasAttemptedGeocode]);
 
     const handleGenerateRoute = async () => {
         if (!selectedService || !selectedFuncionario || !isLoaded) return;
