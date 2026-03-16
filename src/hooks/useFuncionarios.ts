@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
-import type { Funcionario } from '@/types';
+import type { Funcionario, Profile } from '@/types';
 import type { FuncionarioFormData } from '@/lib/validations/funcionario';
 import { createClient } from '@supabase/supabase-js';
 import { generateSecureRandomString } from '@/lib/utils';
@@ -95,7 +95,7 @@ export function useFuncionarios() {
                         console.log("[useFuncionarios] existingFunc check done:", existingFunc);
 
                         if (existingFunc) {
-                            const prof = existingFunc.profiles as any;
+                            const prof = existingFunc.profiles as Profile;
                             const fullName = prof ? `${prof.nombre} ${prof.apellido}` : 'un funcionario activo';
                             throw new Error(`Este correo/cédula ya está registrado y asignado a ${fullName}.`);
                         }
