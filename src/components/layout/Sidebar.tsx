@@ -34,7 +34,6 @@ export function Sidebar({ forceExpand = false }: { forceExpand?: boolean }) {
         { name: 'Horarios', href: '/horarios', icon: CalendarClock },
         { name: 'Asistencia', href: '/asistencia', icon: Clock },
         { name: 'Servicios', href: '/servicios', icon: Briefcase },
-        { name: 'Logística', href: '/logistica', icon: Map },
         { name: 'Clientes', href: '/clientes', icon: Building2 },
         ...(isManager ? [
             { name: 'Reportes Gerenciales', href: '/reportes', icon: Receipt },
