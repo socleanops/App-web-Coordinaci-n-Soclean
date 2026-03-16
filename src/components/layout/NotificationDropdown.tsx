@@ -25,27 +25,26 @@ export function NotificationDropdown() {
     const [notifications, setNotifications] = useState<AuditLog[]>([]);
     const [unreadCount, setUnreadCount] = useState(0);
 
-    const fetchNotifications = async () => {
-        try {
-            // Fetch recent system actions (last 5)
-            const { data, error } = await supabase
-                .from('audit_logs')
-                .select('id, table_name, action, created_at, changed_by')
-                .order('created_at', { ascending: false })
-                .limit(5);
-
-            if (!error && data) {
-                setNotifications(data);
-                // Just assuming any new fetch might have new unread stuff or map it to 0 if opened
-                setUnreadCount(data.length);
-            }
-        } catch (e) {
-            console.error(e);
-        }
-    };
-
     useEffect(() => {
-        fetchNotifications();
+        let mounted = true;
+        const loadInitial = async () => {
+            try {
+                const { data, error } = await supabase
+                    .from('audit_logs')
+                    .select('id, table_name, action, created_at, changed_by')
+                    .order('created_at', { ascending: false })
+                    .limit(5);
+
+                if (!error && data && mounted) {
+                    setNotifications(data);
+                    setUnreadCount(data.length);
+                }
+            } catch (e) {
+                console.error(e);
+            }
+        };
+
+        loadInitial();
 
         // Listen to changes in real-time
         const channel = supabase
@@ -57,6 +56,7 @@ export function NotificationDropdown() {
             .subscribe();
 
         return () => {
+            mounted = false;
             supabase.removeChannel(channel);
         };
     }, []);
