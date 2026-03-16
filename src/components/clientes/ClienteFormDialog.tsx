@@ -9,6 +9,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from '@/components/ui/dialog';
 import {
     Form,
@@ -100,10 +101,10 @@ export function ClienteFormDialog({ open, onOpenChange, clienteToEdit }: Props) 
                 toast.success('Cliente registrado exitosamente');
             }
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Form Submit Error:", error);
             toast.dismiss(loadingId);
-            toast.error(`Error al revisar datos: ${error.message || 'No se pudo guardar la información'}`, { duration: 8000 });
+            toast.error(`Error al revisar datos: ${(error as Error).message || 'No se pudo guardar la información'}`, { duration: 8000 });
         }
     };
 
@@ -112,6 +113,9 @@ export function ClienteFormDialog({ open, onOpenChange, clienteToEdit }: Props) 
             <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{clienteToEdit ? 'Editar Cliente' : 'Añadir Nuevo Cliente (Empresa o Persona)'}</DialogTitle>
+                    <DialogDescription className="sr-only">
+                        Complete los datos del cliente.
+                    </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>

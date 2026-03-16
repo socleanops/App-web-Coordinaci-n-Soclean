@@ -175,4 +175,55 @@ describe('ClienteFormDialog', () => {
             expect(mockOnOpenChange).toHaveBeenCalledWith(false);
         });
     });
+
+    it('handles submission error when creating a new client', async () => {
+        const errorMessage = 'Error de red';
+        mockCreateMutateAsync.mockRejectedValueOnce(new Error(errorMessage));
+
+        const user = userEvent.setup();
+        render(<ClienteFormDialog open={true} onOpenChange={mockOnOpenChange} />);
+
+        // Fill required fields
+        await user.type(screen.getByLabelText(/Razón Social \/ Nombre/i), 'Nueva Empresa');
+        await user.type(screen.getByLabelText(/RUT \/ Cédula/i), '12345678');
+        await user.type(screen.getByLabelText(/Dirección Principal/i), 'Av Central 456');
+
+        const submitButton = screen.getByRole('button', { name: 'Guardar Cliente' });
+        await user.click(submitButton);
+
+        await waitFor(async () => {
+            expect(mockCreateMutateAsync).toHaveBeenCalled();
+            expect(vi.mocked((await import('sonner')).toast.error)).toHaveBeenCalledWith(
+                expect.stringContaining('Error de red'),
+                expect.any(Object)
+            );
+        });
+    });
+
+    it('handles submission error when updating an existing client', async () => {
+        const errorMessage = 'Error al actualizar';
+        mockUpdateMutateAsync.mockRejectedValueOnce(new Error(errorMessage));
+
+        const clienteToEdit = {
+            id: '123',
+            razon_social: 'Empresa Test',
+            rut: '12345678',
+            direccion: 'Calle Falsa 123',
+            estado: 'activo'
+        };
+
+        const user = userEvent.setup();
+        render(<ClienteFormDialog open={true} onOpenChange={mockOnOpenChange} clienteToEdit={clienteToEdit} />);
+
+        const submitButton = screen.getByRole('button', { name: 'Actualizar Cliente' });
+        await user.click(submitButton);
+
+        await waitFor(async () => {
+            expect(mockUpdateMutateAsync).toHaveBeenCalled();
+            expect(vi.mocked((await import('sonner')).toast.error)).toHaveBeenCalledWith(
+                expect.stringContaining('Error al actualizar'),
+                expect.any(Object)
+            );
+        });
+    });
 });
