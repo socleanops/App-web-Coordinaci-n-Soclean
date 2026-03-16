@@ -9,6 +9,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from '@/components/ui/dialog';
 import {
     Form,
@@ -106,6 +107,9 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
             <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{funcionarioToEdit ? 'Editar Funcionario' : 'Añadir Nuevo Funcionario'}</DialogTitle>
+                    <DialogDescription className="sr-only">
+                        Formulario para {funcionarioToEdit ? 'editar los datos de un funcionario existente' : 'registrar un nuevo funcionario en el sistema'}.
+                    </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>

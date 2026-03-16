@@ -9,6 +9,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
     DialogFooter,
 } from '@/components/ui/dialog';
 import {
@@ -180,11 +181,9 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
             <DialogContent className="sm:max-w-lg">
                 <DialogHeader>
                     <DialogTitle>{isEditing ? 'Editar Horario' : 'Asignar Nuevo Horario'}</DialogTitle>
-                    {!isEditing && (
-                        <p className="text-sm text-muted-foreground mt-1">
-                            Selecciona uno o varios días para crear horarios en lote.
-                        </p>
-                    )}
+                    <DialogDescription className={isEditing ? 'sr-only' : 'text-sm text-muted-foreground mt-1'}>
+                        {isEditing ? 'Formulario para editar un horario asignado.' : 'Selecciona uno o varios días para crear horarios en lote.'}
+                    </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>

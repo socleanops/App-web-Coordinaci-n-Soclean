@@ -1,3 +1,5 @@
 ## 2024-03-11 - Adding ARIA labels to Attendance components
 **Learning:** Icon-only buttons in complex data tables or calendars (like week navigators or refresh actions) often lack programmatic names in this project, which severely degrades screen-reader experiences. While `lucide-react` icons are visual indicators, they lack text alternatives by default.
-**Action:** When working on navigation or action buttons without visible text, always add a localized `aria-label` (e.g., in Spanish like "Semana anterior" or "Actualizar datos") to `<Button size="icon">` components to ensure parity between visual and programmatic meaning.
+**Action:** When working on navigation or action buttons without visible text, always add a localized `aria-label` (e.g., in Spanish like "Semana anterior" or "Actualizar datos") to `<Button size="icon">` components to ensure parity between visual and programmatic meaning.## 2024-03-16 - Radix UI Dialog Accessibility
+**Learning:** Radix UI Dialog component requires a `DialogDescription` or `aria-describedby` attribute to be accessible for screen readers, emitting warnings if absent.
+**Action:** Always include a `DialogDescription` component within `DialogHeader` (can be visually hidden with `className="sr-only"`) to provide necessary context without cluttering the UI.

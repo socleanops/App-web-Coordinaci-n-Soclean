@@ -10,6 +10,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from '@/components/ui/dialog';
 import {
     Form,
@@ -101,6 +102,9 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
             <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{servicioToEdit ? 'Editar Servicio / Contrato' : 'Añadir Nuevo Servicio a Cliente'}</DialogTitle>
+                    <DialogDescription className="sr-only">
+                        Formulario para {servicioToEdit ? 'editar los datos de un servicio existente' : 'registrar un nuevo servicio en el sistema'}.
+                    </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>

@@ -9,6 +9,7 @@ import {
     DialogContent,
     DialogHeader,
     DialogTitle,
+    DialogDescription,
 } from '@/components/ui/dialog';
 import {
     Form,
@@ -112,6 +113,9 @@ export function ClienteFormDialog({ open, onOpenChange, clienteToEdit }: Props) 
             <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{clienteToEdit ? 'Editar Cliente' : 'Añadir Nuevo Cliente (Empresa o Persona)'}</DialogTitle>
+                    <DialogDescription className="sr-only">
+                        Formulario para {clienteToEdit ? 'editar los datos de un cliente existente' : 'registrar un nuevo cliente en el sistema'}.
+                    </DialogDescription>
                 </DialogHeader>
 
                 <Form {...form}>
