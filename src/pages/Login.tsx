@@ -22,7 +22,12 @@ import {
 
 const loginSchema = z.object({
     email: z.string().email('Debe ser un correo electrónico válido'),
-    password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+    password: z.string()
+        .min(8, 'La contraseña debe tener al menos 8 caracteres')
+        .regex(/[A-Z]/, 'La contraseña debe contener al menos una letra mayúscula')
+        .regex(/[a-z]/, 'La contraseña debe contener al menos una letra minúscula')
+        .regex(/[0-9]/, 'La contraseña debe contener al menos un número')
+        .regex(/[^A-Za-z0-9]/, 'La contraseña debe contener al menos un carácter especial'),
 });
 
 type LoginForm = z.infer<typeof loginSchema>;
@@ -74,8 +79,8 @@ export default function Login() {
                 setUser(authData.user);
                 navigate('/'); // Redirect to dashboard
             }
-        } catch (err: any) {
-            setError(err.message || 'Error al iniciar sesión');
+        } catch (err) {
+            setError(err instanceof Error ? err.message : 'Error al iniciar sesión');
         } finally {
             setIsLoading(false);
         }
@@ -93,8 +98,8 @@ export default function Login() {
             toast.success('Se ha enviado un correo con las instrucciones para restablecer tu contraseña. Revisa tu bandeja de entrada o spam.');
             setIsResetOpen(false);
             setResetEmail('');
-        } catch (err: any) {
-            toast.error(err.message || 'Error al enviar el correo de recuperación');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Error al enviar el correo de recuperación');
         } finally {
             setIsResetting(false);
         }
