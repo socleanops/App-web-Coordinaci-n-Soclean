@@ -148,11 +148,14 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                 let created = 0;
                 let errors = 0;
 
-                for (const day of daysToCreate) {
-                    try {
-                        await createHorario.mutateAsync({ ...data, dia_semana: day });
+                const results = await Promise.allSettled(
+                    daysToCreate.map(day => createHorario.mutateAsync({ ...data, dia_semana: day }))
+                );
+
+                for (const result of results) {
+                    if (result.status === 'fulfilled') {
                         created++;
-                    } catch {
+                    } else {
                         errors++;
                     }
                 }
@@ -167,9 +170,10 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                 setIsBatchSaving(false);
             }
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error) {
             setIsBatchSaving(false);
-            toast.error(error.message || 'Error al guardar el horario');
+            const err = error as Error;
+            toast.error(err.message || 'Error al guardar el horario');
         }
     };
 
