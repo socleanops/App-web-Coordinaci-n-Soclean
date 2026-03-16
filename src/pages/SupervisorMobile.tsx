@@ -23,12 +23,14 @@ function formatDateStr(d: Date): string {
     return d.toISOString().split('T')[0];
 }
 
+const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+
 function formatTimeVal(dateStr?: string | null): string {
     if (!dateStr) return '';
     try {
         const d = new Date(dateStr);
         if (isNaN(d.getTime())) return '';
-        return d.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+        return timeFormatter.format(d);
     } catch {
         return '';
     }
@@ -45,6 +47,8 @@ export default function SupervisorMobile() {
     const { data: asistencias = [], isLoading, refetch } = getAsistencias;
 
     const [isGenerating, setIsGenerating] = useState(false);
+
+    const dateFormatter = useMemo(() => new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'short' }), []);
 
     // Auto-generate on mount to ensure today is populated
     useEffect(() => {
@@ -135,7 +139,7 @@ export default function SupervisorMobile() {
                 <div className="flex flex-col">
                     <span className="text-sm text-muted-foreground font-medium">Planilla Diaria</span>
                     <span className="text-lg font-bold text-slate-800 dark:text-slate-100 capitalize">
-                        {today.toLocaleDateString('es-UY', { weekday: 'long', day: 'numeric', month: 'short' })}
+                        {dateFormatter.format(today)}
                     </span>
                 </div>
                 <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9">

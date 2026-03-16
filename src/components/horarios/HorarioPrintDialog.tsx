@@ -43,7 +43,8 @@ export function HorarioPrintDialog({ open, onOpenChange, horarios }: Props) {
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
 
-        const dateStr = new Date().toLocaleDateString();
+        const dateFormatter = new Intl.DateTimeFormat('es-UY');
+        const dateStr = dateFormatter.format(new Date());
 
         const uniqueFuncionarios = new Set(horarios.map(h => h.funcionario_id)).size;
         const uniqueServicios = new Set(horarios.map(h => h.servicio_id)).size;
@@ -97,7 +98,7 @@ export function HorarioPrintDialog({ open, onOpenChange, horarios }: Props) {
             const ubicacion = h.servicios?.direccion || '';
             const dia = DIAS_MAP[h.dia_semana] || '';
             const horario = `${h.hora_entrada.substring(0, 5)} - ${h.hora_salida.substring(0, 5)}`;
-            const vigencia = `Desde: ${new Date(h.vigente_desde).toLocaleDateString()} ${h.vigente_hasta ? `Hasta: ${new Date(h.vigente_hasta).toLocaleDateString()}` : ' (Indefinido)'}`;
+            const vigencia = `Desde: ${dateFormatter.format(new Date(h.vigente_desde))} ${h.vigente_hasta ? `Hasta: ${dateFormatter.format(new Date(h.vigente_hasta))}` : ' (Indefinido)'}`;
 
             tableHtml += `
               <tr>

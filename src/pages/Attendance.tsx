@@ -35,10 +35,14 @@ function formatDateStr(d: Date): string {
     return d.toISOString().split('T')[0];
 }
 
+const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
+
 function formatShortDate(dateStr: string): string {
     const d = new Date(dateStr + 'T12:00:00');
-    return d.toLocaleDateString('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
+    return shortDateFormatter.format(d);
 }
+
+const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
 
 function formatTimeVal(dateStr?: string | null): string {
     if (!dateStr) return '';
@@ -46,7 +50,7 @@ function formatTimeVal(dateStr?: string | null): string {
         const d = new Date(dateStr);
         if (isNaN(d.getTime())) return '';
         // input type="time" requires strictly "HH:mm" in 24h format
-        return d.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+        return timeFormatter.format(d);
     } catch {
         return '';
     }
@@ -172,7 +176,13 @@ export default function Attendance() {
 
     const pendingCount = asistencias.filter((a: Asistencia) => ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado)).length;
 
-    const weekLabel = `${weekStart.toLocaleDateString('es-UY', { day: 'numeric', month: 'short' })} — ${weekEnd.toLocaleDateString('es-UY', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    const weekLabelFormatter = useMemo(() => new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short' }), []);
+    const weekLabelEndFormatter = useMemo(() => new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short', year: 'numeric' }), []);
+
+    const weekLabel = `${weekLabelFormatter.format(weekStart)} — ${weekLabelEndFormatter.format(weekEnd)}`;
+
+    const dateFormatterDefault = useMemo(() => new Intl.DateTimeFormat('es-UY'), []);
+    const dateFormatterLong = useMemo(() => new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' }), []);
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -278,7 +288,7 @@ export default function Attendance() {
                         <CardTitle className="text-lg flex-1">
                             {viewMode === 'semana'
                                 ? `Registros de la Semana (${filteredAsistencias.length} entradas)`
-                                : `Registros del Día: ${new Date(singleDate + 'T12:00:00').toLocaleDateString('es-UY')}`
+                                : `Registros del Día: ${dateFormatterDefault.format(new Date(singleDate + 'T12:00:00'))}`
                             }
                         </CardTitle>
                         <div className="relative w-full sm:w-72">
@@ -334,7 +344,7 @@ export default function Attendance() {
                                                     <span className="font-bold text-coreops-primary dark:text-blue-400 capitalize">
                                                         {(() => {
                                                             const d = new Date(fecha + 'T12:00:00');
-                                                            return `${DIAS_NOMBRE[d.getDay()]} ${d.toLocaleDateString('es-UY', { day: 'numeric', month: 'long' })}`;
+                                                            return `${DIAS_NOMBRE[d.getDay()]} ${dateFormatterLong.format(d)}`;
                                                         })()}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground ml-2">({records.length} registros)</span>

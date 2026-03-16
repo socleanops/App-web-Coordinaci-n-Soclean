@@ -53,11 +53,13 @@ export default function Schedules() {
         return d.getDay();
     }, [fechaFiltro, showAll]);
 
+    const fechaLabelFormatter = useMemo(() => new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' }), []);
+
     const fechaLabel = useMemo(() => {
         if (!fechaFiltro) return '';
         const d = new Date(fechaFiltro + 'T12:00:00');
-        return d.toLocaleDateString('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-    }, [fechaFiltro]);
+        return fechaLabelFormatter.format(d);
+    }, [fechaFiltro, fechaLabelFormatter]);
 
     const handleEdit = (horario: Horario) => {
         setEditingHorario(horario);
