@@ -35,9 +35,6 @@ if (typeof PointerEvent === 'undefined') {
     }
     (globalThis as unknown as Record<string, unknown>).PointerEvent = PointerEvent;
 }
-if (!HTMLElement.prototype.hasPointerCapture) {
-    HTMLElement.prototype.hasPointerCapture = () => false;
-}
 
 describe('ClienteFormDialog', () => {
     const mockCreateMutateAsync = vi.fn();
@@ -115,8 +112,8 @@ describe('ClienteFormDialog', () => {
         await user.type(screen.getByLabelText(/Dirección Principal/i), 'Av Central 456');
 
         // Interact with a Radix Select
-        // The previous test patch was applied here, but the state is tricky to test with radix. Let's revert the interact block.
-        // Radix selects are notoriously hard to test without complex setups, we will just test the error scenario based on the form inputs.
+        await user.click(screen.getByRole('combobox', { name: /Estado/i }));
+        await user.click(screen.getByRole('option', { name: /Inactivo/i }));
 
         // Submit form
         const submitButton = screen.getByRole('button', { name: 'Guardar Cliente' });
