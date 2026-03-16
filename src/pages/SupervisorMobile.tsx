@@ -80,8 +80,8 @@ export default function SupervisorMobile() {
 
             await updateAsistencia.mutateAsync({ id: a.id, data: dataToUpdate });
             toast.success(`${a.funcionarios?.profiles?.nombre} marcado como ${ESTADOS_MAP[nuevoEstado].label}`);
-        } catch (error: any) {
-            toast.error(error.message || 'Error al actualizar estado');
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Error al actualizar estado');
         }
     };
 
