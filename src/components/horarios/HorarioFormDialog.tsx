@@ -148,11 +148,16 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                 let created = 0;
                 let errors = 0;
 
-                for (const day of daysToCreate) {
-                    try {
-                        await createHorario.mutateAsync({ ...data, dia_semana: day });
+                const promises = daysToCreate.map(day =>
+                    createHorario.mutateAsync({ ...data, dia_semana: day })
+                );
+
+                const results = await Promise.allSettled(promises);
+
+                for (const result of results) {
+                    if (result.status === 'fulfilled') {
                         created++;
-                    } catch {
+                    } else {
                         errors++;
                     }
                 }
