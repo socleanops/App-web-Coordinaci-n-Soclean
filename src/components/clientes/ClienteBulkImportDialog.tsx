@@ -67,37 +67,43 @@ export function ClienteBulkImportDialog({ open, onOpenChange }: Props) {
             let currentProgress = 0;
             const newErrors: string[] = [];
 
-            // Process row by row
-            for (let i = 0; i < data.length; i++) {
-                const row = data[i];
+            // Process in chunks to avoid N+1 slow sequential inserts
+            const CHUNK_SIZE = 50;
+            for (let i = 0; i < data.length; i += CHUNK_SIZE) {
+                const chunk = data.slice(i, i + CHUNK_SIZE);
 
-                try {
-                    const razon_social = row['Razon Social'] || row.razon_social || row['RAZON SOCIAL'] || row.Nombre || row.nombre || '';
-                    if (!razon_social) throw new Error(`Fila ${i + 2}: No tiene Razón Social o Nombre.`);
+                await Promise.all(
+                    chunk.map(async (row, chunkIndex) => {
+                        const rowIndex = i + chunkIndex;
+                        try {
+                            const razon_social = row['Razon Social'] || row.razon_social || row['RAZON SOCIAL'] || row.Nombre || row.nombre || '';
+                            if (!razon_social) throw new Error(`Fila ${rowIndex + 2}: No tiene Razón Social o Nombre.`);
 
-                    const rut = String(row.RUT || row.rut || row.Rut || row.Cedula || row.cedula || '000000000000');
-                    const nombre_fantasia = row['Nombre Fantasia'] || row.nombre_fantasia || row['FANTASIA'] || row.Fantasia || '';
-                    const direccion = row.Direccion || row.direccion || row.DIRECCION || row['Dirección'] || '-';
-                    const contacto_principal = row.Contacto || row.contacto || row.CONTACTO || '';
-                    const telefono = String(row.Telefono || row.telefono || row.TELEFONO || row['Teléfono'] || '');
-                    const email = row.Email || row.email || row.EMAIL || '';
+                            const rut = String(row.RUT || row.rut || row.Rut || row.Cedula || row.cedula || '000000000000');
+                            const nombre_fantasia = row['Nombre Fantasia'] || row.nombre_fantasia || row['FANTASIA'] || row.Fantasia || '';
+                            const direccion = row.Direccion || row.direccion || row.DIRECCION || row['Dirección'] || '-';
+                            const contacto_principal = row.Contacto || row.contacto || row.CONTACTO || '';
+                            const telefono = String(row.Telefono || row.telefono || row.TELEFONO || row['Teléfono'] || '');
+                            const email = row.Email || row.email || row.EMAIL || '';
 
-                    await createCliente.mutateAsync({
-                        razon_social,
-                        nombre_fantasia,
-                        rut,
-                        direccion,
-                        telefono,
-                        email,
-                        contacto_principal,
-                        estado: 'activo'
-                    });
+                            await createCliente.mutateAsync({
+                                razon_social,
+                                nombre_fantasia,
+                                rut,
+                                direccion,
+                                telefono,
+                                email,
+                                contacto_principal,
+                                estado: 'activo'
+                            });
+                        } catch (err) {
+                            const errorMessage = err instanceof Error ? err.message : `Fila ${rowIndex + 2}: Error desconocido al procesar cliente`;
+                            newErrors.push(errorMessage);
+                        }
+                    })
+                );
 
-                } catch (err: any) {
-                    newErrors.push(err.message || `Fila ${i + 2}: Error desconocido al procesar cliente`);
-                }
-
-                currentProgress++;
+                currentProgress += chunk.length;
                 setProgress(currentProgress);
             }
 
