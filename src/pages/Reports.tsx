@@ -7,6 +7,23 @@ import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
+export interface ExportDataRow {
+    'Nombre Empleado'?: string;
+    'Fecha'?: string;
+    'Cédula'?: string;
+    'Cliente / Servicio'?: string;
+    'Cliente'?: string;
+    'Servicio'?: string;
+    'Horario de Entrada'?: string;
+    'Horario de Salida'?: string;
+    'Total Horas'?: string;
+    'Total Horas Teóricas'?: string;
+    'Estado Confirmación'?: string;
+    'Estado'?: string;
+    'Observaciones'?: string;
+    [key: string]: string | undefined;
+}
+
 export default function Reports() {
     const [desde, setDesde] = useState<string>(new Date().toISOString().substring(0, 8) + '01');
     const [hasta, setHasta] = useState<string>(new Date().toISOString().substring(0, 10));
@@ -79,7 +96,7 @@ export default function Reports() {
             }
 
             // Agrupar datos según el tipo
-            let dataToExport: any[] = [];
+            let dataToExport: ExportDataRow[] = [];
             if (tipo === 'empleados' || tipo === 'quincena1') {
                 // Ordenar por empleado alfabéticamente, y luego por fecha
                 const registrosOrdenados = [...registrosAUsar].sort((a, b) => {
@@ -187,7 +204,7 @@ export default function Reports() {
 
                 // Crear objeto de total. Mapear "Total Horas" a la columna respectiva, 
                 // y usar la primera columna disponible para el texto "TOTAL GLOBAL DE HORAS DE ESTE REPORTE"
-                const summaryRow: any = {};
+                const summaryRow: ExportDataRow = {};
                 const firstKey = Object.keys(dataToExport[0])[0]; // 'Nombre Empleado' o 'Cliente'
                 summaryRow[firstKey] = '=> TOTAL GLOBAL DE HORAS DE ESTE REPORTE <=';
                 summaryRow['Total Horas'] = formattedGlobalTotal;
