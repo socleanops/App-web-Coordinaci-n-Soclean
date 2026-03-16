@@ -58,7 +58,7 @@ export default function Nomina() {
                     hours = Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60));
 
                     // Precision: iterate in 15-minute blocks for accurate nocturnal calculation
-                    let current = new Date(start.getTime());
+                    const current = new Date(start.getTime());
                     while (current < end) {
                         const h = current.getHours();
                         if (h >= 22 || h < 6) nightHours += 0.25;
@@ -122,13 +122,18 @@ export default function Nomina() {
 
 
     const totales = useMemo(() => {
-        return horasPorFuncionario.reduce((acc, curr) => ({
+        const stats = horasPorFuncionario.reduce((acc, curr) => ({
             horas: acc.horas + curr.totalHoras,
             dias: acc.dias + curr.diasTrabajados,
             faltas: acc.faltas + curr.faltas,
             certificados: acc.certificados + curr.certificados,
         }), { horas: 0, dias: 0, faltas: 0, certificados: 0 });
-    }, [horasPorFuncionario]);
+
+        const totalJornadas = asistenciasMes.length;
+        const cumplimientoPorcentaje = totalJornadas > 0 ? (stats.dias / totalJornadas) * 100 : 0;
+
+        return { ...stats, totalJornadas, cumplimientoPorcentaje };
+    }, [horasPorFuncionario, asistenciasMes.length]);
 
     const generarReporteExcel = () => {
         setIsExporting(true);
@@ -219,8 +224,17 @@ export default function Nomina() {
                         <CardTitle className="text-sm font-medium text-emerald-600/90 dark:text-emerald-400">Jornadas Cumplidas</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-slate-800 dark:text-slate-100">{totales.dias} Turnos</div>
-                        <p className="text-xs text-slate-500 mt-1">Completados en el mes</p>
+                        <div className="flex items-center gap-2">
+                            <span className="text-2xl font-bold text-slate-800 dark:text-slate-100">{totales.dias} Turnos</span>
+                            {totales.totalJornadas > 0 && (
+                                <span className={`text-xs font-bold px-2 py-0.5 rounded-md ${totales.cumplimientoPorcentaje >= 95 ? 'bg-emerald-100 text-emerald-700' : totales.cumplimientoPorcentaje >= 80 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
+                                    {totales.cumplimientoPorcentaje.toFixed(1)}%
+                                </span>
+                            )}
+                        </div>
+                        <p className="text-xs text-slate-500 mt-1">
+                            {totales.totalJornadas > 0 ? `De ${totales.totalJornadas} servicios contratados calculados` : 'Completados en el mes'}
+                        </p>
                     </CardContent>
                 </Card>
                 <Card className="bg-white/60 dark:bg-slate-900/60 shadow-sm border border-slate-200 dark:border-slate-800">

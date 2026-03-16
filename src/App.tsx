@@ -11,7 +11,7 @@ const Schedules = lazy(() => import('./pages/Schedules'));
 const Clients = lazy(() => import('./pages/Clients'));
 const Services = lazy(() => import('./pages/Services'));
 const Login = lazy(() => import('./pages/Login'));
-const LogisticsMap = lazy(() => import('./pages/LogisticsMap'));
+
 const Attendance = lazy(() => import('./pages/Attendance'));
 const Billing = lazy(() => import('./pages/Billing'));
 const Reports = lazy(() => import('./pages/Reports'));
@@ -148,7 +148,7 @@ function App() {
               <Route path="horarios" element={<Schedules />} />
               <Route path="clientes" element={<Clients />} />
               <Route path="servicios" element={<Services />} />
-              <Route path="logistica" element={<LogisticsMap />} />
+
               <Route path="asistencia" element={<Attendance />} />
               <Route path="reportes" element={<Reports />} />
               <Route path="facturacion" element={<Billing />} />

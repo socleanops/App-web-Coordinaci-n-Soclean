@@ -1,4 +1,4 @@
-import { Users, Calendar, ClipboardList, Briefcase, HelpCircle, Building2, Map, FileText, Clock } from 'lucide-react';
+import { Users, Calendar, ClipboardList, Briefcase, HelpCircle, Building2, FileText, Clock } from 'lucide-react';
 import { useAuthStore } from '@/stores/authStore';
 import { ModuleCard } from '@/components/dashboard/ModuleCard';
 import { DashboardSupportSection } from '@/components/dashboard/DashboardSupportSection';
@@ -64,14 +64,7 @@ export default function Dashboard() {
                     linkText="Ir a Clientes"
                 />
 
-                <ModuleCard
-                    title="Logística y Rutas"
-                    description="Localiza geográficamente los servicios y calcula trayectos y buses para el personal."
-                    Icon={Map}
-                    colorTheme="orange"
-                    linkTo="/logistica"
-                    linkText="Abrir Logística"
-                />
+
 
                 {isManager && (
                     <>
