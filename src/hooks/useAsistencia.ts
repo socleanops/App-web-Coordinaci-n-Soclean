@@ -12,9 +12,17 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
             let query = supabase
                 .from('asistencia')
                 .select(`
-                    *,
+                    id,
+                    funcionario_id,
+                    horario_id,
+                    fecha,
+                    hora_entrada_registrada,
+                    hora_salida_registrada,
+                    estado,
+                    observaciones,
                     funcionarios(
-                        *,
+                        id,
+                        cargo,
                         profiles(nombre, apellido)
                     ),
                     horarios(
@@ -37,7 +45,7 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
             const { data, error } = await query;
             if (error) throw new Error(error.message);
-            return data;
+            return data as unknown as Asistencia[];
         },
     });
 
@@ -83,7 +91,7 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
             const { data: horariosRaw, error: horariosErr } = await supabase
                 .from('horarios')
-                .select('*')
+                .select('id, funcionario_id, vigente_desde, vigente_hasta')
                 .eq('dia_semana', diaSemana)
                 .lte('vigente_desde', fecha);
 
@@ -153,7 +161,7 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
                 const { data: horariosRaw } = await supabase
                     .from('horarios')
-                    .select('*')
+                    .select('id, funcionario_id, vigente_desde, vigente_hasta')
                     .eq('dia_semana', diaSemana)
                     .lte('vigente_desde', fechaStr);
 

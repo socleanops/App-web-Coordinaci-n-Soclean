@@ -12,7 +12,7 @@ export function useCertificaciones(funcionarioId?: string) {
             if (!funcionarioId) return [];
             const { data, error } = await supabase
                 .from('certificaciones')
-                .select('*')
+                .select('id, funcionario_id, fecha_inicio, fecha_fin, motivo')
                 .eq('funcionario_id', funcionarioId)
                 .order('fecha_inicio', { ascending: false });
 
@@ -27,7 +27,7 @@ export function useCertificaciones(funcionarioId?: string) {
         queryFn: async (): Promise<Certificacion[]> => {
             const { data, error } = await supabase
                 .from('certificaciones')
-                .select('*')
+                .select('id, funcionario_id, fecha_inicio, fecha_fin, motivo')
                 .order('fecha_inicio', { ascending: false });
 
             if (error) throw new Error(error.message);
@@ -38,6 +38,7 @@ export function useCertificaciones(funcionarioId?: string) {
     const createCertificacion = useMutation({
         mutationFn: async (formData: CertificacionFormData) => {
             // 1. Insert into certificaciones
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { id, ...dataToInsert } = formData;
             const { data: cert, error: certErr } = await supabase
                 .from('certificaciones')

@@ -12,15 +12,23 @@ export function useHorarios() {
             const { data, error } = await supabase
                 .from('horarios')
                 .select(`
-                    *,
+                    id,
+                    dia_semana,
+                    hora_entrada,
+                    hora_salida,
+                    vigente_desde,
+                    vigente_hasta,
+                    funcionario_id,
+                    servicio_id,
                     funcionarios(
-                        *,
+                        id,
+                        cargo,
                         profiles(nombre, apellido)
                     ),
                     servicios(
                         nombre,
                         direccion,
-                        clientes(razon_social, nombre_fantasia)
+                        clientes(razon_social)
                     )
                 `)
                 .order('dia_semana', { ascending: true })
@@ -28,7 +36,7 @@ export function useHorarios() {
 
             if (error) throw new Error(error.message);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-            return data;
+            return data as unknown as Horario[];
         },
     });
 
@@ -81,6 +89,7 @@ export function useHorarios() {
 
     const createHorario = useMutation({
         mutationFn: async (formData: HorarioFormData) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { id, ...dataToInsert } = formData;
 
             // Check for overlapping schedules BEFORE inserting

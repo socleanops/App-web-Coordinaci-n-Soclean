@@ -37,7 +37,7 @@ export function useFuncionarios() {
     const getDepartamentos = useQuery({
         queryKey: ['departamentos'],
         queryFn: async () => {
-            const { data, error } = await supabase.from('departamentos').select('*');
+            const { data, error } = await supabase.from('departamentos').select('id, nombre');
             if (error) throw new Error(error.message);
             return data;
         },
@@ -97,7 +97,7 @@ export function useFuncionarios() {
 
                         if (existingFunc) {
                             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-                            const prof = existingFunc.profiles;
+                            const prof = existingFunc.profiles as any;
                             const fullName = prof ? `${prof.nombre} ${prof.apellido}` : 'un funcionario activo';
                             throw new Error(`Este correo/cédula ya está registrado y asignado a ${fullName}.`);
                         }

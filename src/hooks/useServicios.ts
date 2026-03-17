@@ -25,6 +25,7 @@ export function useServicios() {
 
     const createServicio = useMutation({
         mutationFn: async (formData: ServicioFormData) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { id, ...dataToInsert } = formData;
             const { data, error } = await supabase
                 .from('servicios')

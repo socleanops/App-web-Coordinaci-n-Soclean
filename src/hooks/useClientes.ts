@@ -11,7 +11,18 @@ export function useClientes() {
         queryFn: async (): Promise<Cliente[]> => {
             const { data, error } = await supabase
                 .from('clientes')
-                .select('*')
+                .select(`
+                    id,
+                    razon_social,
+                    nombre_fantasia,
+                    rut,
+                    contacto_principal,
+                    frecuencia_visita,
+                    carga_horaria,
+                    telefono,
+                    email,
+                    estado
+                `)
                 .order('razon_social', { ascending: true });
 
             if (error) throw new Error(error.message);
@@ -21,6 +32,7 @@ export function useClientes() {
 
     const createCliente = useMutation({
         mutationFn: async (formData: ClienteFormData) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { id, ...dataToInsert } = formData;
             const payload = { ...dataToInsert, nombre: dataToInsert.razon_social };
             const { data, error } = await supabase
@@ -40,7 +52,7 @@ export function useClientes() {
     const updateCliente = useMutation({
         mutationFn: async ({ id, data }: { id: string; data: Partial<ClienteFormData> }) => {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-            const payload = { ...data };
+            const payload: any = { ...data };
             if (payload.razon_social) {
                 payload.nombre = payload.razon_social;
             }
