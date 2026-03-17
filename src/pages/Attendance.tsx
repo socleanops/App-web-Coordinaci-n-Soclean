@@ -155,16 +155,27 @@ export default function Attendance() {
         }
     };
 
-    const filteredAsistencias = asistencias.filter((a: Asistencia) => {
-        const search = searchTerm.toLowerCase();
-        const func = (a.funcionarios?.profiles?.nombre + ' ' + a.funcionarios?.profiles?.apellido).toLowerCase();
-        const matchesSearch = func.includes(search);
+    const filteredAsistencias = useMemo(() => {
+        return asistencias.filter((a: Asistencia) => {
+            const search = searchTerm.toLowerCase();
+            const func = (a.funcionarios?.profiles?.nombre + ' ' + a.funcionarios?.profiles?.apellido).toLowerCase();
+            const matchesSearch = func.includes(search);
 
-        if (hideResolved) {
-            return matchesSearch && ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado);
-        }
-        return matchesSearch;
-    });
+            if (hideResolved) {
+                return matchesSearch && ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado);
+            }
+            return matchesSearch;
+        }).sort((a: Asistencia, b: Asistencia) => {
+            const clientA = a.horarios?.servicios?.clientes?.razon_social?.toLowerCase() || '';
+            const clientB = b.horarios?.servicios?.clientes?.razon_social?.toLowerCase() || '';
+            const cmp = clientA.localeCompare(clientB);
+            if (cmp !== 0) return cmp;
+            
+            const nameA = (a.funcionarios?.profiles?.nombre + ' ' + a.funcionarios?.profiles?.apellido).toLowerCase();
+            const nameB = (b.funcionarios?.profiles?.nombre + ' ' + b.funcionarios?.profiles?.apellido).toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+    }, [asistencias, searchTerm, hideResolved]);
 
     // Group records by date for the weekly view
     const groupedByDate = useMemo(() => {

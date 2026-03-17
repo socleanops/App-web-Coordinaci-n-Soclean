@@ -89,7 +89,7 @@ export default function Reports() {
 
             // Agrupar datos según el tipo
             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-            let dataToExport[] = [];
+            let dataToExport: any[] = [];
             if (tipo === 'empleados' || tipo === 'quincena1') {
                 // Ordenar por empleado alfabéticamente, y luego por fecha
                 const registrosOrdenados = [...registrosAUsar].sort((a, b) => {
@@ -198,7 +198,7 @@ export default function Reports() {
                 // Crear objeto de total. Mapear "Total Horas" a la columna respectiva, 
                 // y usar la primera columna disponible para el texto "TOTAL GLOBAL DE HORAS DE ESTE REPORTE"
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-                const summaryRow = {};
+                const summaryRow: Record<string, any> = {};
                 const firstKey = Object.keys(dataToExport[0])[0]; // 'Nombre Empleado' o 'Cliente'
                 summaryRow[firstKey] = '=> TOTAL GLOBAL DE HORAS DE ESTE REPORTE <=';
                 summaryRow['Total Horas'] = formattedGlobalTotal;

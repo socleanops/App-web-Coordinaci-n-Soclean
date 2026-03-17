@@ -8,14 +8,14 @@ import { FuncionarioPrintDialog } from './FuncionarioPrintDialog';
 
 interface FuncionariosTableProps {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-    employees[];
+    employees: any[];
     isLoading: boolean;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-    onEdit: (funcionario) => void;
+    onEdit: (funcionario: any) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-    onResetPassword: (funcionario) => void;
+    onResetPassword: (funcionario: any) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-    onCertificaciones: (funcionario) => void;
+    onCertificaciones: (funcionario: any) => void;
 }
 
 export function FuncionariosTable({ employees, isLoading, onEdit, onResetPassword, onCertificaciones }: FuncionariosTableProps) {

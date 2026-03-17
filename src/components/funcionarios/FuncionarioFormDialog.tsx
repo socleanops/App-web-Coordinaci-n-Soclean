@@ -25,6 +25,33 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { toast } from 'sonner';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
+import {
+    Form,
+    FormControl,
+    FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
+} from '@/components/ui/form';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
 import type { FuncionarioFormData } from '@/lib/validations/funcionario';
 import { funcionarioSchema } from '@/lib/validations/funcionario';
 import { useFuncionarios } from '@/hooks/useFuncionarios';
@@ -33,12 +60,6 @@ interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-    funcionarioToEdit? | null; // using any for simplicity, usually Funcionario type
-}
-
-export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }: Props) {
-    const { getDepartamentos, createDepartamento, createFuncionario, updateFuncionario } = useFuncionarios();
-    const form = useForm<FuncionarioFormData>({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         resolver: zodResolver(funcionarioSchema),
         defaultValues: {
