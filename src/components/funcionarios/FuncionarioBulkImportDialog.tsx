@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { read, utils } from 'xlsx';
 import { UploadCloud, FileType2, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { generateSecurePassword } from '@/lib/utils';
 import {
     Dialog,
     DialogContent,
@@ -104,7 +105,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
 
                     // Default role for bulk or grab from excel
                     const rol = (row.rol || row.Rol || row.ROL || 'funcionario').toLowerCase();
-                    const password = row.password || row.Password || row.PASSWORD || cedula; // Default password is the ID
+                    const password = row.password || row.Password || row.PASSWORD || generateSecurePassword();
 
                     let parsedFechaIngreso = new Date().toISOString().split('T')[0];
                     const rawFecha = row.fecha_ingreso || row.Fecha_ingreso || row.Fecha_Ingreso || row.FECHA_INGRESO || row.Ingreso || row.ingreso;
