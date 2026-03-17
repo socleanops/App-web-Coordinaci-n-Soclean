@@ -55,7 +55,7 @@ export function ClienteBulkImportDialog({ open, onOpenChange }: Props) {
             const worksheet = workbook.Sheets[firstSheetName];
 
             // Convert to JSON
-            const data = utils.sheet_to_json<Record<string, string | number | undefined>>(worksheet);
+            const data = utils.sheet_to_json<Record<string, unknown>>(worksheet);
 
             if (!data || data.length === 0) {
                 toast.error("El archivo está vacío o no se pudo leer.");
@@ -93,12 +93,8 @@ export function ClienteBulkImportDialog({ open, onOpenChange }: Props) {
                         estado: 'activo'
                     });
 
-                } catch (err) {
-                    if (err instanceof Error) {
-                        newErrors.push(err.message || `Fila ${i + 2}: Error desconocido al procesar cliente`);
-                    } else {
-                        newErrors.push(`Fila ${i + 2}: Error desconocido al procesar cliente`);
-                    }
+                } catch (err: Record<string, unknown>) {
+                    newErrors.push(err.message || `Fila ${i + 2}: Error desconocido al procesar cliente`);
                 }
 
                 currentProgress++;

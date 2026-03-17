@@ -27,7 +27,7 @@ export function useHorarios() {
                 .order('hora_entrada', { ascending: true });
 
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as unknown as Record<string, unknown>;
         },
     });
 
@@ -80,7 +80,7 @@ export function useHorarios() {
 
     const createHorario = useMutation({
         mutationFn: async (formData: HorarioFormData) => {
-            const { id, ...dataToInsert } = formData;
+            const { ...dataToInsert } = formData;
 
             // Check for overlapping schedules BEFORE inserting
             await checkOverlap(

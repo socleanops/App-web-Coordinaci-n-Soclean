@@ -74,7 +74,7 @@ export default function Schedules() {
             try {
                 await deleteHorario.mutateAsync(id);
                 toast.success('Horario eliminado');
-            } catch (error: any) {
+            } catch (error: Record<string, unknown>) {
                 toast.error(error.message || 'Error al eliminar');
             }
         }

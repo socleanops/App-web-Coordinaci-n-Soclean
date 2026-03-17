@@ -22,21 +22,21 @@ export function useFuncionarios() {
             const { data, error } = await supabase
                 .from('funcionarios')
                 .select(`
-          *,
-          profiles(*),
+          id, cedula, cargo, departamento_id, fecha_ingreso, tipo_contrato, salario_base, estado, profile_id,
+          profiles(id, nombre, apellido, email, rol, activo),
           departamentos(nombre)
         `)
                 .order('fecha_ingreso', { ascending: false });
 
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as unknown as Funcionario[];
         },
     });
 
     const getDepartamentos = useQuery({
         queryKey: ['departamentos'],
         queryFn: async () => {
-            const { data, error } = await supabase.from('departamentos').select('*');
+            const { data, error } = await supabase.from('departamentos').select('id, nombre, descripcion');
             if (error) throw new Error(error.message);
             return data;
         },
@@ -95,7 +95,7 @@ export function useFuncionarios() {
                         console.log("[useFuncionarios] existingFunc check done:", existingFunc);
 
                         if (existingFunc) {
-                            const prof = existingFunc.profiles as any;
+                            const prof = existingFunc.profiles as unknown as Record<string, unknown>;
                             const fullName = prof ? `${prof.nombre} ${prof.apellido}` : 'un funcionario activo';
                             throw new Error(`Este correo/cédula ya está registrado y asignado a ${fullName}.`);
                         }

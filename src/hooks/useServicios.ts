@@ -18,13 +18,13 @@ export function useServicios() {
                 .order('created_at', { ascending: false });
 
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as unknown as Record<string, unknown>;
         },
     });
 
     const createServicio = useMutation({
         mutationFn: async (formData: ServicioFormData) => {
-            const { id, ...dataToInsert } = formData;
+            const { ...dataToInsert } = formData;
             const { data, error } = await supabase
                 .from('servicios')
                 .insert(dataToInsert)

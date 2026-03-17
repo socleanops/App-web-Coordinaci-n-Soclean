@@ -94,7 +94,7 @@ export default function Attendance() {
             } else {
                 toast.info('No se encontraron horarios nuevos para generar esta semana, o los registros ya existían.');
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error(error.message || 'Error al generar la planilla semanal');
         }
     };
@@ -107,14 +107,14 @@ export default function Attendance() {
             } else {
                 toast.info('No se encontraron horarios nuevos para este día.');
             }
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error(error.message || 'Error al generar la planilla');
         }
     };
 
     const handleActualizarEstado = async (a: Asistencia, nuevoEstado: string) => {
         try {
-            const dataToUpdate: any = { estado: nuevoEstado as any };
+            const dataToUpdate: Record<string, unknown> = { estado: nuevoEstado as unknown as Record<string, unknown> };
             
             // Auto-rellenar hora real si se marca presente y están en blanco
             if (nuevoEstado === 'presente' && a.horarios) {
@@ -130,7 +130,7 @@ export default function Attendance() {
 
             await updateAsistencia.mutateAsync({ id: a.id, data: dataToUpdate });
             toast.success(`Estado actualizado a ${ESTADOS_MAP[nuevoEstado].label}`);
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error(error.message || 'No se pudo actualizar el estado de asistencia');
         }
     };
@@ -142,7 +142,7 @@ export default function Attendance() {
                 // timeValue is "HH:mm" - Combine with a.fecha
                 finalValue = new Date(`${a.fecha}T${timeValue}:00`).toISOString();
             }
-            await updateAsistencia.mutateAsync({ id: a.id, data: { [field]: finalValue } as any });
+            await updateAsistencia.mutateAsync({ id: a.id, data: { [field]: finalValue } as unknown as Record<string, unknown> });
             toast.success(field === 'hora_entrada_registrada' ? 'Entrada real guardada' : 'Salida real guardada');
         } catch {
             toast.error('Error al guardar hora real');
@@ -404,7 +404,7 @@ export default function Attendance() {
                                                                 const newVal = e.target.value;
                                                                 if (newVal !== a.observaciones) {
                                                                     try {
-                                                                        await updateAsistencia.mutateAsync({ id: a.id, data: { observaciones: newVal } as any });
+                                                                        await updateAsistencia.mutateAsync({ id: a.id, data: { observaciones: newVal } as unknown as Record<string, unknown> });
                                                                         toast.success('Observación guardada');
                                                                     } catch {
                                                                         toast.error('Error al guardar observación');
@@ -480,7 +480,7 @@ export default function Attendance() {
                                                         const newVal = e.target.value;
                                                         if (newVal !== a.observaciones) {
                                                             try {
-                                                                await updateAsistencia.mutateAsync({ id: a.id, data: { observaciones: newVal } as any });
+                                                                await updateAsistencia.mutateAsync({ id: a.id, data: { observaciones: newVal } as unknown as Record<string, unknown> });
                                                                 toast.success('Observación guardada');
                                                             } catch {
                                                                 toast.error('Error al guardar observación');

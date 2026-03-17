@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Map, MapPin, User, Navigation, Loader2 } from 'lucide-react';
 import { useServicios } from '@/hooks/useServicios';
@@ -40,7 +40,7 @@ export default function LogisticsMap() {
         if (!isLoaded || activeServices.length === 0 || serviceMarkers.length > 0) return;
         const geocoder = new window.google.maps.Geocoder();
         const fetchGeocodes = async () => {
-            const newMarkers: any[] = [];
+            const newMarkers: Record<string, unknown>[] = [];
             for (const s of activeServices) {
                 try {
                     const res = await geocoder.geocode({ address: `${s.direccion}, Montevideo, Uruguay` });

@@ -11,7 +11,7 @@ export function useClientes() {
         queryFn: async (): Promise<Cliente[]> => {
             const { data, error } = await supabase
                 .from('clientes')
-                .select('*')
+                .select('id, razon_social, rut, direccion, email, telefono, created_at, condicion_pago')
                 .order('razon_social', { ascending: true });
 
             if (error) throw new Error(error.message);
@@ -21,7 +21,7 @@ export function useClientes() {
 
     const createCliente = useMutation({
         mutationFn: async (formData: ClienteFormData) => {
-            const { id, ...dataToInsert } = formData;
+            const { ...dataToInsert } = formData;
             const payload = { ...dataToInsert, nombre: dataToInsert.razon_social };
             const { data, error } = await supabase
                 .from('clientes')
@@ -39,7 +39,7 @@ export function useClientes() {
 
     const updateCliente = useMutation({
         mutationFn: async ({ id, data }: { id: string; data: Partial<ClienteFormData> }) => {
-            const payload: any = { ...data };
+            const payload: Record<string, unknown> = { ...data };
             if (payload.razon_social) {
                 payload.nombre = payload.razon_social;
             }

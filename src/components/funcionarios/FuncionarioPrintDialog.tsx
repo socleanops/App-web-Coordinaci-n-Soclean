@@ -15,7 +15,7 @@ import { Printer } from 'lucide-react';
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    employees: any[];
+    employees: Record<string, unknown>[];
 }
 
 export function FuncionarioPrintDialog({ open, onOpenChange, employees }: Props) {

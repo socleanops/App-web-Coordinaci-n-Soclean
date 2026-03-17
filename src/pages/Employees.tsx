@@ -55,8 +55,8 @@ export default function Employees() {
             toast.success(`Contraseña de ${funcionarioToReset.profiles?.nombre} reseteada a: ${newPassword}`);
             setResetDialogOpen(false);
             setFuncionarioToReset(null);
-        } catch (error: any) {
-            toast.error(error.message || 'No se pudo resetear la contraseña');
+        } catch (error: unknown) {
+            toast.error((error as Error).message || 'Error al guardar el funcionario');
         }
     };
 

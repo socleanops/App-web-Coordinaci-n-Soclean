@@ -105,7 +105,7 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                     vigente_desde: horarioToEdit.vigente_desde,
                     vigente_hasta: horarioToEdit.vigente_hasta || '',
                 });
-                setSelectedDays([horarioToEdit.dia_semana]);
+            setTimeout(() => setSelectedDays([horarioToEdit.dia_semana]), 0);
             } else {
                 form.reset({
                     funcionario_id: '',
@@ -116,7 +116,7 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                     vigente_desde: new Date().toISOString().split('T')[0],
                     vigente_hasta: '',
                 });
-                setSelectedDays([1]);
+                setTimeout(() => setSelectedDays([1]), 0);
             }
         }
     }, [open, horarioToEdit, form]);
@@ -167,9 +167,9 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                 setIsBatchSaving(false);
             }
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
             setIsBatchSaving(false);
-            toast.error(error.message || 'Error al guardar el horario');
+            toast.error((error as Error).message || 'Error al guardar el horario');
         }
     };
 

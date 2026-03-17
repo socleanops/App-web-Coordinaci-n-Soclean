@@ -45,7 +45,7 @@ export function NotificationDropdown() {
     };
 
     useEffect(() => {
-        fetchNotifications();
+        setTimeout(() => fetchNotifications(), 0);
 
         // Listen to changes in real-time
         const channel = supabase

@@ -34,7 +34,7 @@ import { useClientes } from '@/hooks/useClientes';
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    servicioToEdit?: any | null; // usually Servicio type
+    servicioToEdit?: Record<string, unknown> | null; // usually Servicio type
 }
 
 export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props) {
@@ -43,7 +43,7 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
     const { data: clientes = [] } = getClientes;
 
     const form = useForm<ServicioFormData>({
-        resolver: zodResolver(servicioSchema) as any,
+        resolver: zodResolver(servicioSchema) as unknown as ReturnType<typeof zodResolver>,
         defaultValues: {
             nombre: '',
             cliente_id: '',
@@ -56,12 +56,12 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
     useEffect(() => {
         if (servicioToEdit) {
             form.reset({
-                id: servicioToEdit.id,
-                nombre: servicioToEdit.nombre || '',
-                cliente_id: servicioToEdit.cliente_id || '',
-                descripcion: servicioToEdit.descripcion || '',
-                direccion: servicioToEdit.direccion || '',
-                estado: servicioToEdit.estado as any || 'activo',
+                id: servicioToEdit.id as string,
+                nombre: servicioToEdit.nombre as string || '',
+                cliente_id: servicioToEdit.cliente_id as string || '',
+                descripcion: servicioToEdit.descripcion as string || '',
+                direccion: servicioToEdit.direccion as string || '',
+                estado: (servicioToEdit.estado as string) || 'activo',
             });
         } else {
             form.reset({
@@ -80,7 +80,7 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
 
         try {
             if (isEditing) {
-                await updateServicio.mutateAsync({ id: servicioToEdit!.id, data });
+                await updateServicio.mutateAsync({ id: servicioToEdit!.id as string, data });
                 toast.dismiss(loadingId);
                 toast.success('Servicio actualizado correctamente');
             } else {
@@ -89,10 +89,10 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
                 toast.success('Servicio registrado exitosamente en el cliente');
             }
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Form Submit Error:", error);
             toast.dismiss(loadingId);
-            toast.error(`Error al revisar datos: ${error.message || 'No se pudo guardar la información'}`, { duration: 8000 });
+            toast.error(`Error al revisar datos: ${(error as Error).message || 'No se pudo guardar la información'}`, { duration: 8000 });
         }
     };
 

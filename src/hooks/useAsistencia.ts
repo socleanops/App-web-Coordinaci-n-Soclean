@@ -35,13 +35,14 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
             const { data, error } = await query;
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as unknown as Asistencia[];
         },
     });
 
     const createAsistencia = useMutation({
         mutationFn: async (formData: AsistenciaFormData) => {
-            const { id, ...dataToInsert } = formData;
+            const { ...dataToInsert } = formData;
+            delete (dataToInsert as {id?: string}).id;
             const { data, error } = await supabase
                 .from('asistencia')
                 .insert(dataToInsert)

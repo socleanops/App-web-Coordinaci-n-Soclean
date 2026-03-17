@@ -38,7 +38,7 @@ export function useCertificaciones(funcionarioId?: string) {
     const createCertificacion = useMutation({
         mutationFn: async (formData: CertificacionFormData) => {
             // 1. Insert into certificaciones
-            const { id, ...dataToInsert } = formData;
+            const { ...dataToInsert } = formData;
             const { data: cert, error: certErr } = await supabase
                 .from('certificaciones')
                 .insert(dataToInsert)

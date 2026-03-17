@@ -74,7 +74,7 @@ export default function Login() {
                 setUser(authData.user);
                 navigate('/'); // Redirect to dashboard
             }
-        } catch (err: any) {
+        } catch (err: Record<string, unknown>) {
             setError(err.message || 'Error al iniciar sesión');
         } finally {
             setIsLoading(false);
@@ -93,7 +93,7 @@ export default function Login() {
             toast.success('Se ha enviado un correo con las instrucciones para restablecer tu contraseña. Revisa tu bandeja de entrada o spam.');
             setIsResetOpen(false);
             setResetEmail('');
-        } catch (err: any) {
+        } catch (err: Record<string, unknown>) {
             toast.error(err.message || 'Error al enviar el correo de recuperación');
         } finally {
             setIsResetting(false);

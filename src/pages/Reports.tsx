@@ -21,29 +21,29 @@ export default function Reports() {
     // Obtener listas únicas con map y useMemo para evitar loops O(N^2) que congelan la UI
     const uniqueEmpleados = useMemo(() => {
         const map = new Map();
-        asistencias.forEach((current: any) => {
-            if (current.funcionario_id && !map.has(current.funcionario_id)) {
-                map.set(current.funcionario_id, current);
+        asistencias.forEach((current: Record<string, unknown>) => {
+            if (current.funcionario_id && !map.has(current.funcionario_id as string)) {
+                map.set(current.funcionario_id as string, current);
             }
         });
-        return Array.from(map.values()).sort((a: any, b: any) => {
-            const nameA = a.funcionarios?.profiles?.nombre || '';
-            const nameB = b.funcionarios?.profiles?.nombre || '';
+        return Array.from(map.values()).sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+            const nameA = (a.funcionarios as Record<string, unknown>)?.profiles ? ((a.funcionarios as Record<string, unknown>).profiles as Record<string, unknown>).nombre as string : '';
+            const nameB = (b.funcionarios as Record<string, unknown>)?.profiles ? ((b.funcionarios as Record<string, unknown>).profiles as Record<string, unknown>).nombre as string : '';
             return nameA.localeCompare(nameB);
         });
     }, [asistencias]);
 
     const uniqueServicios = useMemo(() => {
         const map = new Map();
-        asistencias.forEach((current: any) => {
-            const servicioId = current.horarios?.servicio_id;
-            if (servicioId && !map.has(servicioId)) {
-                map.set(servicioId, current);
+        asistencias.forEach((current: Record<string, unknown>) => {
+            const servicioId = (current.horarios as Record<string, unknown>)?.servicio_id;
+            if (servicioId && !map.has(servicioId as string)) {
+                map.set(servicioId as string, current);
             }
         });
-        return Array.from(map.values()).sort((a: any, b: any) => {
-            const nameA = a.horarios?.servicios?.nombre || '';
-            const nameB = b.horarios?.servicios?.nombre || '';
+        return Array.from(map.values()).sort((a: Record<string, unknown>, b: Record<string, unknown>) => {
+            const nameA = (a.horarios as Record<string, unknown>)?.servicios ? ((a.horarios as Record<string, unknown>).servicios as Record<string, unknown>).nombre as string : '';
+            const nameB = (b.horarios as Record<string, unknown>)?.servicios ? ((b.horarios as Record<string, unknown>).servicios as Record<string, unknown>).nombre as string : '';
             return nameA.localeCompare(nameB);
         });
     }, [asistencias]);
@@ -54,22 +54,22 @@ export default function Reports() {
 
         setTimeout(() => {
             // Filtrar asistencias por rango de fechas
-            const registrosRango = asistencias.filter((a: any) => {
-                 return a.fecha >= desde && a.fecha <= hasta;
+            const registrosRango = asistencias.filter((a: Record<string, unknown>) => {
+                 return (a.fecha as string) >= desde && (a.fecha as string) <= hasta;
             });
 
             let registrosAUsar = registrosRango;
 
             // Aplicar filtros adicionales si están seleccionados
             if (filtroFuncionario !== 'todos') {
-                registrosAUsar = registrosAUsar.filter((a: any) => a.funcionario_id === filtroFuncionario);
+                registrosAUsar = registrosAUsar.filter((a: Record<string, unknown>) => a.funcionario_id === filtroFuncionario);
             }
             if (filtroServicio !== 'todos') {
-                registrosAUsar = registrosAUsar.filter((a: any) => a.horarios?.servicio_id === filtroServicio);
+                registrosAUsar = registrosAUsar.filter((a: Record<string, unknown>) => (a.horarios as Record<string, unknown>)?.servicio_id === filtroServicio);
             }
 
             if (tipo === 'quincena1') {
-                registrosAUsar = registrosAUsar.filter(a => parseInt(a.fecha.split('-')[2]) <= 15);
+                registrosAUsar = registrosAUsar.filter(a => parseInt((a.fecha as string).split('-')[2]) <= 15);
             }
 
             if (registrosAUsar.length === 0) {
@@ -79,7 +79,7 @@ export default function Reports() {
             }
 
             // Agrupar datos según el tipo
-            let dataToExport: any[] = [];
+            let dataToExport: Record<string, unknown>[] = [];
             if (tipo === 'empleados' || tipo === 'quincena1') {
                 // Ordenar por empleado alfabéticamente, y luego por fecha
                 const registrosOrdenados = [...registrosAUsar].sort((a, b) => {
@@ -187,7 +187,7 @@ export default function Reports() {
 
                 // Crear objeto de total. Mapear "Total Horas" a la columna respectiva, 
                 // y usar la primera columna disponible para el texto "TOTAL GLOBAL DE HORAS DE ESTE REPORTE"
-                const summaryRow: any = {};
+                const summaryRow: Record<string, unknown> = {};
                 const firstKey = Object.keys(dataToExport[0])[0]; // 'Nombre Empleado' o 'Cliente'
                 summaryRow[firstKey] = '=> TOTAL GLOBAL DE HORAS DE ESTE REPORTE <=';
                 summaryRow['Total Horas'] = formattedGlobalTotal;
@@ -263,9 +263,9 @@ export default function Reports() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="todos">Todos los Empleados</SelectItem>
-                                    {uniqueEmpleados.map((a: any) => (
-                                        <SelectItem key={`emp_${a.funcionario_id}`} value={a.funcionario_id}>
-                                            {a.funcionarios?.profiles?.nombre} {a.funcionarios?.profiles?.apellido}
+                                    {uniqueEmpleados.map((a: Record<string, unknown>) => (
+                                        <SelectItem key={`emp_${a.funcionario_id as string}`} value={a.funcionario_id as string}>
+                                            {((a.funcionarios as Record<string, unknown>)?.profiles as Record<string, unknown>)?.nombre as string} {((a.funcionarios as Record<string, unknown>)?.profiles as Record<string, unknown>)?.apellido as string}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -283,9 +283,9 @@ export default function Reports() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="todos">Todos los Servicios</SelectItem>
-                                    {uniqueServicios.map((a: any) => (
-                                        <SelectItem key={`srv_${a.horarios?.servicio_id}`} value={a.horarios?.servicio_id}>
-                                            {a.horarios?.servicios?.clientes?.razon_social} - {a.horarios?.servicios?.nombre}
+                                    {uniqueServicios.map((a: Record<string, unknown>) => (
+                                        <SelectItem key={`srv_${(a.horarios as Record<string, unknown>)?.servicio_id as string}`} value={(a.horarios as Record<string, unknown>)?.servicio_id as string}>
+                                            {(((a.horarios as Record<string, unknown>)?.servicios as Record<string, unknown>)?.clientes as Record<string, unknown>)?.razon_social as string} - {((a.horarios as Record<string, unknown>)?.servicios as Record<string, unknown>)?.nombre as string}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>

@@ -12,7 +12,7 @@ export function useFacturas() {
             const { data, error } = await supabase
                 .from('facturas')
                 .select(`
-                    *,
+                    id, numero, cliente_id, fecha_emision, fecha_vencimiento, estado, subtotal, impuesto, descuento, total, observaciones, created_at, updated_at,
                     clientes(razon_social, rut, direccion, email),
                     items:factura_items(
                         id,
@@ -27,7 +27,7 @@ export function useFacturas() {
                 .order('fecha_emision', { ascending: false });
 
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as unknown as (Factura & { items: FacturaItem[] })[];
         },
     });
 

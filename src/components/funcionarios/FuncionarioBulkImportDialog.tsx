@@ -12,7 +12,6 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { useFuncionarios } from '@/hooks/useFuncionarios';
-import { generateSecureRandomString } from '@/lib/utils';
 
 interface Props {
     open: boolean;
@@ -56,7 +55,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
             const worksheet = workbook.Sheets[firstSheetName];
 
             // Convert to JSON
-            const data = utils.sheet_to_json<any>(worksheet);
+            const data = utils.sheet_to_json<Record<string, unknown>>(worksheet);
 
             if (!data || data.length === 0) {
                 toast.error("El archivo está vacío o no se pudo leer.");
@@ -100,7 +99,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         try {
                             matchedDepto = await createDepartamento.mutateAsync(reqDeptoNameOriginal);
                             if (matchedDepto) currentDeptos.push(matchedDepto);
-                        } catch (e: any) {
+                        } catch (e: Record<string, unknown>) {
                             if (currentDeptos.length > 0) {
                                 matchedDepto = currentDeptos[0]; // fallback
                             } else {
@@ -115,11 +114,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
 
                     // Default role for bulk or grab from excel
                     const rol = (row.rol || row.Rol || row.ROL || 'funcionario').toLowerCase();
-
-                    // Generate a random secure password and require password reset on first login.
-                    // Complexity rule requires min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char.
-                    const generatedSecurePassword = generateSecureRandomString(8) + 'Aa1!';
-                    const password = row.password || row.Password || row.PASSWORD || generatedSecurePassword;
+                    const password = row.password || row.Password || row.PASSWORD || cedula; // Default password is the ID
 
                     let parsedFechaIngreso = new Date().toISOString().split('T')[0];
                     const rawFecha = row.fecha_ingreso || row.Fecha_ingreso || row.Fecha_Ingreso || row.FECHA_INGRESO || row.Ingreso || row.ingreso;
@@ -134,7 +129,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         parsedFechaIngreso = jsDate.toISOString().split('T')[0];
                     } else if (typeof rawFecha === 'string' && rawFecha.trim() !== '') {
                         // Try to fix DD/MM/YYYY string formats to YYYY-MM-DD for PostgreSQL
-                        let parts = rawFecha.includes('/') ? rawFecha.split('/') : rawFecha.split('-');
+                        const parts = rawFecha.includes('/') ? rawFecha.split('/') : rawFecha.split('-');
                         if (parts.length === 3) {
                             // Find the 4-digit year format
                             const yearIndex = parts.findIndex(p => p.length === 4);
@@ -179,7 +174,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         estado
                     });
 
-                } catch (err: any) {
+                } catch (err: Record<string, unknown>) {
                     const msg = err.message || '';
                     if (msg.includes('duplicate key value') || msg.includes('cedula_key')) {
                         const duplicateCedula = row.Cedula || row.cedula || row.CEDULA || 'especificada';

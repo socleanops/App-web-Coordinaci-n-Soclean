@@ -7,11 +7,11 @@ import { Search, Pencil, Printer, KeyRound, Stethoscope } from 'lucide-react';
 import { FuncionarioPrintDialog } from './FuncionarioPrintDialog';
 
 interface FuncionariosTableProps {
-    employees: any[];
+    employees: Record<string, unknown>[];
     isLoading: boolean;
-    onEdit: (funcionario: any) => void;
-    onResetPassword: (funcionario: any) => void;
-    onCertificaciones: (funcionario: any) => void;
+    onEdit: (funcionario: Record<string, unknown>) => void;
+    onResetPassword: (funcionario: Record<string, unknown>) => void;
+    onCertificaciones: (funcionario: Record<string, unknown>) => void;
 }
 
 export function FuncionariosTable({ employees, isLoading, onEdit, onResetPassword, onCertificaciones }: FuncionariosTableProps) {
@@ -20,12 +20,13 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
 
     // Optimize array filtering by memoizing it to prevent recalculation on every render
     const filteredEmployees = useMemo(() => {
-        return employees.filter((emp: any) => {
+        return employees.filter((emp: Record<string, unknown>) => {
             const search = searchTerm.toLowerCase();
-            const n = emp?.profiles?.nombre?.toLowerCase() || '';
-            const a = emp?.profiles?.apellido?.toLowerCase() || '';
-            const cedula = emp?.cedula || '';
-            const cargo = emp?.cargo?.toLowerCase() || '';
+            const profiles = emp?.profiles as Record<string, unknown>;
+            const n = (profiles?.nombre as string)?.toLowerCase() || '';
+            const a = (profiles?.apellido as string)?.toLowerCase() || '';
+            const cedula = (emp?.cedula as string) || '';
+            const cargo = (emp?.cargo as string)?.toLowerCase() || '';
             return n.includes(search) || a.includes(search) || cedula.includes(search) || cargo.includes(search);
         });
     }, [employees, searchTerm]);
@@ -88,29 +89,33 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredEmployees.map((emp: any) => (
-                                    <TableRow key={emp.id} className="group hover:bg-muted/30 transition-colors">
+                                filteredEmployees.map((emp: Record<string, unknown>) => {
+                                    const profiles = emp.profiles as Record<string, unknown>;
+                                    const departamentos = emp.departamentos as Record<string, unknown>;
+                                    const estado = emp.estado as string;
+                                    return (
+                                    <TableRow key={emp.id as string} className="group hover:bg-muted/30 transition-colors">
                                         <TableCell>
-                                            <div className="font-medium">{emp.profiles?.nombre} {emp.profiles?.apellido}</div>
-                                            <div className="text-xs text-muted-foreground">{emp.profiles?.email}</div>
+                                            <div className="font-medium">{profiles?.nombre as string} {profiles?.apellido as string}</div>
+                                            <div className="text-xs text-muted-foreground">{profiles?.email as string}</div>
                                         </TableCell>
-                                        <TableCell className="text-muted-foreground">{emp.cedula}</TableCell>
-                                        <TableCell>{emp.cargo}</TableCell>
+                                        <TableCell className="text-muted-foreground">{emp.cedula as string}</TableCell>
+                                        <TableCell>{emp.cargo as string}</TableCell>
                                         <TableCell>
                                             <span className="text-xs bg-secondary/20 text-secondary-foreground px-2 py-1 rounded-md border border-secondary/30">
-                                                {emp.departamentos?.nombre || 'N/A'}
+                                                {(departamentos?.nombre as string) || 'N/A'}
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground text-sm">
-                                            {dateFormatter.format(new Date(emp.fecha_ingreso))}
+                                            {dateFormatter.format(new Date(emp.fecha_ingreso as string))}
                                         </TableCell>
                                         <TableCell>
-                                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${emp.estado === 'activo' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' :
-                                                emp.estado === 'inactivo' ? 'bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700' :
-                                                    emp.estado === 'vacaciones' ? 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800' :
+                                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${estado === 'activo' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' :
+                                                estado === 'inactivo' ? 'bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700' :
+                                                    estado === 'vacaciones' ? 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800' :
                                                         'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
                                                 }`}>
-                                                {emp.estado.charAt(0).toUpperCase() + emp.estado.slice(1)}
+                                                {estado.charAt(0).toUpperCase() + estado.slice(1)}
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-right whitespace-nowrap">
@@ -143,7 +148,8 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
                                             </Button>
                                         </TableCell>
                                     </TableRow>
-                                ))
+                                    );
+                                })
                             )}
                         </TableBody>
                     </Table>

@@ -83,7 +83,7 @@ export default function Settings() {
 
             if (error) throw error;
             toast.success("Perfil actualizado correctamente en la base de datos.");
-        } catch (err: any) {
+        } catch (err: Record<string, unknown>) {
             toast.error(err.message || "No se pudo guardar el perfil.");
         } finally {
             setIsSaving(false);
@@ -117,7 +117,7 @@ export default function Settings() {
 
             if (err) throw err;
             toast.success("Datos de la empresa actualizados exitosamente.");
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error(error.message || "Error al guardar los datos de la empresa.");
         } finally {
             setIsSavingEmpresa(false);
@@ -135,7 +135,7 @@ export default function Settings() {
         }
     };
 
-    const [backups, setBackups] = useState<any[]>([]);
+    const [backups, setBackups] = useState<Record<string, unknown>[]>([]);
     const [isGeneratingBackup, setIsGeneratingBackup] = useState(false);
 
     const loadBackups = async () => {
@@ -166,7 +166,7 @@ export default function Settings() {
             
             const wb = XLSX.utils.book_new();
             
-            const addSheet = (data: any, name: string) => {
+            const addSheet = (data: Record<string, unknown>, name: string) => {
                 if (data && data.data && data.data.length > 0) {
                     const ws = XLSX.utils.json_to_sheet(data.data);
                     XLSX.utils.book_append_sheet(wb, ws, name);
@@ -206,7 +206,7 @@ export default function Settings() {
             
             toast.success("Respaldo completado y guardado en la nube.");
             loadBackups();
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Error generating backup:", error);
             toast.error("Error al generar el respaldo: " + error.message);
         } finally {
@@ -228,7 +228,7 @@ export default function Settings() {
             a.click();
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
-        } catch (error: any) {
+        } catch (error: unknown) {
             toast.error("No se pudo descargar el archivo: " + error.message);
         }
     };
@@ -250,7 +250,7 @@ export default function Settings() {
             toast.success("Contraseña actualizada exitosamente.");
             setNewPass('');
             setConfirmPass('');
-        } catch (err: any) {
+        } catch (err: Record<string, unknown>) {
             toast.error(err.message || "No se pudo cambiar la contraseña.");
         } finally {
             setIsChangingPass(false);

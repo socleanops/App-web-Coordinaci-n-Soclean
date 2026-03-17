@@ -61,7 +61,7 @@ export function FuncionarioCertificacionesDialog({ open, onOpenChange, funcionar
             toast.success('Certificación médica añadida correctamente', { id: loadingId });
             form.reset({ funcionario_id: funcionario!.id, fecha_inicio: '', fecha_fin: '', motivo: '' });
             setIsAdding(false);
-        } catch (error: any) {
+        } catch (error: Record<string, unknown>) {
             toast.error(error.message || 'No se pudo guardar', { id: loadingId });
         }
     };
@@ -73,7 +73,7 @@ export function FuncionarioCertificacionesDialog({ open, onOpenChange, funcionar
         try {
             await deleteCertificacion.mutateAsync(id);
             toast.success('Registro médico eliminado', { id: loading });
-        } catch (error: any) {
+        } catch (error: Record<string, unknown>) {
             toast.error(error.message, { id: loading });
         }
     };

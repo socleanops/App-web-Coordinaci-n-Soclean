@@ -32,13 +32,13 @@ import { useFuncionarios } from '@/hooks/useFuncionarios';
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    funcionarioToEdit?: any | null; // using any for simplicity, usually Funcionario type
+    funcionarioToEdit?: Record<string, unknown> | null; // using any for simplicity, usually Funcionario type
 }
 
 export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }: Props) {
     const { getDepartamentos, createDepartamento, createFuncionario, updateFuncionario } = useFuncionarios();
     const form = useForm<FuncionarioFormData>({
-        resolver: zodResolver(funcionarioSchema) as any,
+        resolver: zodResolver(funcionarioSchema) as unknown as ReturnType<typeof zodResolver>,
         defaultValues: {
             nombre: '',
             apellido: '',
@@ -58,19 +58,19 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
     useEffect(() => {
         if (funcionarioToEdit) {
             form.reset({
-                id: funcionarioToEdit.id,
-                nombre: funcionarioToEdit.profiles?.nombre || '',
-                apellido: funcionarioToEdit.profiles?.apellido || '',
-                email: funcionarioToEdit.profiles?.email || '',
+                id: funcionarioToEdit.id as string,
+                nombre: (funcionarioToEdit.profiles as Record<string, unknown>)?.nombre as string || '',
+                apellido: (funcionarioToEdit.profiles as Record<string, unknown>)?.apellido as string || '',
+                email: (funcionarioToEdit.profiles as Record<string, unknown>)?.email as string || '',
                 password: '', // do not set password on edit
-                rol: (funcionarioToEdit.profiles?.rol as any) || 'funcionario',
-                cedula: funcionarioToEdit.cedula,
-                cargo: funcionarioToEdit.cargo,
-                departamento_id: funcionarioToEdit.departamento_id || '',
-                direccion: funcionarioToEdit.direccion || '',
-                fecha_ingreso: funcionarioToEdit.fecha_ingreso,
-                tipo_contrato: funcionarioToEdit.tipo_contrato,
-                estado: funcionarioToEdit.estado as any,
+                rol: ((funcionarioToEdit.profiles as Record<string, unknown>)?.rol as "admin" | "supervisor" | "funcionario" | "cliente") || 'funcionario',
+                cedula: funcionarioToEdit.cedula as string,
+                cargo: funcionarioToEdit.cargo as string,
+                departamento_id: funcionarioToEdit.departamento_id as string || '',
+                direccion: funcionarioToEdit.direccion as string || '',
+                fecha_ingreso: funcionarioToEdit.fecha_ingreso as string,
+                tipo_contrato: funcionarioToEdit.tipo_contrato as string,
+                estado: funcionarioToEdit.estado as "activo" | "inactivo",
             });
         } else {
             form.reset();
@@ -86,7 +86,7 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
             const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado en Supabase al procesar.')), 20000));
             
             if (isEditing) {
-                await Promise.race([updateFuncionario.mutateAsync({ id: funcionarioToEdit!.id, data }), timeoutPromise]);
+                await Promise.race([updateFuncionario.mutateAsync({ id: funcionarioToEdit!.id as string, data }), timeoutPromise]);
                 toast.success('Funcionario actualizado correctamente', { id: loadingId });
             } else {
                 toast.loading('Iniciando guardado remoto...', { id: loadingId });
@@ -94,9 +94,9 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                 // the mutation itself shows a success toast for "5/5" and hides "Iniciando guardado remoto..."
             }
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error: unknown) {
             console.error("Form Submit Error:", error);
-            const msg = error.message || 'No se pudo guardar la información';
+            const msg = (error as Error).message || 'No se pudo guardar la información';
             toast.error(`Error: ${msg}`, { id: loadingId, duration: 10000 });
         }
     };
@@ -273,7 +273,7 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                                                                 form.setValue('departamento_id', data.id);
                                                                 return 'Departamento añadido';
                                                             },
-                                                            error: (err: any) => `Error al crear: ${err.message}`
+                                                            error: (err: unknown) => `Error al crear: ${(err as Error).message}`
                                                         });
                                                     }
                                                 }}
