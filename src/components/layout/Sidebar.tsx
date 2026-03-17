@@ -11,7 +11,9 @@ import {
     Settings,
     ChevronLeft,
     ChevronRight,
-    Map
+    Map,
+    AlertOctagon,
+    History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -29,6 +31,7 @@ export function Sidebar() {
         { name: 'Funcionarios', href: '/funcionarios', icon: Users },
         { name: 'Horarios', href: '/horarios', icon: CalendarClock },
         { name: 'Asistencia', href: '/asistencia', icon: Clock },
+        { name: 'Incidencias', href: '/incidencias', icon: AlertOctagon },
         { name: 'Servicios', href: '/servicios', icon: Briefcase },
         { name: 'Logística', href: '/logistica', icon: Map },
         { name: 'Clientes', href: '/clientes', icon: Building2 },
@@ -36,6 +39,7 @@ export function Sidebar() {
             { name: 'Reportes Gerenciales', href: '/reportes', icon: Receipt },
             { name: 'Horas por Cliente', href: '/facturacion', icon: Receipt },
             { name: 'Horas RRHH', href: '/nomina', icon: Clock },
+            { name: 'Auditoría', href: '/auditoria', icon: History },
             { name: 'Configuración', href: '/configuracion', icon: Settings }
         ] : []),
     ];

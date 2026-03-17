@@ -112,3 +112,30 @@ export type FacturaItem = {
     total: number;
     servicios?: Servicio; // Joined Data
 };
+
+export type Incidencia = {
+    id: string;
+    funcionario_id: string;
+    tipo: 'Ausencia injustificada' | 'Tardanza' | 'Licencia médica' | 'Vacaciones' | 'Reemplazo' | 'Otro';
+    fecha_inicio: string; // date string
+    fecha_fin?: string; // date string
+    descripcion?: string;
+    estado: 'Pendiente' | 'En proceso' | 'Resuelta' | 'Cerrada';
+    reemplazo_id?: string; // UUID of replacement Funcionario
+    created_at?: string;
+    updated_at?: string;
+    funcionarios?: Funcionario; // Joined data
+    reemplazo?: Funcionario; // Joined data
+};
+
+export type AuditLog = {
+    id: string;
+    table_name: string;
+    record_id: string;
+    action: 'INSERT' | 'UPDATE' | 'DELETE';
+    user_id?: string;
+    old_data?: Record<string, unknown>;
+    new_data?: Record<string, unknown>;
+    created_at: string;
+    users?: Profile; // Assuming we can join to public.profiles via user_id
+};

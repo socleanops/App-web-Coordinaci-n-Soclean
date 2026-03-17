@@ -17,6 +17,8 @@ const Billing = lazy(() => import('./pages/Billing'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Nomina = lazy(() => import('./pages/Nomina'));
 const Settings = lazy(() => import('./pages/Settings'));
+const Incidencias = lazy(() => import('./pages/Incidencias'));
+const Auditoria = lazy(() => import('./pages/Auditoria'));
 
 const PageLoader = () => (
   <div className="flex flex-col h-screen w-full items-center justify-center bg-background/50 backdrop-blur-sm">
@@ -135,6 +137,8 @@ function App() {
               <Route path="asistencia" element={<Attendance />} />
               <Route path="reportes" element={<Reports />} />
               <Route path="facturacion" element={<Billing />} />
+              <Route path="incidencias" element={<Incidencias />} />
+              <Route path="auditoria" element={<Auditoria />} />
 
               {/* TBD Modules with smooth placeholders */}
               <Route path="nomina" element={<Nomina />} />
