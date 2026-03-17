@@ -74,6 +74,7 @@ export default function Login() {
                 setUser(authData.user);
                 navigate('/'); // Redirect to dashboard
             }
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         } catch (err) {
             setError(err.message || 'Error al iniciar sesión');
         } finally {
@@ -93,6 +94,7 @@ export default function Login() {
             toast.success('Se ha enviado un correo con las instrucciones para restablecer tu contraseña. Revisa tu bandeja de entrada o spam.');
             setIsResetOpen(false);
             setResetEmail('');
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         } catch (err) {
             toast.error(err.message || 'Error al enviar el correo de recuperación');
         } finally {

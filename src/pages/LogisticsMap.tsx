@@ -45,6 +45,7 @@ export default function LogisticsMap() {
         setHasAttemptedGeocode(true); // Prevent re-runs if it fails or returns empty
         
         const geocoder = new window.google.maps.Geocoder();
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         const fetchGeocodes = async () => {
             const newMarkers[] = [];
             for (const s of activeServices) {

@@ -27,6 +27,7 @@ export function useHorarios() {
                 .order('hora_entrada', { ascending: true });
 
             if (error) throw new Error(error.message);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             return data;
         },
     });

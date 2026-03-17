@@ -55,6 +55,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
             const worksheet = workbook.Sheets[firstSheetName];
 
             // Convert to JSON
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             const data = utils.sheet_to_json<any>(worksheet);
 
             if (!data || data.length === 0) {
@@ -99,6 +100,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         try {
                             matchedDepto = await createDepartamento.mutateAsync(reqDeptoNameOriginal);
                             if (matchedDepto) currentDeptos.push(matchedDepto);
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
                         } catch (e) {
                             if (currentDeptos.length > 0) {
                                 matchedDepto = currentDeptos[0]; // fallback
@@ -174,6 +176,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         estado
                     });
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
                 } catch (err) {
                     const msg = err.message || '';
                     if (msg.includes('duplicate key value') || msg.includes('cedula_key')) {

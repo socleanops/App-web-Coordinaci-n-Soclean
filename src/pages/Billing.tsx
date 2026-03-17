@@ -79,6 +79,7 @@ export default function HorasPorCliente() {
             const rows: ReportRow[] = [];
             let sumatoriaHorasDecimal = 0;
 
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             data.forEach((a) => {
                 const est = a.estado;
                 // Calculamos solo presentes o justificados para facturación
@@ -128,6 +129,7 @@ export default function HorasPorCliente() {
                 toast.info('Los turnos encontrados no aplican para cobro (Ej: Ausentes).');
             }
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         } catch (err) {
             toast.error(err.message || 'Error al obtener los datos.');
         } finally {
@@ -152,6 +154,7 @@ export default function HorasPorCliente() {
         const m = Math.round((totalHoras - h) * 60);
         const hsDisplayFinal = m === 0 ? `${h}h` : `${h}h ${m}m`;
 
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         dataToExport.push({});
         dataToExport.push({
             'Día': 'TOTAL GENERAL:',

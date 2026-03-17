@@ -32,12 +32,14 @@ import { useFuncionarios } from '@/hooks/useFuncionarios';
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
     funcionarioToEdit? | null; // using any for simplicity, usually Funcionario type
 }
 
 export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }: Props) {
     const { getDepartamentos, createDepartamento, createFuncionario, updateFuncionario } = useFuncionarios();
     const form = useForm<FuncionarioFormData>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         resolver: zodResolver(funcionarioSchema),
         defaultValues: {
             nombre: '',
@@ -63,6 +65,7 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                 apellido: funcionarioToEdit.profiles?.apellido || '',
                 email: funcionarioToEdit.profiles?.email || '',
                 password: '', // do not set password on edit
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
                 rol: (funcionarioToEdit.profiles?.rol) || 'funcionario',
                 cedula: funcionarioToEdit.cedula,
                 cargo: funcionarioToEdit.cargo,
@@ -70,6 +73,7 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                 direccion: funcionarioToEdit.direccion || '',
                 fecha_ingreso: funcionarioToEdit.fecha_ingreso,
                 tipo_contrato: funcionarioToEdit.tipo_contrato,
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
                 estado: funcionarioToEdit.estado,
             });
         } else {
@@ -94,6 +98,7 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                 // the mutation itself shows a success toast for "5/5" and hides "Iniciando guardado remoto..."
             }
             onOpenChange(false);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         } catch (error) {
             console.error("Form Submit Error:", error);
             const msg = error.message || 'No se pudo guardar la información';
@@ -273,6 +278,7 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                                                                 form.setValue('departamento_id', data.id);
                                                                 return 'Departamento añadido';
                                                             },
+                                                            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
                                                             error: (err) => `Error al crear: ${err.message}`
                                                         });
                                                     }

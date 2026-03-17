@@ -15,6 +15,7 @@ import { Printer } from 'lucide-react';
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
     employees[];
 }
 

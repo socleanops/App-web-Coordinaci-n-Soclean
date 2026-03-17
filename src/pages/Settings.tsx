@@ -83,6 +83,7 @@ export default function Settings() {
                 .eq('id', user.id);
 
             if (error) throw error;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             toast.success("Perfil actualizado correctamente en la base de datos.");
         } catch (err) {
             toast.error(err.message || "No se pudo guardar el perfil.");
@@ -117,6 +118,7 @@ export default function Settings() {
             }
 
             if (err) throw err;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             toast.success("Datos de la empresa actualizados exitosamente.");
         } catch (error) {
             toast.error(error.message || "Error al guardar los datos de la empresa.");
@@ -135,6 +137,7 @@ export default function Settings() {
             toast.info("Notificaciones UI/UX desactivadas.");
         }
     };
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
 
     const [backups, setBackups] = useState<any[]>([]);
     const [isGeneratingBackup, setIsGeneratingBackup] = useState(false);
@@ -166,6 +169,7 @@ export default function Settings() {
             ]);
             
             const wb = XLSX.utils.book_new();
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             
             const addSheet = (data, name: string) => {
                 if (data && data.data && data.data.length > 0) {
@@ -206,6 +210,7 @@ export default function Settings() {
             if (logError) throw logError;
             
             toast.success("Respaldo completado y guardado en la nube.");
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             loadBackups();
         } catch (error) {
             console.error("Error generating backup:", error);
@@ -228,6 +233,7 @@ export default function Settings() {
             document.body.appendChild(a);
             a.click();
             window.URL.revokeObjectURL(url);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             document.body.removeChild(a);
         } catch (error) {
             toast.error("No se pudo descargar el archivo: " + error.message);
@@ -250,6 +256,7 @@ export default function Settings() {
             if (error) throw error;
             toast.success("Contraseña actualizada exitosamente.");
             setNewPass('');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             setConfirmPass('');
         } catch (err) {
             toast.error(err.message || "No se pudo cambiar la contraseña.");

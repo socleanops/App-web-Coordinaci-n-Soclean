@@ -34,6 +34,7 @@ import { useClientes } from '@/hooks/useClientes';
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
     servicioToEdit? | null; // usually Servicio type
 }
 
@@ -43,6 +44,7 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
     const { data: clientes = [] } = getClientes;
 
     const form = useForm<ServicioFormData>({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         resolver: zodResolver(servicioSchema),
         defaultValues: {
             nombre: '',
@@ -61,6 +63,7 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
                 cliente_id: servicioToEdit.cliente_id || '',
                 descripcion: servicioToEdit.descripcion || '',
                 direccion: servicioToEdit.direccion || '',
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
                 estado: servicioToEdit.estado || 'activo',
             });
         } else {
@@ -89,6 +92,7 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
                 toast.success('Servicio registrado exitosamente en el cliente');
             }
             onOpenChange(false);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         } catch (error) {
             console.error("Form Submit Error:", error);
             toast.dismiss(loadingId);

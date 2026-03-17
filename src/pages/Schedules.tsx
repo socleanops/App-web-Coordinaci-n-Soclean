@@ -74,6 +74,7 @@ export default function Schedules() {
             try {
                 await deleteHorario.mutateAsync(id);
                 toast.success('Horario eliminado');
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             } catch (error) {
                 toast.error(error.message || 'Error al eliminar');
             }

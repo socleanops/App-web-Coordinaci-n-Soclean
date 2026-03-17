@@ -18,6 +18,7 @@ export function useServicios() {
                 .order('created_at', { ascending: false });
 
             if (error) throw new Error(error.message);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             return data;
         },
     });

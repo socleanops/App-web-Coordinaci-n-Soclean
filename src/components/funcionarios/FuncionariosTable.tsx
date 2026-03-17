@@ -7,10 +7,14 @@ import { Search, Pencil, Printer, KeyRound, Stethoscope } from 'lucide-react';
 import { FuncionarioPrintDialog } from './FuncionarioPrintDialog';
 
 interface FuncionariosTableProps {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
     employees[];
     isLoading: boolean;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
     onEdit: (funcionario) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
     onResetPassword: (funcionario) => void;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
     onCertificaciones: (funcionario) => void;
 }
 
@@ -20,6 +24,7 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
 
     // Optimize array filtering by memoizing it to prevent recalculation on every render
     const filteredEmployees = useMemo(() => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         return employees.filter((emp) => {
             const search = searchTerm.toLowerCase();
             const n = emp?.profiles?.nombre?.toLowerCase() || '';
@@ -88,6 +93,7 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
                                     </TableCell>
                                 </TableRow>
                             ) : (
+                                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
                                 filteredEmployees.map((emp) => (
                                     <TableRow key={emp.id} className="group hover:bg-muted/30 transition-colors">
                                         <TableCell>

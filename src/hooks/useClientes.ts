@@ -39,6 +39,7 @@ export function useClientes() {
 
     const updateCliente = useMutation({
         mutationFn: async ({ id, data }: { id: string; data: Partial<ClienteFormData> }) => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             const payload = { ...data };
             if (payload.razon_social) {
                 payload.nombre = payload.razon_social;

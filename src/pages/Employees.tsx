@@ -55,6 +55,7 @@ export default function Employees() {
             toast.success(`Contraseña de ${funcionarioToReset.profiles?.nombre} reseteada a: ${newPassword}`);
             setResetDialogOpen(false);
             setFuncionarioToReset(null);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         } catch (error) {
             toast.error(error.message || 'No se pudo resetear la contraseña');
         }

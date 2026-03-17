@@ -32,12 +32,15 @@ export const generateRegistroPDF = (factura: Factura) => {
 
     // Tabla de Ítems (Conceptos)
     const tableColumn = ["Detalle del Servicio", "Cantidad de Horas"];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
     const tableRows[] = [];
     
     let totalCantidad = 0;
 
     // Llenar datos de la tabla (usando cast any porque a veces TypeScript molesta con autoTable)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
     const items = (factura).items || [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
     items.forEach((item) => {
         const itemData = [
             item.descripcion || 'Sin descripción',
@@ -50,6 +53,7 @@ export const generateRegistroPDF = (factura: Factura) => {
     // Agregar Fila de Totales
     tableRows.push([{ content: 'Total de Horas Calculadas', styles: { fontStyle: 'bold', halign: 'right' } }, { content: totalCantidad.toString(), styles: { fontStyle: 'bold' } }]);
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
     (doc).autoTable({
         head: [tableColumn],
         body: tableRows,

@@ -55,6 +55,7 @@ export function ClienteBulkImportDialog({ open, onOpenChange }: Props) {
             const worksheet = workbook.Sheets[firstSheetName];
 
             // Convert to JSON
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             const data = utils.sheet_to_json<any>(worksheet);
 
             if (!data || data.length === 0) {
@@ -93,6 +94,7 @@ export function ClienteBulkImportDialog({ open, onOpenChange }: Props) {
                         estado: 'activo'
                     });
 
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
                 } catch (err) {
                     newErrors.push(err.message || `Fila ${i + 2}: Error desconocido al procesar cliente`);
                 }

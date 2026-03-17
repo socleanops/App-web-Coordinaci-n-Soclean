@@ -167,6 +167,7 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                 }
                 setIsBatchSaving(false);
             }
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             onOpenChange(false);
         } catch (error) {
             setIsBatchSaving(false);

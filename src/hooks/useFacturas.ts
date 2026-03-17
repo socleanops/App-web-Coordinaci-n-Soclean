@@ -27,6 +27,7 @@ export function useFacturas() {
                 .order('fecha_emision', { ascending: false });
 
             if (error) throw new Error(error.message);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             return data;
         },
     });

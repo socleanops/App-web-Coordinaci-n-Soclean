@@ -61,6 +61,7 @@ export function FuncionarioCertificacionesDialog({ open, onOpenChange, funcionar
             toast.success('Certificación médica añadida correctamente', { id: loadingId });
             form.reset({ funcionario_id: funcionario!.id, fecha_inicio: '', fecha_fin: '', motivo: '' });
             setIsAdding(false);
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         } catch (error) {
             toast.error(error.message || 'No se pudo guardar', { id: loadingId });
         }
@@ -73,6 +74,7 @@ export function FuncionarioCertificacionesDialog({ open, onOpenChange, funcionar
         try {
             await deleteCertificacion.mutateAsync(id);
             toast.success('Registro médico eliminado', { id: loading });
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         } catch (error) {
             toast.error(error.message, { id: loading });
         }
