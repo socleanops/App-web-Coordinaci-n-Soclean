@@ -65,7 +65,7 @@ export function useFuncionarios() {
 
                 const randomSuffix = generateSecureRandomString(6);
                 const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
-                const safePassword = formData.password?.trim() || `SC${formData.cedula.replace(/\D/g, '')}#2026`;
+                const safePassword = formData.password?.trim() || generateSecureRandomString(8) + 'Aa1!';
 
                 // 1. Create Auth User if it's new
                 if (!profileId) {
@@ -178,7 +178,7 @@ export function useFuncionarios() {
                     throw new Error(funcError.message);
                 }
                 
-                toast.success('5/5 Operación exitosa!', { id: tid });
+                toast.success(`5/5 Operación exitosa! Contraseña: ${safePassword}`, { id: tid, duration: 10000 });
                 return funcData;
             })();
 
