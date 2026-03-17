@@ -12,7 +12,13 @@ export function useServicios() {
             const { data, error } = await supabase
                 .from('servicios')
                 .select(`
-                    *,
+                    id,
+                    cliente_id,
+                    nombre,
+                    descripcion,
+                    direccion,
+                    estado,
+                    created_at,
                     clientes(razon_social, nombre_fantasia, nombre)
                 `)
                 .order('created_at', { ascending: false });

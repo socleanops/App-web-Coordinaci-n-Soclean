@@ -22,8 +22,17 @@ export function useFuncionarios() {
             const { data, error } = await supabase
                 .from('funcionarios')
                 .select(`
-          *,
-          profiles(*),
+          id,
+          profile_id,
+          cedula,
+          cargo,
+          departamento_id,
+          direccion,
+          fecha_ingreso,
+          tipo_contrato,
+          salario_base,
+          estado,
+          profiles(id, nombre, apellido, email, rol, avatar_url, activo),
           departamentos(nombre)
         `)
                 .order('fecha_ingreso', { ascending: false });
@@ -36,7 +45,7 @@ export function useFuncionarios() {
     const getDepartamentos = useQuery({
         queryKey: ['departamentos'],
         queryFn: async () => {
-            const { data, error } = await supabase.from('departamentos').select('*');
+            const { data, error } = await supabase.from('departamentos').select('id, nombre, descripcion');
             if (error) throw new Error(error.message);
             return data;
         },

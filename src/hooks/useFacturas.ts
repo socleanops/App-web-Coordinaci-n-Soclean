@@ -12,7 +12,19 @@ export function useFacturas() {
             const { data, error } = await supabase
                 .from('facturas')
                 .select(`
-                    *,
+                    id,
+                    cliente_id,
+                    numero,
+                    fecha_emision,
+                    fecha_vencimiento,
+                    periodo,
+                    estado,
+                    subtotal,
+                    impuesto,
+                    descuento,
+                    total,
+                    created_at,
+                    updated_at,
                     clientes(razon_social, rut, direccion, email),
                     items:factura_items(
                         id,
