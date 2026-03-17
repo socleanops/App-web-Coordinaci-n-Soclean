@@ -12,6 +12,7 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { useFuncionarios } from '@/hooks/useFuncionarios';
+import { generateSecureRandomString } from '@/lib/utils';
 
 interface Props {
     open: boolean;
@@ -114,7 +115,11 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
 
                     // Default role for bulk or grab from excel
                     const rol = (row.rol || row.Rol || row.ROL || 'funcionario').toLowerCase();
-                    const password = row.password || row.Password || row.PASSWORD || cedula; // Default password is the ID
+
+                    // Generate a random secure password and require password reset on first login.
+                    // Complexity rule requires min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char.
+                    const generatedSecurePassword = generateSecureRandomString(8) + 'Aa1!';
+                    const password = row.password || row.Password || row.PASSWORD || generatedSecurePassword;
 
                     let parsedFechaIngreso = new Date().toISOString().split('T')[0];
                     const rawFecha = row.fecha_ingreso || row.Fecha_ingreso || row.Fecha_Ingreso || row.FECHA_INGRESO || row.Ingreso || row.ingreso;
