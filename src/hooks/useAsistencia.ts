@@ -35,7 +35,6 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
                 query = query.eq('fecha', fechaDesde);
             }
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             const { data, error } = await query;
             if (error) throw new Error(error.message);
             return data;
@@ -44,6 +43,7 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
     const createAsistencia = useMutation({
         mutationFn: async (formData: AsistenciaFormData) => {
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { id, ...dataToInsert } = formData;
             const { data, error } = await supabase
                 .from('asistencia')

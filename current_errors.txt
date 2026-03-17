@@ -1,16 +1,12 @@
-C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\components\clientes\ClienteFormDialog.tsx:36:19 Parsing error: ';' expected.
 C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\components\funcionarios\FuncionarioBulkImportDialog.tsx:134:29 'parts' is never reassigned. Use 'const' instead.
-C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\components\funcionarios\FuncionarioFormDialog.tsx:36:23 Parsing error: ';' expected.
+C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\components\funcionarios\FuncionarioFormDialog.tsx:64:29 Parsing error: ';' expected.
 C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\components\funcionarios\FuncionarioPrintDialog.tsx:19:4 Parsing error: Property or signature expected.
-C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\components\funcionarios\FuncionariosTable.tsx:11:4 Parsing error: Property or signature expected.
 C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\components\layout\Sidebar.tsx:14:5 'Map' is defined but never used.
 C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\components\servicios\ServicioFormDialog.tsx:38:20 Parsing error: ';' expected.
 C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\components\ui\textarea.tsx:6:18 An interface declaring no members is equivalent to its supertype.
-C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\hooks\useAsistencia.ts:47:21 'id' is assigned a value but never used.
 C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\hooks\useCertificaciones.ts:41:21 'id' is assigned a value but never used.
 C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\hooks\useClientes.ts:24:21 'id' is assigned a value but never used.
 C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\hooks\useHorarios.ts:84:21 'id' is assigned a value but never used.
 C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\hooks\useServicios.ts:28:21 'id' is assigned a value but never used.
 C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\lib\pdfGenerator.ts:36:19 Parsing error: ',' expected.
 C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\pages\LogisticsMap.tsx:50:28 Parsing error: ',' expected.
-C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinaci├│n\src\pages\Reports.tsx:92:28 Parsing error: ',' expected.
