@@ -1,3 +1,4 @@
 ## 2024-02-28 - Pre-instantiate Intl.DateTimeFormat
 **Learning:** Calling `new Date().toLocaleDateString()` inside a React `.map` loop creates a new `Intl.DateTimeFormat` object for every iteration, which is expensive and causes performance bottlenecks during list rendering.
 **Action:** Extract the formatter by calling `const dateFormatter = new Intl.DateTimeFormat('locale')` outside the component (or memoize it with `useMemo`), and use `dateFormatter.format(date)` inside the render loop.
+\n## 2024-03-17 - Concurrent Geocoding API Requests\n**Learning:** Executing client-side API calls (like Google Maps Geocoding) sequentially using `await` inside a `for...of` loop creates an O(N) network latency bottleneck. \n**Action:** Use `Promise.all` or `Promise.allSettled` with `.map` to dispatch independent API requests concurrently, reducing the total network round-trip time from O(N) to O(1).

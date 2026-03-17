@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Map, MapPin, User, Navigation, Loader2 } from 'lucide-react';
 import { useServicios } from '@/hooks/useServicios';
@@ -40,22 +40,27 @@ export default function LogisticsMap() {
         if (!isLoaded || activeServices.length === 0 || serviceMarkers.length > 0) return;
         const geocoder = new window.google.maps.Geocoder();
         const fetchGeocodes = async () => {
-            const newMarkers: any[] = [];
-            for (const s of activeServices) {
+            // ⚡ Bolt: Execute geocoding concurrently to reduce latency from O(N) to O(1)
+            const geocodePromises = activeServices.map(async (s) => {
                 try {
                     const res = await geocoder.geocode({ address: `${s.direccion}, Montevideo, Uruguay` });
                     if (res.results && res.results[0]) {
-                        newMarkers.push({
+                        return {
                             id: s.id,
                             title: `${s.clientes?.razon_social || ''} - ${s.nombre}`,
                             lat: res.results[0].geometry.location.lat(),
                             lng: res.results[0].geometry.location.lng()
-                        });
+                        };
                     }
                 } catch (error) {
                     console.log(`Geocoding error for ${s.direccion}`, error);
                 }
-            }
+                return null;
+            });
+
+            const results = await Promise.all(geocodePromises);
+            const newMarkers = results.filter((r) => r !== null) as {id: string, lat: number, lng: number, title: string}[];
+
             setServiceMarkers(newMarkers);
         };
         fetchGeocodes();
