@@ -18,10 +18,12 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
                         profiles(nombre, apellido)
                     ),
                     horarios(
+                        id,
                         dia_semana,
                         hora_entrada,
                         hora_salida,
-                        servicios(nombre, direccion, clientes(razon_social))
+                        servicio_id,
+                        servicios(id, nombre, direccion, clientes(razon_social))
                     )
                 `)
                 .order('fecha', { ascending: true })
@@ -35,7 +37,7 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
             const { data, error } = await query;
             if (error) throw new Error(error.message);
-            return data as any;
+            return data;
         },
     });
 

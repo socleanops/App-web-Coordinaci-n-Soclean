@@ -21,12 +21,12 @@ export default function Reports() {
     // Obtener listas únicas con map y useMemo para evitar loops O(N^2) que congelan la UI
     const uniqueEmpleados = useMemo(() => {
         const map = new Map();
-        asistencias.forEach((current: any) => {
+        asistencias.forEach((current) => {
             if (current.funcionario_id && !map.has(current.funcionario_id)) {
                 map.set(current.funcionario_id, current);
             }
         });
-        return Array.from(map.values()).sort((a: any, b: any) => {
+        return Array.from(map.values()).sort((a, b) => {
             const nameA = a.funcionarios?.profiles?.nombre || '';
             const nameB = b.funcionarios?.profiles?.nombre || '';
             return nameA.localeCompare(nameB);
@@ -35,13 +35,13 @@ export default function Reports() {
 
     const uniqueServicios = useMemo(() => {
         const map = new Map();
-        asistencias.forEach((current: any) => {
+        asistencias.forEach((current) => {
             const servicioId = current.horarios?.servicio_id;
             if (servicioId && !map.has(servicioId)) {
                 map.set(servicioId, current);
             }
         });
-        return Array.from(map.values()).sort((a: any, b: any) => {
+        return Array.from(map.values()).sort((a, b) => {
             const nameA = a.horarios?.servicios?.nombre || '';
             const nameB = b.horarios?.servicios?.nombre || '';
             return nameA.localeCompare(nameB);
@@ -54,7 +54,7 @@ export default function Reports() {
 
         setTimeout(() => {
             // Filtrar asistencias por rango de fechas
-            const registrosRango = asistencias.filter((a: any) => {
+            const registrosRango = asistencias.filter((a) => {
                  return a.fecha >= desde && a.fecha <= hasta;
             });
 
@@ -62,10 +62,10 @@ export default function Reports() {
 
             // Aplicar filtros adicionales si están seleccionados
             if (filtroFuncionario !== 'todos') {
-                registrosAUsar = registrosAUsar.filter((a: any) => a.funcionario_id === filtroFuncionario);
+                registrosAUsar = registrosAUsar.filter((a) => a.funcionario_id === filtroFuncionario);
             }
             if (filtroServicio !== 'todos') {
-                registrosAUsar = registrosAUsar.filter((a: any) => a.horarios?.servicio_id === filtroServicio);
+                registrosAUsar = registrosAUsar.filter((a) => a.horarios?.servicio_id === filtroServicio);
             }
 
             if (tipo === 'quincena1') {
@@ -79,7 +79,7 @@ export default function Reports() {
             }
 
             // Agrupar datos según el tipo
-            let dataToExport: any[] = [];
+            let dataToExport[] = [];
             if (tipo === 'empleados' || tipo === 'quincena1') {
                 // Ordenar por empleado alfabéticamente, y luego por fecha
                 const registrosOrdenados = [...registrosAUsar].sort((a, b) => {
@@ -187,7 +187,7 @@ export default function Reports() {
 
                 // Crear objeto de total. Mapear "Total Horas" a la columna respectiva, 
                 // y usar la primera columna disponible para el texto "TOTAL GLOBAL DE HORAS DE ESTE REPORTE"
-                const summaryRow: any = {};
+                const summaryRow = {};
                 const firstKey = Object.keys(dataToExport[0])[0]; // 'Nombre Empleado' o 'Cliente'
                 summaryRow[firstKey] = '=> TOTAL GLOBAL DE HORAS DE ESTE REPORTE <=';
                 summaryRow['Total Horas'] = formattedGlobalTotal;
@@ -263,7 +263,7 @@ export default function Reports() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="todos">Todos los Empleados</SelectItem>
-                                    {uniqueEmpleados.map((a: any) => (
+                                    {uniqueEmpleados.map((a) => (
                                         <SelectItem key={`emp_${a.funcionario_id}`} value={a.funcionario_id}>
                                             {a.funcionarios?.profiles?.nombre} {a.funcionarios?.profiles?.apellido}
                                         </SelectItem>
@@ -283,7 +283,7 @@ export default function Reports() {
                                 </SelectTrigger>
                                 <SelectContent>
                                     <SelectItem value="todos">Todos los Servicios</SelectItem>
-                                    {uniqueServicios.map((a: any) => (
+                                    {uniqueServicios.map((a) => (
                                         <SelectItem key={`srv_${a.horarios?.servicio_id}`} value={a.horarios?.servicio_id}>
                                             {a.horarios?.servicios?.clientes?.razon_social} - {a.horarios?.servicios?.nombre}
                                         </SelectItem>

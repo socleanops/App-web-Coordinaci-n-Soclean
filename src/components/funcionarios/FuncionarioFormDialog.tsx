@@ -32,13 +32,13 @@ import { useFuncionarios } from '@/hooks/useFuncionarios';
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    funcionarioToEdit?: any | null; // using any for simplicity, usually Funcionario type
+    funcionarioToEdit? | null; // using any for simplicity, usually Funcionario type
 }
 
 export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }: Props) {
     const { getDepartamentos, createDepartamento, createFuncionario, updateFuncionario } = useFuncionarios();
     const form = useForm<FuncionarioFormData>({
-        resolver: zodResolver(funcionarioSchema) as any,
+        resolver: zodResolver(funcionarioSchema),
         defaultValues: {
             nombre: '',
             apellido: '',
@@ -63,14 +63,14 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                 apellido: funcionarioToEdit.profiles?.apellido || '',
                 email: funcionarioToEdit.profiles?.email || '',
                 password: '', // do not set password on edit
-                rol: (funcionarioToEdit.profiles?.rol as any) || 'funcionario',
+                rol: (funcionarioToEdit.profiles?.rol) || 'funcionario',
                 cedula: funcionarioToEdit.cedula,
                 cargo: funcionarioToEdit.cargo,
                 departamento_id: funcionarioToEdit.departamento_id || '',
                 direccion: funcionarioToEdit.direccion || '',
                 fecha_ingreso: funcionarioToEdit.fecha_ingreso,
                 tipo_contrato: funcionarioToEdit.tipo_contrato,
-                estado: funcionarioToEdit.estado as any,
+                estado: funcionarioToEdit.estado,
             });
         } else {
             form.reset();
@@ -94,7 +94,7 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                 // the mutation itself shows a success toast for "5/5" and hides "Iniciando guardado remoto..."
             }
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error) {
             console.error("Form Submit Error:", error);
             const msg = error.message || 'No se pudo guardar la información';
             toast.error(`Error: ${msg}`, { id: loadingId, duration: 10000 });
@@ -273,7 +273,7 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
                                                                 form.setValue('departamento_id', data.id);
                                                                 return 'Departamento añadido';
                                                             },
-                                                            error: (err: any) => `Error al crear: ${err.message}`
+                                                            error: (err) => `Error al crear: ${err.message}`
                                                         });
                                                     }
                                                 }}

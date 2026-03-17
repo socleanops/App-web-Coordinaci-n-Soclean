@@ -79,7 +79,7 @@ export default function HorasPorCliente() {
             const rows: ReportRow[] = [];
             let sumatoriaHorasDecimal = 0;
 
-            data.forEach((a: any) => {
+            data.forEach((a) => {
                 const est = a.estado;
                 // Calculamos solo presentes o justificados para facturación
                 if (est === 'presente' || est === 'tardanza' || est === 'salida_anticipada' || est === 'justificado') {
@@ -128,7 +128,7 @@ export default function HorasPorCliente() {
                 toast.info('Los turnos encontrados no aplican para cobro (Ej: Ausentes).');
             }
 
-        } catch (err: any) {
+        } catch (err) {
             toast.error(err.message || 'Error al obtener los datos.');
         } finally {
             setIsLoading(false);
@@ -152,7 +152,7 @@ export default function HorasPorCliente() {
         const m = Math.round((totalHoras - h) * 60);
         const hsDisplayFinal = m === 0 ? `${h}h` : `${h}h ${m}m`;
 
-        dataToExport.push({} as any);
+        dataToExport.push({});
         dataToExport.push({
             'Día': 'TOTAL GENERAL:',
             'Servicio Realizado': '',

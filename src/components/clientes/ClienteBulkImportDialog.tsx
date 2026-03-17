@@ -93,7 +93,7 @@ export function ClienteBulkImportDialog({ open, onOpenChange }: Props) {
                         estado: 'activo'
                     });
 
-                } catch (err: any) {
+                } catch (err) {
                     newErrors.push(err.message || `Fila ${i + 2}: Error desconocido al procesar cliente`);
                 }
 

@@ -1,23 +1,36 @@
 import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Search, Clock, FileSpreadsheet } from 'lucide-react';
+import { Search, Clock, FileSpreadsheet, AlertCircle, UserPlus, CheckCircle2 } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { useAsistencia } from '@/hooks/useAsistencia';
+import { useFuncionarios } from '@/hooks/useFuncionarios';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
 export default function Nomina() {
     const [mes, setMes] = useState<string>(new Date().toISOString().substring(0, 7)); // YYYY-MM
     const [searchTerm, setSearchTerm] = useState('');
+    const [searchTermServicios, setSearchTermServicios] = useState('');
     const [isExporting, setIsExporting] = useState(false);
+    const [vista, setVista] = useState<'funcionarios' | 'servicios'>('funcionarios');
+
+    // Estado para "Cubrir Servicio"
+    const [isCoverDialogOpen, setIsCoverDialogOpen] = useState(false);
+    const [selectedAsistenciaId, setSelectedAsistenciaId] = useState<string | null>(null);
+    const [selectedFuncionarioId, setSelectedFuncionarioId] = useState<string>('');
 
     const fechaDesde = `${mes}-01`;
     const fechaHasta = new Date(parseInt(mes.split('-')[0]), parseInt(mes.split('-')[1]), 0).toISOString().split('T')[0];
 
-    const { getAsistencias } = useAsistencia(fechaDesde, fechaHasta);
+    const { getAsistencias, updateAsistencia } = useAsistencia(fechaDesde, fechaHasta);
     const { data: asistencias = [], isLoading } = getAsistencias;
+
+    const { getFuncionarios } = useFuncionarios();
+    const { data: funcionariosList = [] } = getFuncionarios;
 
     // Filter by month (ya filtrado por backend, pero por seguridad lo dejamos)
     const asistenciasMes = useMemo(() => {
@@ -134,6 +147,108 @@ export default function Nomina() {
 
         return { ...stats, totalJornadas, cumplimientoPorcentaje };
     }, [horasPorFuncionario, asistenciasMes.length]);
+
+    const resumenServicios = useMemo(() => {
+        const agrupar: Record<string, {
+            servicioId: string;
+            nombreServicio: string;
+            cliente: string;
+            turnosProgramados: number;
+            turnosRealizados: number;
+            horasProgramadas: number;
+            horasRealizadas: number;
+            ausencias: (import('@/types').Asistencia & { scheduledHours: number; servicioNombre: string; cliente: string; })[];
+        }> = {};
+
+        asistenciasMes.forEach(a => {
+            const horario = a.horarios;
+            if (!horario || !horario.servicios) return;
+
+            const servId = horario.servicios.id || `unknown_${horario.servicio_id || a.horario_id}`;
+            const cliente = horario.servicios.clientes?.razon_social || horario.servicios.clientes?.nombre || 'Desconocido';
+            const nombre = horario.servicios.nombre || 'Servicio';
+
+            if (!agrupar[servId]) {
+                agrupar[servId] = {
+                    servicioId: servId,
+                    nombreServicio: nombre,
+                    cliente: cliente,
+                    turnosProgramados: 0,
+                    turnosRealizados: 0,
+                    horasProgramadas: 0,
+                    horasRealizadas: 0,
+                    ausencias: []
+                };
+            }
+
+            agrupar[servId].turnosProgramados += 1;
+            
+            let scheduledHours = 0;
+            if (horario.hora_entrada && horario.hora_salida) {
+                const [hIn, mIn] = horario.hora_entrada.split(':').map(Number);
+                const [hOut, mOut] = horario.hora_salida.split(':').map(Number);
+                let endHours = hOut + mOut / 60;
+                const startHours = hIn + mIn / 60;
+                if (endHours < startHours) endHours += 24;
+                scheduledHours = endHours - startHours;
+            }
+            agrupar[servId].horasProgramadas += scheduledHours;
+
+            const completado = a.estado === 'presente' || a.estado === 'tardanza' || a.estado === 'salida_anticipada';
+            
+            if (completado) {
+                agrupar[servId].turnosRealizados += 1;
+                let hours = 0;
+                if (a.hora_entrada_registrada && a.hora_salida_registrada) {
+                    const start = new Date(a.hora_entrada_registrada);
+                    const end = new Date(a.hora_salida_registrada);
+                    hours = Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60));
+                } else {
+                    hours = scheduledHours; 
+                }
+                agrupar[servId].horasRealizadas += hours;
+            } else if (a.estado === 'ausente' || a.estado === 'pendiente' || a.estado === 'certificado') {
+                agrupar[servId].ausencias.push({
+                    ...a,
+                    scheduledHours,
+                    servicioNombre: nombre,
+                    cliente: cliente
+                });
+            }
+        });
+
+        return Object.values(agrupar).filter(s => {
+            const search = searchTermServicios.toLowerCase();
+            return s.nombreServicio.toLowerCase().includes(search) || s.cliente.toLowerCase().includes(search);
+        }).sort((a, b) => b.turnosProgramados - a.turnosProgramados);
+    }, [asistenciasMes, searchTermServicios]);
+
+    const handleOpenCoverDialog = (id: string) => {
+        setSelectedAsistenciaId(id);
+        setSelectedFuncionarioId('');
+        setIsCoverDialogOpen(true);
+    };
+
+    const handleCoverShift = () => {
+        if (!selectedAsistenciaId || !selectedFuncionarioId) return;
+        updateAsistencia.mutate({
+            id: selectedAsistenciaId,
+            data: {
+                funcionario_id: selectedFuncionarioId,
+                estado: 'presente',
+            }
+        }, {
+            onSuccess: () => {
+                toast.success('Servicio cubierto exitosamente.');
+                setIsCoverDialogOpen(false);
+                setSelectedAsistenciaId(null);
+                setSelectedFuncionarioId('');
+            },
+            onError: (err) => {
+                toast.error(`Error al cubrir servicio: ${err.message}`);
+            }
+        });
+    };
 
     const generarReporteExcel = () => {
         setIsExporting(true);
@@ -257,6 +372,23 @@ export default function Nomina() {
                 </Card>
             </div>
 
+            {/* Selector de Vistas */}
+            <div className="flex gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-lg w-full sm:w-max mb-6">
+                <button
+                    onClick={() => setVista('funcionarios')}
+                    className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${vista === 'funcionarios' ? 'bg-white shadow text-primary dark:bg-slate-700' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
+                >
+                    Consolidado por Funcionario
+                </button>
+                <button
+                    onClick={() => setVista('servicios')}
+                    className={`px-4 py-2 text-sm font-semibold rounded-md transition-all ${vista === 'servicios' ? 'bg-white shadow text-primary dark:bg-slate-700' : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'}`}
+                >
+                    Cumplimiento de Servicios
+                </button>
+            </div>
+
+            {vista === 'funcionarios' && (
             <Card className="border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
                 <CardHeader className="pb-4 border-b">
                     <div className="flex flex-col sm:flex-row justify-between w-full items-center gap-4">
@@ -342,7 +474,157 @@ export default function Nomina() {
                     </div>
                 </CardContent>
             </Card>
+            )}
+
+            {vista === 'servicios' && (
+                <div className="space-y-6">
+                    <Card className="border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
+                        <CardHeader className="pb-4 border-b">
+                            <div className="flex flex-col sm:flex-row justify-between w-full items-center gap-4">
+                                <CardTitle className="text-lg flex-1">Cumplimiento y Horas por Servicio (Proyectadas vs Realizadas)</CardTitle>
+                                <div className="relative w-full sm:w-72">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Buscar servicio o cliente..."
+                                        className="pl-9 bg-background/50"
+                                        value={searchTermServicios}
+                                        onChange={(e) => setSearchTermServicios(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <div className="overflow-x-auto">
+                                <Table className="min-w-[800px]">
+                                    <TableHeader className="bg-slate-50 dark:bg-slate-800/50">
+                                        <TableRow>
+                                            <TableHead className="pl-6">Cliente / Servicio</TableHead>
+                                            <TableHead className="text-center">Días Contratados (Prog)</TableHead>
+                                            <TableHead className="text-center text-emerald-600">Días Realizados</TableHead>
+                                            <TableHead className="text-center font-semibold text-primary">% Cumplimiento</TableHead>
+                                            <TableHead className="text-right">Horas Contrato</TableHead>
+                                            <TableHead className="text-right pr-6">Horas Reales</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {isLoading ? (
+                                            <TableRow>
+                                                <TableCell colSpan={6} className="text-center h-32 text-muted-foreground">Analizando servicios...</TableCell>
+                                            </TableRow>
+                                        ) : resumenServicios.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={6} className="text-center h-32 text-muted-foreground">No se encontraron servicios.</TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            resumenServicios.map((s) => {
+                                                const porc = s.turnosProgramados > 0 ? (s.turnosRealizados / s.turnosProgramados) * 100 : 0;
+                                                return (
+                                                    <TableRow key={s.servicioId} className="hover:bg-muted/30">
+                                                        <TableCell className="pl-6">
+                                                            <div className="font-semibold text-slate-800 dark:text-slate-200">{s.cliente}</div>
+                                                            <div className="text-xs text-muted-foreground">{s.nombreServicio}</div>
+                                                        </TableCell>
+                                                        <TableCell className="text-center font-medium text-slate-500">{s.turnosProgramados} d</TableCell>
+                                                        <TableCell className="text-center font-medium text-emerald-600">{s.turnosRealizados} d</TableCell>
+                                                        <TableCell className="text-center">
+                                                            <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-bold ${porc >= 95 ? 'bg-emerald-100 text-emerald-700' : porc >= 80 ? 'bg-amber-100 text-amber-700' : 'bg-red-100 text-red-700'}`}>
+                                                                {porc.toFixed(1)}%
+                                                            </span>
+                                                        </TableCell>
+                                                        <TableCell className="text-right font-medium text-slate-500">{s.horasProgramadas.toFixed(1)} Hrs</TableCell>
+                                                        <TableCell className="text-right pr-6 font-bold text-coreops-primary">{s.horasRealizadas.toFixed(1)} Hrs</TableCell>
+                                                    </TableRow>
+                                                );
+                                            })
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </CardContent>
+                    </Card>
+
+                    <Card className="border-red-200 dark:border-red-900 bg-red-50/30 dark:bg-red-900/10 backdrop-blur-md shadow-sm">
+                        <CardHeader className="pb-4 border-b border-red-100 dark:border-red-900/50">
+                            <CardTitle className="text-lg text-red-600 dark:text-red-400 flex items-center gap-2">
+                                <AlertCircle className="w-5 h-5" /> Turnos Sin Cubrir (Ausencias/Pendientes)
+                            </CardTitle>
+                        </CardHeader>
+                        <CardContent className="p-0">
+                            <div className="overflow-x-auto">
+                                <Table>
+                                    <TableHeader>
+                                        <TableRow>
+                                            <TableHead className="pl-6">Fecha</TableHead>
+                                            <TableHead>Cliente / Servicio</TableHead>
+                                            <TableHead>Funcionario Original (Ausente)</TableHead>
+                                            <TableHead className="text-right pr-6">Acción</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {resumenServicios.flatMap(s => s.ausencias).length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">Todos los turnos están cubiertos.</TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            resumenServicios.flatMap(s => s.ausencias).sort((a, b) => new Date(a.fecha).getTime() - new Date(b.fecha).getTime()).map(aus => (
+                                                <TableRow key={aus.id}>
+                                                    <TableCell className="pl-6 font-medium">{aus.fecha}</TableCell>
+                                                    <TableCell>
+                                                        <div className="font-semibold">{aus.cliente}</div>
+                                                        <div className="text-xs text-muted-foreground">{aus.servicioNombre}</div>
+                                                    </TableCell>
+                                                    <TableCell className="text-red-500">
+                                                        {aus.funcionarios?.profiles?.nombre} {aus.funcionarios?.profiles?.apellido}
+                                                    </TableCell>
+                                                    <TableCell className="text-right pr-6">
+                                                        <Button size="sm" variant="outline" className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700" onClick={() => handleOpenCoverDialog(aus.id)}>
+                                                            <UserPlus className="w-4 h-4 mr-2" /> Cubrir
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
+            <Dialog open={isCoverDialogOpen} onOpenChange={setIsCoverDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Cubrir Servicio</DialogTitle>
+                        <DialogDescription>Selecciona un funcionario para cubrir esta ausencia / turno pendiente.</DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4">
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Funcionario Suplente</label>
+                            <Select value={selectedFuncionarioId} onValueChange={setSelectedFuncionarioId}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Buscar y seleccionar funcionario..." />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {funcionariosList.filter(f => f.estado === 'activo').map(f => (
+                                        <SelectItem key={f.id} value={f.id}>
+                                            {f.profiles?.nombre} {f.profiles?.apellido} - CI: {f.cedula}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsCoverDialogOpen(false)}>Cancelar</Button>
+                        <Button onClick={handleCoverShift} disabled={!selectedFuncionarioId}>
+                            <CheckCircle2 className="w-4 h-4 mr-2" /> Confirmar Cobertura
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
 
         </div>
     );
 }
+

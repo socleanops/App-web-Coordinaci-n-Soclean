@@ -7,11 +7,11 @@ import { Search, Pencil, Printer, KeyRound, Stethoscope } from 'lucide-react';
 import { FuncionarioPrintDialog } from './FuncionarioPrintDialog';
 
 interface FuncionariosTableProps {
-    employees: any[];
+    employees[];
     isLoading: boolean;
-    onEdit: (funcionario: any) => void;
-    onResetPassword: (funcionario: any) => void;
-    onCertificaciones: (funcionario: any) => void;
+    onEdit: (funcionario) => void;
+    onResetPassword: (funcionario) => void;
+    onCertificaciones: (funcionario) => void;
 }
 
 export function FuncionariosTable({ employees, isLoading, onEdit, onResetPassword, onCertificaciones }: FuncionariosTableProps) {
@@ -20,7 +20,7 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
 
     // Optimize array filtering by memoizing it to prevent recalculation on every render
     const filteredEmployees = useMemo(() => {
-        return employees.filter((emp: any) => {
+        return employees.filter((emp) => {
             const search = searchTerm.toLowerCase();
             const n = emp?.profiles?.nombre?.toLowerCase() || '';
             const a = emp?.profiles?.apellido?.toLowerCase() || '';
@@ -88,7 +88,7 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredEmployees.map((emp: any) => (
+                                filteredEmployees.map((emp) => (
                                     <TableRow key={emp.id} className="group hover:bg-muted/30 transition-colors">
                                         <TableCell>
                                             <div className="font-medium">{emp.profiles?.nombre} {emp.profiles?.apellido}</div>

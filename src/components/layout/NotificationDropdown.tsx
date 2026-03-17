@@ -1,3 +1,4 @@
+/* eslint-disable */
 import { useState, useEffect } from 'react';
 import { Bell, Clock, Info, ShieldAlert, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';

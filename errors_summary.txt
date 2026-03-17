@@ -1,0 +1,142 @@
+\src\components\clientes\ClienteBulkImportDialog.tsx:58 Unexpected any. Specify a different type.
+\src\components\clientes\ClienteBulkImportDialog.tsx:96 Unexpected any. Specify a different type.
+\src\components\clientes\ClienteFormDialog.tsx:35 Unexpected any. Specify a different type.
+\src\components\clientes\ClienteFormDialog.tsx:42 Unexpected any. Specify a different type.
+\src\components\clientes\ClienteFormDialog.tsx:70 Unexpected any. Specify a different type.
+\src\components\clientes\ClienteFormDialog.tsx:103 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioBulkImportDialog.tsx:58 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioBulkImportDialog.tsx:102 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioBulkImportDialog.tsx:132 'parts' is never reassigned. Use 'const' instead.
+\src\components\funcionarios\FuncionarioBulkImportDialog.tsx:177 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioCertificacionesDialog.tsx:64 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioCertificacionesDialog.tsx:76 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioFormDialog.tsx:35 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioFormDialog.tsx:41 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioFormDialog.tsx:66 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioFormDialog.tsx:73 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioFormDialog.tsx:97 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioFormDialog.tsx:276 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionarioPrintDialog.tsx:18 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionariosTable.tsx:10 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionariosTable.tsx:12 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionariosTable.tsx:13 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionariosTable.tsx:14 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionariosTable.tsx:23 Unexpected any. Specify a different type.
+\src\components\funcionarios\FuncionariosTable.tsx:91 Unexpected any. Specify a different type.
+\src\components\horarios\HorarioFormDialog.tsx:108 Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinación\src\components\horarios\HorarioFormDialog.tsx:108:17
+  106 |                     vigente_hasta: horarioToEdit.vigente_hasta || '',
+  107 |                 });
+> 108 |                 setSelectedDays([horarioToEdit.dia_semana]);
+      |                 ^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  109 |             } else {
+  110 |                 form.reset({
+  111 |                     funcionario_id: '',
+\src\components\horarios\HorarioFormDialog.tsx:170 Unexpected any. Specify a different type.
+\src\components\layout\NotificationDropdown.tsx:48 Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinación\src\components\layout\NotificationDropdown.tsx:48:9
+  46 |
+  47 |     useEffect(() => {
+> 48 |         fetchNotifications();
+     |         ^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  49 |
+  50 |         // Listen to changes in real-time
+  51 |         const channel = supabase
+\src\components\layout\Sidebar.tsx:14 'Map' is defined but never used.
+\src\components\servicios\ServicioFormDialog.tsx:37 Unexpected any. Specify a different type.
+\src\components\servicios\ServicioFormDialog.tsx:46 Unexpected any. Specify a different type.
+\src\components\servicios\ServicioFormDialog.tsx:64 Unexpected any. Specify a different type.
+\src\components\servicios\ServicioFormDialog.tsx:92 Unexpected any. Specify a different type.
+\src\components\theme-provider.tsx:66 Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+\src\components\ui\button.tsx:57 Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+\src\components\ui\form.tsx:170 Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components.
+\src\components\ui\textarea.tsx:5 An interface declaring no members is equivalent to its supertype.
+\src\hooks\useAsistencia.ts:38 Unexpected any. Specify a different type.
+\src\hooks\useAsistencia.ts:44 'id' is assigned a value but never used.
+\src\hooks\useCertificaciones.ts:41 'id' is assigned a value but never used.
+\src\hooks\useClientes.ts:24 'id' is assigned a value but never used.
+\src\hooks\useClientes.ts:42 Unexpected any. Specify a different type.
+\src\hooks\useFacturas.ts:30 Unexpected any. Specify a different type.
+\src\hooks\useFuncionarios.ts:32 Unexpected any. Specify a different type.
+\src\hooks\useFuncionarios.ts:98 Unexpected any. Specify a different type.
+\src\hooks\useHorarios.ts:30 Unexpected any. Specify a different type.
+\src\hooks\useHorarios.ts:83 'id' is assigned a value but never used.
+\src\hooks\useServicios.ts:21 Unexpected any. Specify a different type.
+\src\hooks\useServicios.ts:27 'id' is assigned a value but never used.
+\src\lib\pdfGenerator.ts:35 Unexpected any. Specify a different type.
+\src\lib\pdfGenerator.ts:40 Unexpected any. Specify a different type.
+\src\lib\pdfGenerator.ts:41 Unexpected any. Specify a different type.
+\src\lib\pdfGenerator.ts:53 Unexpected any. Specify a different type.
+\src\pages\Attendance.tsx:97 Unexpected any. Specify a different type.
+\src\pages\Attendance.tsx:110 Unexpected any. Specify a different type.
+\src\pages\Attendance.tsx:117 Unexpected any. Specify a different type.
+\src\pages\Attendance.tsx:117 Unexpected any. Specify a different type.
+\src\pages\Attendance.tsx:133 Unexpected any. Specify a different type.
+\src\pages\Attendance.tsx:145 Unexpected any. Specify a different type.
+\src\pages\Attendance.tsx:407 Unexpected any. Specify a different type.
+\src\pages\Attendance.tsx:483 Unexpected any. Specify a different type.
+\src\pages\Billing.tsx:82 Unexpected any. Specify a different type.
+\src\pages\Billing.tsx:131 Unexpected any. Specify a different type.
+\src\pages\Billing.tsx:155 Unexpected any. Specify a different type.
+\src\pages\Employees.tsx:58 Unexpected any. Specify a different type.
+\src\pages\Login.tsx:77 Unexpected any. Specify a different type.
+\src\pages\Login.tsx:96 Unexpected any. Specify a different type.
+\src\pages\LogisticsMap.tsx:44 Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinación\src\pages\LogisticsMap.tsx:44:9
+  42 |         if (!isLoaded || activeServices.length === 0 || serviceMarkers.length > 0 || hasAttemptedGeocode) return;
+  43 |         
+> 44 |         setHasAttemptedGeocode(true); // Prevent re-runs if it fails or returns empty
+     |         ^^^^^^^^^^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  45 |         
+  46 |         const geocoder = new window.google.maps.Geocoder();
+  47 |         const fetchGeocodes = async () => {
+\src\pages\LogisticsMap.tsx:48 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:24 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:29 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:29 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:38 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:44 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:44 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:57 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:65 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:68 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:82 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:190 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:266 Unexpected any. Specify a different type.
+\src\pages\Reports.tsx:286 Unexpected any. Specify a different type.
+\src\pages\Schedules.tsx:77 Unexpected any. Specify a different type.
+\src\pages\Settings.tsx:86 Unexpected any. Specify a different type.
+\src\pages\Settings.tsx:120 Unexpected any. Specify a different type.
+\src\pages\Settings.tsx:138 Unexpected any. Specify a different type.
+\src\pages\Settings.tsx:151 React Hook useEffect has a missing dependency: 'loadBackups'. Either include it or remove the dependency array.
+\src\pages\Settings.tsx:169 Unexpected any. Specify a different type.
+\src\pages\Settings.tsx:209 Unexpected any. Specify a different type.
+\src\pages\Settings.tsx:231 Unexpected any. Specify a different type.
+\src\pages\Settings.tsx:253 Unexpected any. Specify a different type.
+\src\pages\SupervisorMobile.tsx:11 Unexpected any. Specify a different type.
+\src\pages\SupervisorMobile.tsx:67 Unexpected any. Specify a different type.
+\src\pages\SupervisorMobile.tsx:67 Unexpected any. Specify a different type.
+\src\pages\SupervisorMobile.tsx:83 Unexpected any. Specify a different type.
+\src\pages\SupervisorMobile.tsx:94 Unexpected any. Specify a different type.
+\src\pages\SupervisorMobile.tsx:104 Unexpected any. Specify a different type.

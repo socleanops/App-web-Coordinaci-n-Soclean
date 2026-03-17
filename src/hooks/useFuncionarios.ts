@@ -29,7 +29,7 @@ export function useFuncionarios() {
                 .order('fecha_ingreso', { ascending: false });
 
             if (error) throw new Error(error.message);
-            return data as any;
+            return data;
         },
     });
 
@@ -95,7 +95,7 @@ export function useFuncionarios() {
                         console.log("[useFuncionarios] existingFunc check done:", existingFunc);
 
                         if (existingFunc) {
-                            const prof = existingFunc.profiles as any;
+                            const prof = existingFunc.profiles;
                             const fullName = prof ? `${prof.nombre} ${prof.apellido}` : 'un funcionario activo';
                             throw new Error(`Este correo/cédula ya está registrado y asignado a ${fullName}.`);
                         }

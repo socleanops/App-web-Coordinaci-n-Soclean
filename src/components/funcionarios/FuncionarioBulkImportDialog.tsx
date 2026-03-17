@@ -99,7 +99,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         try {
                             matchedDepto = await createDepartamento.mutateAsync(reqDeptoNameOriginal);
                             if (matchedDepto) currentDeptos.push(matchedDepto);
-                        } catch (e: any) {
+                        } catch (e) {
                             if (currentDeptos.length > 0) {
                                 matchedDepto = currentDeptos[0]; // fallback
                             } else {
@@ -174,7 +174,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         estado
                     });
 
-                } catch (err: any) {
+                } catch (err) {
                     const msg = err.message || '';
                     if (msg.includes('duplicate key value') || msg.includes('cedula_key')) {
                         const duplicateCedula = row.Cedula || row.cedula || row.CEDULA || 'especificada';

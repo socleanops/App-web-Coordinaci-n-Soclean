@@ -39,7 +39,7 @@ export function useClientes() {
 
     const updateCliente = useMutation({
         mutationFn: async ({ id, data }: { id: string; data: Partial<ClienteFormData> }) => {
-            const payload: any = { ...data };
+            const payload = { ...data };
             if (payload.razon_social) {
                 payload.nombre = payload.razon_social;
             }
