@@ -1,9 +1,8 @@
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
-import { useAsistencia } from "./useAsistencia";
+import { useAsistencia } from "../../hooks/useAsistencia";
 import { supabase } from "@/lib/supabase";
-import type { AsistenciaFormData } from "@/lib/validations/asistencia";
 
 // Mock dependencies
 vi.mock("@/lib/supabase", () => ({
@@ -23,7 +22,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 const createChainableMock = (resolvedData: unknown = null) => {
-  const chainable: Record<string, Mock> = {
+  const chainable: Record<string, unknown> = {
     select: vi.fn(() => chainable),
     order: vi.fn(() => chainable),
     gte: vi.fn(() => chainable),
@@ -33,15 +32,13 @@ const createChainableMock = (resolvedData: unknown = null) => {
     insert: vi.fn(() => chainable),
     update: vi.fn(() => chainable),
     single: vi.fn(() => Promise.resolve({ data: resolvedData, error: null })),
-    then: vi.fn((resolve: (val: unknown) => void) =>
-      resolve({ data: resolvedData, error: null }),
-    ),
+    then: vi.fn((resolve) => resolve({ data: resolvedData, error: null })),
   };
   return chainable;
 };
 
 describe("useAsistencia", () => {
-  let mockSupabase: Record<string, Record<string, Mock>> = {};
+  let mockSupabase: Record<string, Record<string, any>> = {};
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -101,7 +98,7 @@ describe("useAsistencia", () => {
 
     it("throws error when fetching fails", async () => {
       const builder = createChainableMock();
-      builder.then = vi.fn((resolve: (val: unknown) => void) =>
+      builder.then = vi.fn((resolve) =>
         resolve({ data: null, error: { message: "Fetch error" } }),
       );
       mockSupabase.asistencia = builder;
@@ -128,7 +125,7 @@ describe("useAsistencia", () => {
           horario_id: "h1",
           fecha: "2023-10-10",
           estado: "pendiente",
-        } as unknown as AsistenciaFormData);
+        } as any);
       });
 
       await waitFor(() =>

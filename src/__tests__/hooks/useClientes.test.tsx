@@ -1,7 +1,7 @@
 import { renderHook, waitFor, act } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { describe, it, expect, vi, beforeEach, type Mock } from "vitest";
-import { useClientes } from "./useClientes";
+import { useClientes } from "../../hooks/useClientes";
 import { supabase } from "@/lib/supabase";
 import type { ClienteFormData } from "@/lib/validations/cliente";
 
@@ -23,22 +23,20 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 const createChainableMock = (resolvedData: unknown = null) => {
-  const chainable: Record<string, Mock> = {
+  const chainable: Record<string, any> = {
     select: vi.fn(() => chainable),
     order: vi.fn(() => chainable),
     insert: vi.fn(() => chainable),
     update: vi.fn(() => chainable),
     eq: vi.fn(() => chainable),
     single: vi.fn(() => Promise.resolve({ data: resolvedData, error: null })),
-    then: vi.fn((resolve: (val: unknown) => void) =>
-      resolve({ data: resolvedData, error: null }),
-    ),
+    then: vi.fn((resolve) => resolve({ data: resolvedData, error: null })),
   };
   return chainable;
 };
 
 describe("useClientes", () => {
-  let mockSupabase: Record<string, Record<string, Mock>> = {};
+  let mockSupabase: Record<string, Record<string, any>> = {};
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -46,7 +46,7 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe("useFuncionarios", () => {
-  let mockTables: Record<string, Record<string, any>> = {};
+  let mockTables: Record<string, Record<string, Mock>> = {};
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -58,12 +58,10 @@ describe("useFuncionarios", () => {
         select: vi.fn().mockReturnValue({
           order: vi.fn().mockResolvedValue({ data: [], error: null }),
           eq: vi.fn().mockReturnValue({
-            single: vi
-              .fn()
-              .mockResolvedValue({
-                data: { profile_id: "prof-1" },
-                error: null,
-              }),
+            single: vi.fn().mockResolvedValue({
+              data: { profile_id: "prof-1" },
+              error: null,
+            }),
           }),
         }),
         insert: vi.fn().mockReturnValue({
@@ -76,12 +74,10 @@ describe("useFuncionarios", () => {
         update: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
             select: vi.fn().mockReturnValue({
-              single: vi
-                .fn()
-                .mockResolvedValue({
-                  data: { id: "func-1", cargo: "Manager" },
-                  error: null,
-                }),
+              single: vi.fn().mockResolvedValue({
+                data: { id: "func-1", cargo: "Manager" },
+                error: null,
+              }),
             }),
           }),
         }),
@@ -90,12 +86,10 @@ describe("useFuncionarios", () => {
         select: vi.fn().mockResolvedValue({ data: [], error: null }),
         insert: vi.fn().mockReturnValue({
           select: vi.fn().mockReturnValue({
-            single: vi
-              .fn()
-              .mockResolvedValue({
-                data: { id: "dep-1", nombre: "IT" },
-                error: null,
-              }),
+            single: vi.fn().mockResolvedValue({
+              data: { id: "dep-1", nombre: "IT" },
+              error: null,
+            }),
           }),
         }),
       },
