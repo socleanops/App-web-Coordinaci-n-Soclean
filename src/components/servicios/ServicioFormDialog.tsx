@@ -28,14 +28,14 @@ import {
 } from '@/components/ui/select';
 import type { ServicioFormData } from '@/lib/validations/servicio';
 import { servicioSchema } from '@/lib/validations/servicio';
+import type { Servicio } from '@/types';
 import { useServicios } from '@/hooks/useServicios';
 import { useClientes } from '@/hooks/useClientes';
 
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-    servicioToEdit? | null; // usually Servicio type
+    servicioToEdit: Servicio | null | undefined; // usually Servicio type
 }
 
 export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props) {
@@ -45,7 +45,7 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
 
     const form = useForm<ServicioFormData>({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-        resolver: zodResolver(servicioSchema),
+        resolver: zodResolver(servicioSchema) as any,
         defaultValues: {
             nombre: '',
             cliente_id: '',
@@ -96,7 +96,8 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
         } catch (error) {
             console.error("Form Submit Error:", error);
             toast.dismiss(loadingId);
-            toast.error(`Error al revisar datos: ${error.message || 'No se pudo guardar la información'}`, { duration: 8000 });
+            const errorMessage = error instanceof Error ? error.message : 'No se pudo guardar la información';
+            toast.error(`Error al revisar datos: ${errorMessage}`, { duration: 8000 });
         }
     };
 

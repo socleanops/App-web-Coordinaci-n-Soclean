@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, memo, useCallback, useMemo } from 'react';
 import { NavLink } from 'react-router-dom';
 import {
     BarChart3,
@@ -10,8 +10,7 @@ import {
     Receipt,
     Settings,
     ChevronLeft,
-    ChevronRight,
-    Map
+    ChevronRight
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { APP_VERSION, APP_COPYRIGHT, APP_DEVELOPER } from '@/lib/appInfo';
@@ -19,16 +18,24 @@ import { Button } from '@/components/ui/button';
 
 import { useAuthStore } from '@/stores/authStore';
 
-export function Sidebar({ forceExpand = false }: { forceExpand?: boolean }) {
+/**
+ * Sidebar component with navigation links.
+ * Optimized with React.memo to prevent unnecessary re-renders.
+ */
+export const Sidebar = memo(function Sidebar({ forceExpand = false }: { forceExpand?: boolean }) {
     const [collapsed, setCollapsed] = useState(false);
     const role = useAuthStore(s => s.role);
 
     // If mobile menu forces expansion, ignore collapsed state
     const isCollapsed = forceExpand ? false : collapsed;
 
+    const handleToggle = useCallback(() => {
+        setCollapsed(c => !c);
+    }, []);
+
     const isManager = role === 'superadmin' || role === 'admin';
 
-    const navigation = [
+    const navigation = useMemo(() => [
         { name: 'Dashboard', href: '/', icon: BarChart3 },
         { name: 'Funcionarios', href: '/funcionarios', icon: Users },
         { name: 'Horarios', href: '/horarios', icon: CalendarClock },
@@ -41,7 +48,7 @@ export function Sidebar({ forceExpand = false }: { forceExpand?: boolean }) {
             { name: 'Horas RRHH', href: '/nomina', icon: Clock },
             { name: 'Configuración', href: '/configuracion', icon: Settings }
         ] : []),
-    ];
+    ], [isManager]);
 
     return (
         <div className={cn(
@@ -107,7 +114,7 @@ export function Sidebar({ forceExpand = false }: { forceExpand?: boolean }) {
                     <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => setCollapsed(!isCollapsed)}
+                        onClick={handleToggle}
                         className="mx-auto flex w-full justify-center"
                         aria-label={isCollapsed ? "Expandir menú" : "Colapsar menú"}
                     >
@@ -117,4 +124,4 @@ export function Sidebar({ forceExpand = false }: { forceExpand?: boolean }) {
             )}
         </div>
     );
-}
+});

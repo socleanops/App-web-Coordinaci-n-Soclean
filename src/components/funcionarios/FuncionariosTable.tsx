@@ -1,24 +1,26 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, memo } from 'react';
+import { List } from 'react-window';
+import type { RowComponentProps } from 'react-window';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Search, Pencil, Printer, KeyRound, Stethoscope } from 'lucide-react';
 import { FuncionarioPrintDialog } from './FuncionarioPrintDialog';
+import type { Funcionario } from '@/types';
 
 interface FuncionariosTableProps {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-    employees: any[];
+    employees: Funcionario[];
     isLoading: boolean;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-    onEdit: (funcionario: any) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-    onResetPassword: (funcionario: any) => void;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-    onCertificaciones: (funcionario: any) => void;
+    onEdit: (funcionario: Funcionario) => void;
+    onResetPassword: (funcionario: Funcionario) => void;
+    onCertificaciones: (funcionario: Funcionario) => void;
 }
 
-export function FuncionariosTable({ employees, isLoading, onEdit, onResetPassword, onCertificaciones }: FuncionariosTableProps) {
+/**
+ * Tabla virtualizada de funcionarios.
+ * Optimizada con React.memo para prevenir re-renderizados innecesarios.
+ */
+export const FuncionariosTable = memo(function FuncionariosTable({ employees, isLoading, onEdit, onResetPassword, onCertificaciones }: FuncionariosTableProps) {
     const [searchTerm, setSearchTerm] = useState('');
     const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
 
@@ -41,6 +43,83 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
         month: 'numeric',
         day: 'numeric'
     }), []);
+
+    interface RowProps {
+        filteredEmployees: Funcionario[];
+        onEdit: (funcionario: Funcionario) => void;
+        onResetPassword: (funcionario: Funcionario) => void;
+        onCertificaciones: (funcionario: Funcionario) => void;
+        dateFormatter: Intl.DateTimeFormat;
+    }
+
+    // Define Row outside to ensure stable reference, passing data via rowProps
+    const rowProps = useMemo<RowProps>(() => ({
+        filteredEmployees,
+        onEdit,
+        onResetPassword,
+        onCertificaciones,
+        dateFormatter
+    }), [filteredEmployees, onEdit, onResetPassword, onCertificaciones, dateFormatter]);
+
+    const Row = ({ index, style, ariaAttributes, filteredEmployees, onEdit, onResetPassword, onCertificaciones, dateFormatter }: RowComponentProps & RowProps): React.ReactElement => {
+        const emp = filteredEmployees[index];
+        return (
+            <div style={style} {...ariaAttributes} className="flex w-full border-b border-slate-200 dark:border-slate-800 hover:bg-muted/30 transition-colors group">
+                <div className="flex-1 min-w-0 px-4 py-3 w-[200px]">
+                    <div className="font-medium">{emp.profiles?.nombre} {emp.profiles?.apellido}</div>
+                    <div className="text-xs text-muted-foreground">{emp.profiles?.email}</div>
+                </div>
+                <div className="w-32 px-4 py-3 text-muted-foreground">{emp.cedula}</div>
+                <div className="w-32 px-4 py-3">{emp.cargo}</div>
+                <div className="w-24 px-4 py-3">
+                    <span className="text-xs bg-secondary/20 text-secondary-foreground px-2 py-1 rounded-md border border-secondary/30">
+                        {emp.departamentos?.nombre || 'N/A'}
+                    </span>
+                </div>
+                <div className="w-24 px-4 py-3 text-muted-foreground text-sm">
+                    {dateFormatter.format(new Date(emp.fecha_ingreso))}
+                </div>
+                <div className="w-24 px-4 py-3">
+                    <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${emp.estado === 'activo' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' :
+                        emp.estado === 'inactivo' ? 'bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700' :
+                            emp.estado === 'vacaciones' ? 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800' :
+                                'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
+                        }`}>
+                        {emp.estado.charAt(0).toUpperCase() + emp.estado.slice(1)}
+                    </span>
+                </div>
+                <div className="w-32 px-4 py-3 text-right whitespace-nowrap">
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onCertificaciones(emp)}
+                        className="text-muted-foreground hover:text-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Certificaciones Médicas"
+                    >
+                        <Stethoscope className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onResetPassword(emp)}
+                        className="text-muted-foreground hover:text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Forzar Reseteo de Contraseña"
+                    >
+                        <KeyRound className="h-4 w-4" />
+                    </Button>
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(emp)}
+                        className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                        title="Editar Ficha"
+                    >
+                        <Pencil className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+        );
+    };
 
     return (
         <Card className="border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
@@ -66,93 +145,38 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-background/50 overflow-x-auto overflow-y-hidden">
-                    <Table className="min-w-[800px]">
-                        <TableHeader className="bg-muted/50">
-                            <TableRow>
-                                <TableHead className="w-[200px]">Funcionario</TableHead>
-                                <TableHead>Cédula</TableHead>
-                                <TableHead>Cargo</TableHead>
-                                <TableHead>Dpto.</TableHead>
-                                <TableHead>Ingreso</TableHead>
-                                <TableHead>Estado</TableHead>
-                                <TableHead className="text-right">Acciones</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {isLoading ? (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
-                                        Cargando información...
-                                    </TableCell>
-                                </TableRow>
-                            ) : filteredEmployees.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
-                                        No se encontraron funcionarios.
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-                                filteredEmployees.map((emp) => (
-                                    <TableRow key={emp.id} className="group hover:bg-muted/30 transition-colors">
-                                        <TableCell>
-                                            <div className="font-medium">{emp.profiles?.nombre} {emp.profiles?.apellido}</div>
-                                            <div className="text-xs text-muted-foreground">{emp.profiles?.email}</div>
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground">{emp.cedula}</TableCell>
-                                        <TableCell>{emp.cargo}</TableCell>
-                                        <TableCell>
-                                            <span className="text-xs bg-secondary/20 text-secondary-foreground px-2 py-1 rounded-md border border-secondary/30">
-                                                {emp.departamentos?.nombre || 'N/A'}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground text-sm">
-                                            {dateFormatter.format(new Date(emp.fecha_ingreso))}
-                                        </TableCell>
-                                        <TableCell>
-                                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${emp.estado === 'activo' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' :
-                                                emp.estado === 'inactivo' ? 'bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700' :
-                                                    emp.estado === 'vacaciones' ? 'bg-amber-100 text-amber-800 border border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800' :
-                                                        'bg-blue-100 text-blue-800 border border-blue-200 dark:bg-blue-900/30 dark:text-blue-400 dark:border-blue-800'
-                                                }`}>
-                                                {emp.estado.charAt(0).toUpperCase() + emp.estado.slice(1)}
-                                            </span>
-                                        </TableCell>
-                                        <TableCell className="text-right whitespace-nowrap">
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => onCertificaciones(emp)}
-                                                className="text-muted-foreground hover:text-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                title="Certificaciones Médicas"
-                                            >
-                                                <Stethoscope className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => onResetPassword(emp)}
-                                                className="text-muted-foreground hover:text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                title="Forzar Reseteo de Contraseña"
-                                            >
-                                                <KeyRound className="h-4 w-4" />
-                                            </Button>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={() => onEdit(emp)}
-                                                className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
-                                                title="Editar Ficha"
-                                            >
-                                                <Pencil className="h-4 w-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
+                <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-background/50 overflow-hidden">
+                    {/* Header */}
+                    <div className="flex w-full bg-muted/50 border-b border-slate-200 dark:border-slate-800 font-medium text-sm text-muted-foreground">
+                        <div className="flex-1 min-w-0 px-4 py-3 w-[200px]">Funcionario</div>
+                        <div className="w-32 px-4 py-3">Cédula</div>
+                        <div className="w-32 px-4 py-3">Cargo</div>
+                        <div className="w-24 px-4 py-3">Dpto.</div>
+                        <div className="w-24 px-4 py-3">Ingreso</div>
+                        <div className="w-24 px-4 py-3">Estado</div>
+                        <div className="w-32 px-4 py-3 text-right">Acciones</div>
+                    </div>
+                    
+                    {/* Virtualized Body */}
+                    {isLoading ? (
+                        <div className="flex items-center justify-center h-24 text-muted-foreground">
+                            Cargando información...
+                        </div>
+                    ) : filteredEmployees.length === 0 ? (
+                        <div className="flex items-center justify-center h-24 text-muted-foreground">
+                            No se encontraron funcionarios.
+                        </div>
+                    ) : (
+                        <List<object>
+                            defaultHeight={400}
+                            rowCount={filteredEmployees.length}
+                            rowHeight={64}
+                            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                            rowComponent={Row as any}
+                            rowProps={rowProps}
+                            style={{ width: '100%' }}
+                        />
+                    )}
                 </div>
             </CardContent>
 
@@ -163,4 +187,4 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
             />
         </Card>
     );
-}
+});

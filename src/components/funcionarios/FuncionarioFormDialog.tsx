@@ -25,33 +25,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { toast } from 'sonner';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-} from '@/components/ui/dialog';
-import {
-    Form,
-    FormControl,
-    FormField,
-    FormItem,
-    FormLabel,
-    FormMessage,
-} from '@/components/ui/form';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
 import type { FuncionarioFormData } from '@/lib/validations/funcionario';
 import { funcionarioSchema } from '@/lib/validations/funcionario';
 import { useFuncionarios } from '@/hooks/useFuncionarios';
@@ -60,8 +33,15 @@ interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
+    funcionarioToEdit?: any | null; // usually Funcionario type
+}
+
+export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }: Props) {
+    const { createFuncionario, updateFuncionario, createDepartamento, getDepartamentos } = useFuncionarios();
+
+    const form = useForm<FuncionarioFormData>({
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-        resolver: zodResolver(funcionarioSchema),
+        resolver: zodResolver(funcionarioSchema) as any,
         defaultValues: {
             nombre: '',
             apellido: '',
@@ -120,7 +100,7 @@ interface Props {
             }
             onOpenChange(false);
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-        } catch (error) {
+        } catch (error: any) {
             console.error("Form Submit Error:", error);
             const msg = error.message || 'No se pudo guardar la información';
             toast.error(`Error: ${msg}`, { id: loadingId, duration: 10000 });
@@ -300,7 +280,7 @@ interface Props {
                                                                 return 'Departamento añadido';
                                                             },
                                                             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-                                                            error: (err) => `Error al crear: ${err.message}`
+                                                            error: (err: any) => `Error al crear: ${err.message}`
                                                         });
                                                     }
                                                 }}
