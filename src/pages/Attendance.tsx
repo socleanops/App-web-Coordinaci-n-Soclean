@@ -35,9 +35,15 @@ function formatDateStr(d: Date): string {
     return d.toISOString().split('T')[0];
 }
 
+const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
+const longDateFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
+const fullDateFormatter = new Intl.DateTimeFormat('es-UY');
+const weekStartFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short' });
+const weekEndFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short', year: 'numeric' });
+
 function formatShortDate(dateStr: string): string {
     const d = new Date(dateStr + 'T12:00:00');
-    return d.toLocaleDateString('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
+    return shortDateFormatter.format(d);
 }
 
 function formatTimeVal(dateStr?: string | null): string {
@@ -172,7 +178,7 @@ export default function Attendance() {
 
     const pendingCount = asistencias.filter((a: Asistencia) => ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado)).length;
 
-    const weekLabel = `${weekStart.toLocaleDateString('es-UY', { day: 'numeric', month: 'short' })} — ${weekEnd.toLocaleDateString('es-UY', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    const weekLabel = `${weekStartFormatter.format(weekStart)} — ${weekEndFormatter.format(weekEnd)}`;
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -278,7 +284,7 @@ export default function Attendance() {
                         <CardTitle className="text-lg flex-1">
                             {viewMode === 'semana'
                                 ? `Registros de la Semana (${filteredAsistencias.length} entradas)`
-                                : `Registros del Día: ${new Date(singleDate + 'T12:00:00').toLocaleDateString('es-UY')}`
+                                : `Registros del Día: ${fullDateFormatter.format(new Date(singleDate + 'T12:00:00'))}`
                             }
                         </CardTitle>
                         <div className="relative w-full sm:w-72">
@@ -334,7 +340,7 @@ export default function Attendance() {
                                                     <span className="font-bold text-coreops-primary dark:text-blue-400 capitalize">
                                                         {(() => {
                                                             const d = new Date(fecha + 'T12:00:00');
-                                                            return `${DIAS_NOMBRE[d.getDay()]} ${d.toLocaleDateString('es-UY', { day: 'numeric', month: 'long' })}`;
+                                                            return `${DIAS_NOMBRE[d.getDay()]} ${longDateFormatter.format(d)}`;
                                                         })()}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground ml-2">({records.length} registros)</span>
