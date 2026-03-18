@@ -51,6 +51,10 @@ export function SearchableSelect({
             {/* Trigger button */}
             <button
                 type="button"
+                role="combobox"
+                aria-expanded={isOpen}
+                aria-haspopup="listbox"
+                aria-controls="searchable-select-listbox"
                 onClick={() => { setIsOpen(!isOpen); setSearch(''); }}
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
@@ -75,14 +79,14 @@ export function SearchableSelect({
                             className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                         />
                         {search && (
-                            <button type="button" onClick={() => setSearch('')} className="text-muted-foreground hover:text-foreground">
+                            <button type="button" onClick={() => setSearch('')} className="text-muted-foreground hover:text-foreground" aria-label="Borrar búsqueda">
                                 <X className="h-3 w-3" />
                             </button>
                         )}
                     </div>
 
                     {/* Options list */}
-                    <div className="max-h-48 overflow-y-auto p-1">
+                    <div className="max-h-48 overflow-y-auto p-1" id="searchable-select-listbox" role="listbox">
                         {filtered.length === 0 ? (
                             <div className="px-3 py-4 text-sm text-muted-foreground text-center">
                                 No se encontraron resultados
@@ -91,6 +95,8 @@ export function SearchableSelect({
                             filtered.map(option => (
                                 <button
                                     key={option.value}
+                                    role="option"
+                                    aria-selected={option.value === value}
                                     type="button"
                                     onClick={() => {
                                         onValueChange(option.value);
