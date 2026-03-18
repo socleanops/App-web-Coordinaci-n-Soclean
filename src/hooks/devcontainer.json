@@ -1,0 +1,15 @@
+{
+  "name": "Soclean Dev Environment",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:20",
+  "forwardPorts": [5173],
+  "postCreateCommand": "npm install",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "editor.formatOnSave": true
+      },
+      "extensions": ["dbaeumer.vscode-eslint", "bradlc.vscode-tailwindcss"]
+    }
+  },
+  "remoteUser": "node"
+}
