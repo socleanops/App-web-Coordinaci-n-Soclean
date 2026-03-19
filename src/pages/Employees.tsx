@@ -9,6 +9,7 @@ import { FuncionarioCertificacionesDialog } from '@/components/funcionarios/Func
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { generateComplexPassword } from '@/lib/utils';
 
 export default function Employees() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -43,16 +44,14 @@ export default function Employees() {
         if (!funcionarioToReset || !funcionarioToReset.profile_id) return;
 
         try {
-            // Se usa la cédula como nueva clave estándar (limpiando puntos y guiones por seguridad básica)
-            const cleanCedula = funcionarioToReset.cedula.replace(/[^0-9]/g, '');
-            const newPassword = `SC${cleanCedula}#2026`; // Ej: SC12345678#2026
+            const newPassword = generateComplexPassword();
 
             await resetPassword.mutateAsync({
                 profileId: funcionarioToReset.profile_id,
                 newPassword: newPassword
             });
 
-            toast.success(`Contraseña de ${funcionarioToReset.profiles?.nombre} reseteada a: ${newPassword}`);
+            toast.success(`Contraseña de ${funcionarioToReset.profiles?.nombre} reseteada a: ${newPassword}`, { duration: 10000 });
             setResetDialogOpen(false);
             setFuncionarioToReset(null);
         } catch (error: any) {
@@ -108,7 +107,7 @@ export default function Employees() {
                     </DialogHeader>
 
                     <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 p-4 border border-amber-200 dark:border-amber-800 rounded-md text-sm mt-2 mb-4">
-                        Esto invalidará su sesión actual y su contraseña pasará a ser el estándar de alta inicial basada en su documento (ej. <strong>SC12345678#2026</strong>). Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
+                        Esto invalidará su sesión actual y generará una nueva contraseña segura aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
                     </div>
 
                     <DialogFooter className="sm:justify-end gap-2">
