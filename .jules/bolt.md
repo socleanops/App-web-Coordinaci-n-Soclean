@@ -1,3 +1,3 @@
-## 2024-02-28 - Pre-instantiate Intl.DateTimeFormat
-**Learning:** Calling `new Date().toLocaleDateString()` inside a React `.map` loop creates a new `Intl.DateTimeFormat` object for every iteration, which is expensive and causes performance bottlenecks during list rendering.
-**Action:** Extract the formatter by calling `const dateFormatter = new Intl.DateTimeFormat('locale')` outside the component (or memoize it with `useMemo`), and use `dateFormatter.format(date)` inside the render loop.
+## 2024-05-18 - Extracting Intl.DateTimeFormat instantiations from render loops
+**Learning:** Instantiating `Intl.DateTimeFormat` or calling `Date.prototype.toLocaleDateString()` with locale options inside React render cycles or list mapping functions creates a massive amount of unnecessary object allocations and causes significant rendering overhead. Each call requires the JS engine to resolve the locale data and re-parse the formatting options.
+**Action:** Always pre-instantiate and cache `Intl.DateTimeFormat` instances as module-level constants outside of React components. Use the cached `.format(date)` method inside render loops. Be careful to ensure that different formatting configurations (e.g., those requiring `{ weekday: 'long' }` vs those that do not) have their own dedicated formatter instances to prevent side-effects.
