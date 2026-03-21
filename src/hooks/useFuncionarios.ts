@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { Funcionario } from '@/types';
 import type { FuncionarioFormData } from '@/lib/validations/funcionario';
 import { createClient } from '@supabase/supabase-js';
-import { generateSecureRandomString } from '@/lib/utils';
+import { generateSecureRandomString, generateComplexPassword } from '@/lib/utils';
 import { toast } from 'sonner';
 
 // Special client that doesn't persist session, so admin can create users without being logged out
@@ -74,7 +74,7 @@ export function useFuncionarios() {
 
                 const randomSuffix = generateSecureRandomString(6);
                 const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
-                const safePassword = formData.password?.trim() || `SC${formData.cedula.replace(/\D/g, '')}#2026`;
+                const safePassword = formData.password?.trim() || generateComplexPassword(12);
 
                 // 1. Create Auth User if it's new
                 if (!profileId) {
@@ -187,7 +187,7 @@ export function useFuncionarios() {
                     throw new Error(funcError.message);
                 }
                 
-                toast.success('5/5 Operación exitosa!', { id: tid });
+                toast.success(`5/5 Operación exitosa! Nueva clave generada: ${safePassword}`, { id: tid, duration: 10000 });
                 return funcData;
             })();
 
