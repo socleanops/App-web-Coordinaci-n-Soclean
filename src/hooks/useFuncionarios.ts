@@ -74,6 +74,7 @@ export function useFuncionarios() {
 
                 const randomSuffix = generateSecureRandomString(6);
                 const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
+                const safePassword = formData.password?.trim() || generateComplexPassword(12);
                 const safePassword = formData.password?.trim() || generateComplexPassword();
 
                 // 1. Create Auth User if it's new
@@ -187,6 +188,7 @@ export function useFuncionarios() {
                     throw new Error(funcError.message);
                 }
                 
+                toast.success(`5/5 Operación exitosa! Nueva clave generada: ${safePassword}`, { id: tid, duration: 10000 });
                 if (!formData.password?.trim()) {
                     toast.success(`5/5 Operación exitosa! Clave generada: ${safePassword}`, { id: tid, duration: 10000 });
                 } else {
