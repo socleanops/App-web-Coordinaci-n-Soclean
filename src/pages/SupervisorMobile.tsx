@@ -8,6 +8,8 @@ import { Clock, RefreshCw, CheckCircle2, UserX, AlertTriangle, AlertCircle } fro
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 
+const dailyDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'short' });
+
 const ESTADOS_MAP: Record<string, { label: string, color: string, icon: any }> = {
     'presente': { label: 'Presente', color: 'bg-emerald-100 text-emerald-800 border-emerald-300', icon: CheckCircle2 },
     'ausente': { label: 'Ausente', color: 'bg-red-100 text-red-800 border-red-300', icon: UserX },
@@ -138,6 +140,7 @@ export default function SupervisorMobile() {
                 <div className="flex flex-col">
                     <span className="text-sm text-muted-foreground font-medium">Planilla Diaria</span>
                     <span className="text-lg font-bold text-slate-800 dark:text-slate-100 capitalize">
+                        {dailyDateFormatter.format(today)}
                         {headerDateFormatter.format(today)}
                     </span>
                 </div>

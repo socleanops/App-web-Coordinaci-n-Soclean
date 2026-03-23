@@ -9,6 +9,11 @@ import { useAsistencia } from '@/hooks/useAsistencia';
 import type { Asistencia } from '@/types';
 import { toast } from 'sonner';
 
+const dayMonthFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short' });
+const dayMonthYearFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short', year: 'numeric' });
+const defaultDateFormatter = new Intl.DateTimeFormat('es-UY');
+const dayLongMonthFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
+
 const ESTADOS_MAP: Record<string, { label: string, color: string }> = {
     'presente': { label: 'Presente', color: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' },
     'ausente': { label: 'Ausente', color: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' },
@@ -179,6 +184,7 @@ export default function Attendance() {
 
     const pendingCount = asistencias.filter((a: Asistencia) => ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado)).length;
 
+    const weekLabel = `${dayMonthFormatter.format(weekStart)} — ${dayMonthYearFormatter.format(weekEnd)}`;
     const weekLabel = `${weekLabelStartFormatter.format(weekStart)} — ${weekLabelEndFormatter.format(weekEnd)}`;
 
     return (
@@ -341,6 +347,7 @@ export default function Attendance() {
                                                     <span className="font-bold text-coreops-primary dark:text-blue-400 capitalize">
                                                         {(() => {
                                                             const d = new Date(fecha + 'T12:00:00');
+                                                            return `${DIAS_NOMBRE[d.getDay()]} ${dayLongMonthFormatter.format(d)}`;
                                                             return `${DIAS_NOMBRE[d.getDay()]} ${dayMonthFormatter.format(d)}`;
                                                         })()}
                                                     </span>
