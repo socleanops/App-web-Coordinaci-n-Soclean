@@ -222,7 +222,7 @@ export default function LogisticsMap() {
                                                 key={m.id} 
                                                 position={{lat: m.lat, lng: m.lng}} 
                                                 title={m.title}
-                                                icon="http://maps.google.com/mapfiles/ms/icons/green-dot.png" 
+                                                icon="https://maps.google.com/mapfiles/ms/icons/green-dot.png"
                                             />
                                         ))}
                                     </GoogleMap>
@@ -284,7 +284,7 @@ export default function LogisticsMap() {
                                                 key={m.id} 
                                                 position={{lat: m.lat, lng: m.lng}} 
                                                 title={m.title}
-                                                icon="http://maps.google.com/mapfiles/ms/icons/green-dot.png" 
+                                                icon="https://maps.google.com/mapfiles/ms/icons/green-dot.png"
                                             />
                                         ))}
                                     </GoogleMap>
