@@ -141,7 +141,7 @@ export default function SupervisorMobile() {
                         {headerDateFormatter.format(today)}
                     </span>
                 </div>
-                <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9">
+                <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9" aria-label="Actualizar datos">
                     <RefreshCw className="h-4 w-4 text-muted-foreground" />
                 </Button>
             </div>
