@@ -134,7 +134,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         parsedFechaIngreso = jsDate.toISOString().split('T')[0];
                     } else if (typeof rawFecha === 'string' && rawFecha.trim() !== '') {
                         // Try to fix DD/MM/YYYY string formats to YYYY-MM-DD for PostgreSQL
-                        let parts = rawFecha.includes('/') ? rawFecha.split('/') : rawFecha.split('-');
+                        const parts = rawFecha.includes('/') ? rawFecha.split('/') : rawFecha.split('-');
                         if (parts.length === 3) {
                             // Find the 4-digit year format
                             const yearIndex = parts.findIndex(p => p.length === 4);
