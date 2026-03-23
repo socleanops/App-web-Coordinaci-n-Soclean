@@ -41,6 +41,12 @@ function formatDateStr(d: Date): string {
 }
 
 const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
+const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+const dayMonthFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
+const defaultDateFormatter = new Intl.DateTimeFormat('es-UY');
+const weekLabelStartFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short' });
+const weekLabelEndFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short', year: 'numeric' });
+
 function formatShortDate(dateStr: string): string {
     const d = new Date(dateStr + 'T12:00:00');
     return shortDateFormatter.format(d);
@@ -52,7 +58,7 @@ function formatTimeVal(dateStr?: string | null): string {
         const d = new Date(dateStr);
         if (isNaN(d.getTime())) return '';
         // input type="time" requires strictly "HH:mm" in 24h format
-        return d.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+        return timeFormatter.format(d);
     } catch {
         return '';
     }
@@ -179,6 +185,7 @@ export default function Attendance() {
     const pendingCount = asistencias.filter((a: Asistencia) => ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado)).length;
 
     const weekLabel = `${dayMonthFormatter.format(weekStart)} — ${dayMonthYearFormatter.format(weekEnd)}`;
+    const weekLabel = `${weekLabelStartFormatter.format(weekStart)} — ${weekLabelEndFormatter.format(weekEnd)}`;
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -341,6 +348,7 @@ export default function Attendance() {
                                                         {(() => {
                                                             const d = new Date(fecha + 'T12:00:00');
                                                             return `${DIAS_NOMBRE[d.getDay()]} ${dayLongMonthFormatter.format(d)}`;
+                                                            return `${DIAS_NOMBRE[d.getDay()]} ${dayMonthFormatter.format(d)}`;
                                                         })()}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground ml-2">({records.length} registros)</span>

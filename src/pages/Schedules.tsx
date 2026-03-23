@@ -30,7 +30,7 @@ function getTomorrowStr(): string {
     return d.toISOString().split('T')[0]; // YYYY-MM-DD
 }
 
-const dateFormatter = new Intl.DateTimeFormat('es-UY');
+const dateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
 export default function Schedules() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -59,6 +59,7 @@ export default function Schedules() {
         if (!fechaFiltro) return '';
         const d = new Date(fechaFiltro + 'T12:00:00');
         return fullDateFormatter.format(d);
+        return dateFormatter.format(d);
     }, [fechaFiltro]);
 
     const handleEdit = (horario: Horario) => {
