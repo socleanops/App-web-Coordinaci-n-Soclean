@@ -10,6 +10,7 @@ import { FuncionarioCertificacionesDialog } from '@/components/funcionarios/Func
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { Loader2 } from 'lucide-react';
 import { generateComplexPassword } from '@/lib/utils';
 
 export default function Employees() {
@@ -125,7 +126,7 @@ export default function Employees() {
                             onClick={confirmResetPassword}
                             disabled={resetPassword.isPending}
                         >
-                            {resetPassword.isPending ? 'Aplicando...' : 'Confirmar Reseteo'}
+                            {resetPassword.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Aplicando...</> : 'Confirmar Reseteo'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
