@@ -10,3 +10,8 @@
 **Vulnerability:** Default and reset passwords used a predictable pattern (`SC${cedula}#2026`), allowing unauthorized access if an attacker knows a user's ID/cédula.
 **Learning:** Default fallback passwords must be cryptographically secure and surfaced clearly in the UI, rather than relying on predictable patterns.
 **Prevention:** Use a secure password generator using `window.crypto.getRandomValues()` and ensure the UI conveys the generated password securely.
+
+## 2025-05-15 - Mixed Content Vulnerability with Google Maps Icons
+**Vulnerability:** Serving assets (Google Maps markers) over insecure HTTP in an HTTPS application.
+**Learning:** Insecure asset requests can be blocked by browsers or lead to mixed content vulnerabilities, compromising the security context of the page.
+**Prevention:** Always use HTTPS for external asset URLs to ensure they load correctly in secure contexts.
