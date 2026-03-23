@@ -26,6 +26,7 @@ const ESTADOS_MAP: Record<string, { label: string, color: string }> = {
 };
 
 const DIAS_NOMBRE = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const longDateFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
 
 // Get Monday of the week containing the given date
 function getMonday(d: Date): Date {
@@ -52,12 +53,14 @@ function formatShortDate(dateStr: string): string {
     return shortDateFormatter.format(d);
 }
 
+const timeValFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
 function formatTimeVal(dateStr?: string | null): string {
     if (!dateStr) return '';
     try {
         const d = new Date(dateStr);
         if (isNaN(d.getTime())) return '';
         // input type="time" requires strictly "HH:mm" in 24h format
+        return timeValFormatter.format(d);
         return timeFormatter.format(d);
     } catch {
         return '';
@@ -347,6 +350,7 @@ export default function Attendance() {
                                                     <span className="font-bold text-coreops-primary dark:text-blue-400 capitalize">
                                                         {(() => {
                                                             const d = new Date(fecha + 'T12:00:00');
+                                                            return `${DIAS_NOMBRE[d.getDay()]} ${longDateFormatter.format(d)}`;
                                                             return `${DIAS_NOMBRE[d.getDay()]} ${dayLongMonthFormatter.format(d)}`;
                                                             return `${DIAS_NOMBRE[d.getDay()]} ${dayMonthFormatter.format(d)}`;
                                                         })()}
