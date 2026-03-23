@@ -18,6 +18,8 @@ interface Props {
     employees: any[];
 }
 
+const dateFormatter = new Intl.DateTimeFormat('es-UY');
+
 export function FuncionarioPrintDialog({ open, onOpenChange, employees }: Props) {
     const [selectedColumns, setSelectedColumns] = useState({
         nombre: true,
@@ -34,7 +36,7 @@ export function FuncionarioPrintDialog({ open, onOpenChange, employees }: Props)
         const printWindow = window.open('', '_blank');
         if (!printWindow) return;
 
-        const dateStr = new Date().toLocaleDateString();
+        const dateStr = dateFormatter.format(new Date());
 
         const activeCount = employees.filter(e => e.estado === 'activo').length;
         const deptsCount = new Set(employees.map(e => e.departamentos?.nombre).filter(Boolean)).size;
@@ -88,7 +90,7 @@ export function FuncionarioPrintDialog({ open, onOpenChange, employees }: Props)
                 ${selectedColumns.cedula ? `<td>${emp.cedula || ''}</td>` : ''}
                 ${selectedColumns.cargo ? `<td>${emp.cargo || ''}</td>` : ''}
                 ${selectedColumns.departamento ? `<td>${emp.departamentos?.nombre || ''}</td>` : ''}
-                ${selectedColumns.fecha_ingreso ? `<td>${emp.fecha_ingreso ? new Date(emp.fecha_ingreso).toLocaleDateString() : ''}</td>` : ''}
+                ${selectedColumns.fecha_ingreso ? `<td>${emp.fecha_ingreso ? dateFormatter.format(new Date(emp.fecha_ingreso)) : ''}</td>` : ''}
                 ${selectedColumns.direccion ? `<td>${emp.direccion || ''}</td>` : ''}
                 ${selectedColumns.email ? `<td>${emp.profiles?.email || ''}</td>` : ''}
                 ${selectedColumns.estado ? `<td>${emp.estado || ''}</td>` : ''}

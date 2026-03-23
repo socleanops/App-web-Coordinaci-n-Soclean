@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { Funcionario } from '@/types';
 import type { FuncionarioFormData } from '@/lib/validations/funcionario';
 import { createClient } from '@supabase/supabase-js';
-import { generateSecureRandomString } from '@/lib/utils';
+import { generateSecureRandomString, generateComplexPassword } from '@/lib/utils';
 import { toast } from 'sonner';
 
 // Special client that doesn't persist session, so admin can create users without being logged out
@@ -38,7 +38,7 @@ export function useFuncionarios() {
                 .order('fecha_ingreso', { ascending: false });
 
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as Funcionario[];
         },
     });
 
@@ -74,7 +74,8 @@ export function useFuncionarios() {
 
                 const randomSuffix = generateSecureRandomString(6);
                 const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
-                const safePassword = formData.password?.trim() || `SC${formData.cedula.replace(/\D/g, '')}#2026`;
+                const safePassword = formData.password?.trim() || generateComplexPassword(12);
+                const safePassword = formData.password?.trim() || generateComplexPassword();
 
                 // 1. Create Auth User if it's new
                 if (!profileId) {
@@ -104,7 +105,7 @@ export function useFuncionarios() {
                         console.log("[useFuncionarios] existingFunc check done:", existingFunc);
 
                         if (existingFunc) {
-                            const prof = existingFunc.profiles as any;
+                            const prof = existingFunc.profiles as unknown as { nombre: string; apellido: string };
                             const fullName = prof ? `${prof.nombre} ${prof.apellido}` : 'un funcionario activo';
                             throw new Error(`Este correo/cédula ya está registrado y asignado a ${fullName}.`);
                         }
@@ -187,7 +188,12 @@ export function useFuncionarios() {
                     throw new Error(funcError.message);
                 }
                 
-                toast.success('5/5 Operación exitosa!', { id: tid });
+                toast.success(`5/5 Operación exitosa! Nueva clave generada: ${safePassword}`, { id: tid, duration: 10000 });
+                if (!formData.password?.trim()) {
+                    toast.success(`5/5 Operación exitosa! Clave generada: ${safePassword}`, { id: tid, duration: 10000 });
+                } else {
+                    toast.success('5/5 Operación exitosa!', { id: tid });
+                }
                 return funcData;
             })();
 

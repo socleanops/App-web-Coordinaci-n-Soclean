@@ -11,6 +11,8 @@ import { useCertificaciones } from '@/hooks/useCertificaciones';
 import type { Horario } from '@/types';
 import { toast } from 'sonner';
 
+const fullDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
 const DIAS_MAP: Record<number, string> = {
     0: 'Domingo',
     1: 'Lunes',
@@ -28,7 +30,7 @@ function getTomorrowStr(): string {
     return d.toISOString().split('T')[0]; // YYYY-MM-DD
 }
 
-const dateFormatter = new Intl.DateTimeFormat('es-UY');
+const dateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
 export default function Schedules() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -56,7 +58,8 @@ export default function Schedules() {
     const fechaLabel = useMemo(() => {
         if (!fechaFiltro) return '';
         const d = new Date(fechaFiltro + 'T12:00:00');
-        return d.toLocaleDateString('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+        return fullDateFormatter.format(d);
+        return dateFormatter.format(d);
     }, [fechaFiltro]);
 
     const handleEdit = (horario: Horario) => {
