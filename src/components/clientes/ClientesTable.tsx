@@ -97,6 +97,7 @@ export function ClientesTable({ clientes, isLoading, onEdit }: ClientesTableProp
                                                 size="icon"
                                                 onClick={() => onEdit(emp)}
                                                 className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                                aria-label="Editar cliente"
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
