@@ -58,7 +58,7 @@ export function Header({ isSupervisor = false }: HeaderProps) {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full">
+                            <Button variant="ghost" size="icon" className="rounded-full" aria-label="Abrir menú de usuario">
                                 <UserCircle className="h-7 w-7 text-muted-foreground" />
                                 <span className="sr-only">Menú de usuario</span>
                             </Button>
