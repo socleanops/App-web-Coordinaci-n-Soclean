@@ -48,35 +48,4 @@ export function generateComplexPassword(length: number = 12): string {
   }
 
   return passArray.join('');
-  const uppercase = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const lowercase = 'abcdefghijklmnopqrstuvwxyz';
-  const numbers = '0123456789';
-  const specials = '!@#$%^&*()_+~`|}{[]:;?><,./-=';
-  const allChars = uppercase + lowercase + numbers + specials;
-
-  const getRandomChar = (charset: string) => {
-    const array = new Uint32Array(1);
-    window.crypto.getRandomValues(array);
-    return charset[array[0] % charset.length];
-  };
-
-  let password = '';
-  password += getRandomChar(uppercase);
-  password += getRandomChar(lowercase);
-  password += getRandomChar(numbers);
-  password += getRandomChar(specials);
-
-  for (let i = 4; i < length; i++) {
-    password += getRandomChar(allChars);
-  }
-
-  const passwordArray = password.split('');
-  for (let i = passwordArray.length - 1; i > 0; i--) {
-    const randomArray = new Uint32Array(1);
-    window.crypto.getRandomValues(randomArray);
-    const j = randomArray[0] % (i + 1);
-    [passwordArray[i], passwordArray[j]] = [passwordArray[j], passwordArray[i]];
-  }
-
-  return passwordArray.join('');
 }
