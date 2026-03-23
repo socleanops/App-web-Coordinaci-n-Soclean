@@ -40,22 +40,29 @@ export default function LogisticsMap() {
         if (!isLoaded || activeServices.length === 0 || serviceMarkers.length > 0) return;
         const geocoder = new window.google.maps.Geocoder();
         const fetchGeocodes = async () => {
-            const newMarkers: any[] = [];
-            for (const s of activeServices) {
-                try {
-                    const res = await geocoder.geocode({ address: `${s.direccion}, Montevideo, Uruguay` });
-                    if (res.results && res.results[0]) {
-                        newMarkers.push({
-                            id: s.id,
-                            title: `${s.clientes?.razon_social || ''} - ${s.nombre}`,
-                            lat: res.results[0].geometry.location.lat(),
-                            lng: res.results[0].geometry.location.lng()
-                        });
+            const results = await Promise.allSettled(
+                activeServices.map(async (s) => {
+                    try {
+                        const res = await geocoder.geocode({ address: `${s.direccion}, Montevideo, Uruguay` });
+                        if (res.results && res.results[0]) {
+                            return {
+                                id: s.id,
+                                title: `${s.clientes?.razon_social || ''} - ${s.nombre}`,
+                                lat: res.results[0].geometry.location.lat(),
+                                lng: res.results[0].geometry.location.lng()
+                            };
+                        }
+                    } catch (error) {
+                        console.log(`Geocoding error for ${s.direccion}`, error);
                     }
-                } catch (error) {
-                    console.log(`Geocoding error for ${s.direccion}`, error);
-                }
-            }
+                    return null;
+                })
+            );
+
+            const newMarkers = results
+                .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled' && r.value !== null)
+                .map(r => r.value);
+
             setServiceMarkers(newMarkers);
         };
         fetchGeocodes();
@@ -222,7 +229,7 @@ export default function LogisticsMap() {
                                                 key={m.id} 
                                                 position={{lat: m.lat, lng: m.lng}} 
                                                 title={m.title}
-                                                icon="http://maps.google.com/mapfiles/ms/icons/green-dot.png" 
+                                                icon="https://maps.google.com/mapfiles/ms/icons/green-dot.png"
                                             />
                                         ))}
                                     </GoogleMap>
@@ -284,7 +291,7 @@ export default function LogisticsMap() {
                                                 key={m.id} 
                                                 position={{lat: m.lat, lng: m.lng}} 
                                                 title={m.title}
-                                                icon="http://maps.google.com/mapfiles/ms/icons/green-dot.png" 
+                                                icon="https://maps.google.com/mapfiles/ms/icons/green-dot.png"
                                             />
                                         ))}
                                     </GoogleMap>

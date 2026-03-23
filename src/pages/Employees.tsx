@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FuncionarioFormDialog } from '@/components/funcionarios/FuncionarioFormDialog';
 import { FuncionarioBulkImportDialog } from '@/components/funcionarios/FuncionarioBulkImportDialog';
 import { useFuncionarios } from '@/hooks/useFuncionarios';
+import { generateComplexPassword } from '@/lib/utils';
 import type { Funcionario } from '@/types';
 import { FuncionariosHeader } from '@/components/funcionarios/FuncionariosHeader';
 import { FuncionariosTable } from '@/components/funcionarios/FuncionariosTable';
@@ -10,6 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
+import { generateComplexPassword } from '@/lib/utils';
 
 export default function Employees() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -44,16 +46,16 @@ export default function Employees() {
         if (!funcionarioToReset || !funcionarioToReset.profile_id) return;
 
         try {
-            // Se usa la cédula como nueva clave estándar (limpiando puntos y guiones por seguridad básica)
-            const cleanCedula = funcionarioToReset.cedula.replace(/[^0-9]/g, '');
-            const newPassword = `SC${cleanCedula}#2026`; // Ej: SC12345678#2026
+            const newPassword = generateComplexPassword(12);
+            // Se genera una nueva clave segura
+            const newPassword = generateComplexPassword();
 
             await resetPassword.mutateAsync({
                 profileId: funcionarioToReset.profile_id,
                 newPassword: newPassword
             });
 
-            toast.success(`Contraseña de ${funcionarioToReset.profiles?.nombre} reseteada a: ${newPassword}`);
+            toast.success(`Contraseña de ${funcionarioToReset.profiles?.nombre} reseteada a: ${newPassword}`, { duration: 10000 });
             setResetDialogOpen(false);
             setFuncionarioToReset(null);
         } catch (error: any) {
@@ -109,7 +111,9 @@ export default function Employees() {
                     </DialogHeader>
 
                     <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 p-4 border border-amber-200 dark:border-amber-800 rounded-md text-sm mt-2 mb-4">
-                        Esto invalidará su sesión actual y su contraseña pasará a ser el estándar de alta inicial basada en su documento (ej. <strong>SC12345678#2026</strong>). Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
+                        Esto invalidará su sesión actual y se generará una nueva contraseña compleja y aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
+                        Esto invalidará su sesión actual y se generará una nueva contraseña segura de forma aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
+                        Esto invalidará su sesión actual y se generará una nueva contraseña segura y aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
                     </div>
 
                     <DialogFooter className="sm:justify-end gap-2">
