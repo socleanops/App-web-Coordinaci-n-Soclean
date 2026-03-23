@@ -127,6 +127,8 @@ export default function Services() {
                                                     size="icon"
                                                     onClick={() => handleEdit(serv)}
                                                     className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                                    aria-label="Editar servicio"
+                                                    title="Editar servicio"
                                                 >
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>

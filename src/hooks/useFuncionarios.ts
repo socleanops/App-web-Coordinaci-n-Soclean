@@ -187,7 +187,11 @@ export function useFuncionarios() {
                     throw new Error(funcError.message);
                 }
                 
-                toast.success('5/5 Operación exitosa!', { id: tid });
+                if (!formData.password?.trim()) {
+                    toast.success(`5/5 Operación exitosa! Clave generada: ${safePassword}`, { id: tid, duration: 10000 });
+                } else {
+                    toast.success('5/5 Operación exitosa!', { id: tid });
+                }
                 return funcData;
             })();
 
