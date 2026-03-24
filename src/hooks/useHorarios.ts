@@ -44,7 +44,7 @@ export function useHorarios() {
                 .order('hora_entrada', { ascending: true });
 
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as Horario[];
         },
     });
 

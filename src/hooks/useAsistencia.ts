@@ -54,7 +54,7 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
             const { data, error } = await query;
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as Asistencia[];
         },
     });
 
