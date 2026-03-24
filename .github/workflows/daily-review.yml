@@ -150,7 +150,7 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
         with:
-          ref: dev
+          ref: main
 
       - name: Buscar TODOs y FIXMEs en el código
         id: find-todos
