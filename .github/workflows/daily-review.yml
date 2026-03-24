@@ -262,3 +262,35 @@ jobs:
           ---
           [Ver reporte completo de tests](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           EOF
+jules-review:
+  name: 🤖 Jules AI Code Review
+  runs-on: ubuntu-latest
+  needs: run-tests
+
+  steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+      with:
+        ref: dev
+
+    - name: Install dependencies
+      run: |
+        sudo apt update
+        sudo apt install jq -y
+
+    - name: Jules AI Review
+      env:
+        JULES_TOKEN: ${{ secrets.JULES_TOKEN }}
+      run: |
+        echo "Running Jules automated review..."
+
+        RESPONSE=$(curl -s https://api.jules.google/v1/review \
+        -H "Authorization: Bearer $JULES_TOKEN" \
+        -H "Content-Type: application/json" \
+        -d '{
+          "repo": "'$GITHUB_REPOSITORY'",
+          "branch": "dev",
+          "type": "code_review"
+        }')
+
+        echo "$RESPONSE"
