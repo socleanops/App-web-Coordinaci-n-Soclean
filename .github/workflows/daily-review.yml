@@ -294,3 +294,9 @@ jules-review:
         }')
 
         echo "$RESPONSE"
+- name: Install Playwright browsers
+  run: npx playwright install --with-deps
+
+- name: Run E2E tests
+  run: pnpm test:e2e
+  
