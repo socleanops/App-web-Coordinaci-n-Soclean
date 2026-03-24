@@ -65,7 +65,6 @@ function formatTimeVal(dateStr?: string | null): string {
         if (isNaN(d.getTime())) return '';
         // input type="time" requires strictly "HH:mm" in 24h format
         return timeValFormatter.format(d);
-        return timeFormatter.format(d);
     } catch {
         return '';
     }
