@@ -75,6 +75,7 @@ export function useFuncionarios() {
                 const randomSuffix = generateSecureRandomString(6);
                 const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
                 const safePassword = formData.password?.trim() || generateComplexPassword(12);
+                const safePassword = formData.password?.trim() || generateComplexPassword();
 
                 // 1. Create Auth User if it's new
                 if (!profileId) {

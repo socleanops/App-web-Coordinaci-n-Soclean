@@ -41,6 +41,12 @@ function formatDateStr(d: Date): string {
     return d.toISOString().split('T')[0];
 }
 
+// ⚡ Bolt: Cache Intl formatters outside the render cycle
+// Recreating Intl.DateTimeFormat objects during map loops or renders is expensive.
+// Instantiating them once here avoids performance bottlenecks in the UI.
+const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
+const longDateFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
+const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
 const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
 const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
 const weekLabelStartFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short' });
