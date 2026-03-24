@@ -9,6 +9,11 @@ import { useAsistencia } from '@/hooks/useAsistencia';
 import type { Asistencia } from '@/types';
 import { toast } from 'sonner';
 
+const dayMonthFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short' });
+const dayMonthYearFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short', year: 'numeric' });
+const defaultDateFormatter = new Intl.DateTimeFormat('es-UY');
+const dayLongMonthFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
+
 const ESTADOS_MAP: Record<string, { label: string, color: string }> = {
     'presente': { label: 'Presente', color: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' },
     'ausente': { label: 'Ausente', color: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/30 dark:text-red-400 dark:border-red-800' },
@@ -21,6 +26,7 @@ const ESTADOS_MAP: Record<string, { label: string, color: string }> = {
 };
 
 const DIAS_NOMBRE = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
+const longDateFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
 
 // Get Monday of the week containing the given date
 function getMonday(d: Date): Date {
@@ -41,18 +47,26 @@ function formatDateStr(d: Date): string {
 const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
 const longDateFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
 const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
+const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+const dayMonthFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
+const defaultDateFormatter = new Intl.DateTimeFormat('es-UY');
+const weekLabelStartFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short' });
+const weekLabelEndFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short', year: 'numeric' });
 
 function formatShortDate(dateStr: string): string {
     const d = new Date(dateStr + 'T12:00:00');
     return shortDateFormatter.format(d);
 }
 
+const timeValFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
 function formatTimeVal(dateStr?: string | null): string {
     if (!dateStr) return '';
     try {
         const d = new Date(dateStr);
         if (isNaN(d.getTime())) return '';
         // input type="time" requires strictly "HH:mm" in 24h format
+        return timeValFormatter.format(d);
         return timeFormatter.format(d);
     } catch {
         return '';
@@ -179,7 +193,8 @@ export default function Attendance() {
 
     const pendingCount = asistencias.filter((a: Asistencia) => ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado)).length;
 
-    const weekLabel = `${weekStart.toLocaleDateString('es-UY', { day: 'numeric', month: 'short' })} — ${weekEnd.toLocaleDateString('es-UY', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+    const weekLabel = `${dayMonthFormatter.format(weekStart)} — ${dayMonthYearFormatter.format(weekEnd)}`;
+    const weekLabel = `${weekLabelStartFormatter.format(weekStart)} — ${weekLabelEndFormatter.format(weekEnd)}`;
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -285,7 +300,7 @@ export default function Attendance() {
                         <CardTitle className="text-lg flex-1">
                             {viewMode === 'semana'
                                 ? `Registros de la Semana (${filteredAsistencias.length} entradas)`
-                                : `Registros del Día: ${new Date(singleDate + 'T12:00:00').toLocaleDateString('es-UY')}`
+                                : `Registros del Día: ${defaultDateFormatter.format(new Date(singleDate + 'T12:00:00'))}`
                             }
                         </CardTitle>
                         <div className="relative w-full sm:w-72">
@@ -342,6 +357,8 @@ export default function Attendance() {
                                                         {(() => {
                                                             const d = new Date(fecha + 'T12:00:00');
                                                             return `${DIAS_NOMBRE[d.getDay()]} ${longDateFormatter.format(d)}`;
+                                                            return `${DIAS_NOMBRE[d.getDay()]} ${dayLongMonthFormatter.format(d)}`;
+                                                            return `${DIAS_NOMBRE[d.getDay()]} ${dayMonthFormatter.format(d)}`;
                                                         })()}
                                                     </span>
                                                     <span className="text-xs text-muted-foreground ml-2">({records.length} registros)</span>
