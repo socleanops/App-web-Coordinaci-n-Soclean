@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { generateComplexPassword } from '../../lib/utils';
+import { generateComplexPassword, generateSecureRandomString } from '../../lib/utils';
 
 describe('generateComplexPassword', () => {
   beforeEach(() => {
@@ -46,10 +46,8 @@ describe('generateComplexPassword', () => {
   it('contains at least one special character', () => {
     const password = generateComplexPassword();
     expect(password).toMatch(/[!@#$%^&*()_+~`|}{[\]:;?><,./-=]/);
-import { describe, it, expect } from 'vitest';
-import { generateSecureRandomString, generateComplexPassword } from '../../lib/utils';
-
-// Mock window.crypto.getRandomValues for jsdom environment if not present
+  });
+});
 // Using Object.defineProperty to ensure it's available in the global scope
 if (typeof window !== 'undefined' && (!window.crypto || !window.crypto.getRandomValues)) {
   Object.defineProperty(window, 'crypto', {
