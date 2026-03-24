@@ -111,6 +111,7 @@ export default function Employees() {
                     </DialogHeader>
 
                     <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 p-4 border border-amber-200 dark:border-amber-800 rounded-md text-sm mt-2 mb-4">
+                        Esto invalidará su sesión actual y se le asignará una nueva contraseña segura aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
                         Esto invalidará su sesión actual y se generará una nueva contraseña compleja y aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
                         Esto invalidará su sesión actual y se generará una nueva contraseña segura de forma aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
                         Esto invalidará su sesión actual y se generará una nueva contraseña segura y aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
