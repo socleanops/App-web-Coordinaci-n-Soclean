@@ -11,7 +11,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
-import { generateComplexPassword } from '@/lib/utils';
 
 export default function Employees() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -46,9 +45,8 @@ export default function Employees() {
         if (!funcionarioToReset || !funcionarioToReset.profile_id) return;
 
         try {
-            const newPassword = generateComplexPassword(12);
             // Se genera una nueva clave segura
-            const newPassword = generateComplexPassword();
+            const newPassword = generateComplexPassword(12);
 
             await resetPassword.mutateAsync({
                 profileId: funcionarioToReset.profile_id,
