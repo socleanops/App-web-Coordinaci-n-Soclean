@@ -27,7 +27,7 @@ jobs:
       - name: Checkout del código (rama dev)
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: dev
 
       - name: Configurar Node.js 22
         uses: actions/setup-node@v4
@@ -150,7 +150,7 @@ jobs:
       - name: Checkout del código
         uses: actions/checkout@v4
         with:
-          ref: main
+          ref: dev
 
       - name: Buscar TODOs y FIXMEs en el código
         id: find-todos
