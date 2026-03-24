@@ -49,8 +49,6 @@ const longDateFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', mon
 const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
 const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
 const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
-const dayMonthFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
-const defaultDateFormatter = new Intl.DateTimeFormat('es-UY');
 const weekLabelStartFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short' });
 const weekLabelEndFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short', year: 'numeric' });
 
@@ -193,7 +191,6 @@ export default function Attendance() {
 
     const pendingCount = asistencias.filter((a: Asistencia) => ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado)).length;
 
-    const weekLabel = `${dayMonthFormatter.format(weekStart)} — ${dayMonthYearFormatter.format(weekEnd)}`;
     const weekLabel = `${weekLabelStartFormatter.format(weekStart)} — ${weekLabelEndFormatter.format(weekEnd)}`;
 
     return (

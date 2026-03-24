@@ -12,7 +12,7 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { useFuncionarios } from '@/hooks/useFuncionarios';
-import { generateSecureRandomString } from '@/lib/utils';
+import { generateComplexPassword } from '@/lib/utils';
 
 interface Props {
     open: boolean;
@@ -118,7 +118,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
 
                     // Generate a random secure password and require password reset on first login.
                     // Complexity rule requires min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char.
-                    const generatedSecurePassword = generateSecureRandomString(8) + 'Aa1!';
+                    const generatedSecurePassword = generateComplexPassword(12);
                     const password = row.password || row.Password || row.PASSWORD || generatedSecurePassword;
 
                     let parsedFechaIngreso = new Date().toISOString().split('T')[0];
