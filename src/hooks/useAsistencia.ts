@@ -18,8 +18,11 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
                     fecha,
                     hora_entrada_registrada,
                     hora_salida_registrada,
+                    distancia_entrada_metros,
+                    distancia_salida_metros,
                     estado,
                     observaciones,
+                    created_at,
                     funcionarios(
                         id,
                         cargo,

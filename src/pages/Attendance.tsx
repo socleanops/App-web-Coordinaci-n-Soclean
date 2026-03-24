@@ -319,6 +319,7 @@ export default function Attendance() {
                                     <TableHead>Cliente / Servicio</TableHead>
                                     <TableHead>H. Coordinado</TableHead>
                                     <TableHead>Hora Real</TableHead>
+                                    <TableHead>Distancia GPS</TableHead>
                                     <TableHead>Estado</TableHead>
                                     <TableHead>Observaciones</TableHead>
                                 </TableRow>
@@ -401,6 +402,12 @@ export default function Attendance() {
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
+                                                        <div className="flex flex-col text-[10px] text-muted-foreground min-w-[60px]">
+                                                            {a.distancia_entrada_metros != null && <span>E: {Math.round(a.distancia_entrada_metros)}m</span>}
+                                                            {a.distancia_salida_metros != null && <span>S: {Math.round(a.distancia_salida_metros)}m</span>}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell>
                                                         <Select defaultValue={a.estado} onValueChange={(val) => handleActualizarEstado(a, val)}>
                                                             <SelectTrigger className={`h-9 w-[150px] text-xs font-semibold border ${ESTADOS_MAP[a.estado].color}`}>
                                                                 <SelectValue />
@@ -475,6 +482,12 @@ export default function Attendance() {
                                                         className="h-8 w-[90px] text-xs font-mono"
                                                         onBlur={(e) => handleGuardarHora(a, 'hora_salida_registrada', e.target.value)}
                                                     />
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <div className="flex flex-col text-[10px] text-muted-foreground min-w-[60px]">
+                                                    {a.distancia_entrada_metros != null && <span>E: {Math.round(a.distancia_entrada_metros)}m</span>}
+                                                    {a.distancia_salida_metros != null && <span>S: {Math.round(a.distancia_salida_metros)}m</span>}
                                                 </div>
                                             </TableCell>
                                             <TableCell>
