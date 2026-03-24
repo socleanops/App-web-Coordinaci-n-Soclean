@@ -27,7 +27,7 @@ jobs:
       - name: Checkout del código (rama dev)
         uses: actions/checkout@v4
         with:
-          ref: dev
+          ref: main
 
       - name: Configurar Node.js 22
         uses: actions/setup-node@v4
