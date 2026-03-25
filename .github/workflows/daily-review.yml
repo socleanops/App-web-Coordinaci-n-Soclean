@@ -18,6 +18,10 @@ jobs:
     name: 🧪 Tests diarios
     runs-on: ubuntu-latest
 
+    # CORRECCIÓN 1: Permisos explícitos para este job
+    permissions:
+      contents: read
+
     outputs:
       test_status: ${{ steps.test-run.outputs.status }}
       test_summary: ${{ steps.test-run.outputs.summary }}
@@ -37,15 +41,15 @@ jobs:
       - name: Instalar pnpm (versión fija)
         uses: pnpm/action-setup@v4
         with:
-          version: 9          # ← Fijá aquí tu versión de pnpm
+          version: 9
 
       - name: Instalar dependencias
-        run: pnpm install --frozen-lockfile
+        # CORRECCIÓN 2: --no-frozen-lockfile para evitar ERR_PNPM_NO_LOCKFILE
+        run: pnpm install --no-frozen-lockfile
 
       - name: Correr tests con cobertura
         id: test-run
         run: |
-          # Correr tests y guardar resultado
           set +e
           pnpm test --reporter=verbose --coverage > test-output.txt 2>&1
           EXIT_CODE=$?
@@ -57,15 +61,12 @@ jobs:
             echo "status=❌ Tests fallando" >> $GITHUB_OUTPUT
           fi
 
-          # Extraer línea de cobertura (adaptar si usás Jest en lugar de Vitest)
           COVERAGE=$(grep -E "^All files" test-output.txt | awk '{print $4}' || echo "N/A")
           echo "coverage=${COVERAGE}%" >> $GITHUB_OUTPUT
 
-          # Resumen compacto (últimas 20 líneas)
           SUMMARY=$(tail -20 test-output.txt | tr '\n' '|')
           echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
 
-          # Subir output completo como artefacto
           exit $EXIT_CODE
 
       - name: Subir reporte de tests
@@ -85,6 +86,11 @@ jobs:
     needs: run-tests
     if: always()
 
+    # CORRECCIÓN 3: Permisos explícitos para leer y comentar PRs
+    permissions:
+      pull-requests: write
+      contents: read
+
     outputs:
       pr_count:   ${{ steps.check-prs.outputs.pr_count }}
       pr_summary: ${{ steps.check-prs.outputs.pr_summary }}
@@ -95,7 +101,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Obtener PRs abiertos hacia dev
           PRS=$(gh pr list \
             --repo "$GITHUB_REPOSITORY" \
             --base dev \
@@ -106,7 +111,6 @@ jobs:
           PR_COUNT=$(echo "$PRS" | jq length)
           echo "pr_count=${PR_COUNT}" >> $GITHUB_OUTPUT
 
-          # Construir resumen de PRs
           if [ "$PR_COUNT" -eq 0 ]; then
             echo "pr_summary=Sin PRs abiertos hacia dev." >> $GITHUB_OUTPUT
           else
@@ -118,7 +122,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # PRs abiertos hace más de 3 días sin review
           STALE_DATE=$(date -d '3 days ago' --iso-8601)
 
           gh pr list \
@@ -133,18 +136,22 @@ jobs:
             gh pr comment "$PR_NUMBER" \
               --repo "$GITHUB_REPOSITORY" \
               --body "⏰ **Recordatorio automático:** Este PR lleva más de 3 días sin revisión. ¿Necesita atención o puede ser asignado a Jules?" \
-              2>/dev/null || true   # No fallar si ya se comentó hoy
+              2>/dev/null || true
           done
 
   # ─────────────────────────────────────────
   # JOB 3: Asignar tareas a Jules
-  # Crea un issue con tareas pendientes para que Jules las tome
   # ─────────────────────────────────────────
   assign-jules:
     name: 🤖 Tareas para Jules
     runs-on: ubuntu-latest
     needs: [run-tests, review-prs]
     if: always()
+
+    # CORRECCIÓN 4: Permisos para crear issues
+    permissions:
+      issues: write
+      contents: read
 
     steps:
       - name: Checkout del código
@@ -155,7 +162,6 @@ jobs:
       - name: Buscar TODOs y FIXMEs en el código
         id: find-todos
         run: |
-          # Buscar TODOs y FIXMEs (excluye node_modules y .git)
           TODOS=$(grep -rn "TODO\|FIXME\|HACK\|XXX" \
             --include="*.ts" --include="*.tsx" --include="*.js" \
             --exclude-dir=node_modules --exclude-dir=.git \
@@ -165,7 +171,6 @@ jobs:
             echo "has_todos=false" >> $GITHUB_OUTPUT
           else
             echo "has_todos=true" >> $GITHUB_OUTPUT
-            # Guardar en archivo para el siguiente paso
             echo "$TODOS" > todos.txt
           fi
 
@@ -177,7 +182,6 @@ jobs:
           TODAY=$(date '+%d/%m/%Y')
           TODOS_CONTENT=$(cat todos.txt | head -15)
 
-          # Verificar si ya existe un issue de Jules para hoy
           EXISTING=$(gh issue list \
             --repo "$GITHUB_REPOSITORY" \
             --label "jules-task" \
@@ -208,7 +212,7 @@ jobs:
           fi
 
   # ─────────────────────────────────────────
-  # JOB 4: Notificación resumen (Slack o email)
+  # JOB 4: Notificación resumen
   # ─────────────────────────────────────────
   notify:
     name: 📣 Notificación diaria
@@ -216,10 +220,11 @@ jobs:
     needs: [run-tests, review-prs, assign-jules]
     if: always()
 
+    permissions:
+      contents: read
+
     steps:
       - name: Enviar resumen a Slack
-        # REQUISITO: Agregar SLACK_WEBHOOK_URL en Settings → Secrets and variables → Actions
-        # Si no usás Slack, eliminá este paso
         if: ${{ vars.SLACK_ENABLED == 'true' }}
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
@@ -241,9 +246,7 @@ jobs:
               ]
             }"
 
-      - name: Enviar resumen por email (GitHub nativo)
-        # GitHub ya envía notificaciones al dueño del repo cuando un workflow falla.
-        # Este paso crea un summary visible en la UI de Actions para revisión rápida.
+      - name: Resumen en GitHub Actions UI
         run: |
           TODAY=$(date '+%d/%m/%Y')
           cat >> $GITHUB_STEP_SUMMARY << EOF
@@ -262,41 +265,3 @@ jobs:
           ---
           [Ver reporte completo de tests](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
           EOF
-jules-review:
-  name: 🤖 Jules AI Code Review
-  runs-on: ubuntu-latest
-  needs: run-tests
-
-  steps:
-    - name: Checkout repo
-      uses: actions/checkout@v4
-      with:
-        ref: dev
-
-    - name: Install dependencies
-      run: |
-        sudo apt update
-        sudo apt install jq -y
-
-    - name: Jules AI Review
-      env:
-        JULES_TOKEN: ${{ secrets.JULES_TOKEN }}
-      run: |
-        echo "Running Jules automated review..."
-
-        RESPONSE=$(curl -s https://api.jules.google/v1/review \
-        -H "Authorization: Bearer $JULES_TOKEN" \
-        -H "Content-Type: application/json" \
-        -d '{
-          "repo": "'$GITHUB_REPOSITORY'",
-          "branch": "dev",
-          "type": "code_review"
-        }')
-
-        echo "$RESPONSE"
-- name: Install Playwright browsers
-  run: npx playwright install --with-deps
-
-- name: Run E2E tests
-  run: pnpm test:e2e
-  
