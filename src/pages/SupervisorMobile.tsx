@@ -8,8 +8,10 @@ import { Clock, RefreshCw, CheckCircle2, UserX, AlertTriangle, AlertCircle } fro
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 
+const dailyDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'short' });
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-const ESTADOS_MAP: Record<string, { label: string, color: string, icon }> = {
+const ESTADOS_MAP: Record<string, { label: string, color: string, icon: any }> = {
     'presente': { label: 'Presente', color: 'bg-emerald-100 text-emerald-800 border-emerald-300', icon: CheckCircle2 },
     'ausente': { label: 'Ausente', color: 'bg-red-100 text-red-800 border-red-300', icon: UserX },
     'tardanza': { label: 'Tarde', color: 'bg-amber-100 text-amber-800 border-amber-300', icon: AlertTriangle },
@@ -24,12 +26,15 @@ function formatDateStr(d: Date): string {
     return d.toISOString().split('T')[0];
 }
 
+const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+const headerDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'short' });
+
 function formatTimeVal(dateStr?: string | null): string {
     if (!dateStr) return '';
     try {
         const d = new Date(dateStr);
         if (isNaN(d.getTime())) return '';
-        return d.toLocaleTimeString('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
+        return timeFormatter.format(d);
     } catch {
         return '';
     }
@@ -65,9 +70,8 @@ export default function SupervisorMobile() {
 
     const handleActualizarEstado = async (a: Asistencia, nuevoEstado: string) => {
         try {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-            const dataToUpdate = { estado: nuevoEstado };
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const dataToUpdate: any = { estado: nuevoEstado };
             
             // Auto-fill actual times if marking present and they are null
             if (nuevoEstado === 'presente' && a.horarios) {
@@ -83,9 +87,8 @@ export default function SupervisorMobile() {
 
             await updateAsistencia.mutateAsync({ id: a.id, data: dataToUpdate });
             toast.success(`${a.funcionarios?.profiles?.nombre} marcado como ${ESTADOS_MAP[nuevoEstado].label}`);
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
-        } catch (error) {
-            toast.error(error.message || 'Error al actualizar estado');
+        } catch (error: any) {
+            toast.error(error?.message || 'Error al actualizar estado');
         }
     };
 
@@ -141,10 +144,11 @@ export default function SupervisorMobile() {
                 <div className="flex flex-col">
                     <span className="text-sm text-muted-foreground font-medium">Planilla Diaria</span>
                     <span className="text-lg font-bold text-slate-800 dark:text-slate-100 capitalize">
-                        {today.toLocaleDateString('es-UY', { weekday: 'long', day: 'numeric', month: 'short' })}
+                        {dailyDateFormatter.format(today)}
+                        {headerDateFormatter.format(today)}
                     </span>
                 </div>
-                <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9">
+                <Button variant="outline" size="icon" onClick={() => refetch()} className="h-9 w-9" aria-label="Actualizar datos">
                     <RefreshCw className="h-4 w-4 text-muted-foreground" />
                 </Button>
             </div>

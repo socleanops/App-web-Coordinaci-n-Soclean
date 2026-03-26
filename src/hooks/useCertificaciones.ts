@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/lib/supabase';
+import { certificacionService } from '@/lib/services/certificacionService';
 import type { Certificacion } from '@/types';
 import type { CertificacionFormData } from '@/lib/validations/certificacion';
 
@@ -10,14 +10,18 @@ export function useCertificaciones(funcionarioId?: string) {
         queryKey: ['certificaciones', funcionarioId],
         queryFn: async (): Promise<Certificacion[]> => {
             if (!funcionarioId) return [];
+<<<<<<< HEAD
+            return await certificacionService.getCertificaciones(funcionarioId);
+=======
             const { data, error } = await supabase
                 .from('certificaciones')
-                .select('id, funcionario_id, fecha_inicio, fecha_fin, motivo')
+                .select('id, funcionario_id, fecha_inicio, fecha_fin, motivo, created_at')
                 .eq('funcionario_id', funcionarioId)
                 .order('fecha_inicio', { ascending: false });
 
             if (error) throw new Error(error.message);
             return data;
+>>>>>>> origin/dev
         },
         enabled: !!funcionarioId
     });
@@ -25,41 +29,23 @@ export function useCertificaciones(funcionarioId?: string) {
     const getAllCertificaciones = useQuery({
         queryKey: ['certificaciones', 'all'],
         queryFn: async (): Promise<Certificacion[]> => {
+<<<<<<< HEAD
+            return await certificacionService.getAllCertificaciones();
+=======
             const { data, error } = await supabase
                 .from('certificaciones')
-                .select('id, funcionario_id, fecha_inicio, fecha_fin, motivo')
+                .select('id, funcionario_id, fecha_inicio, fecha_fin, motivo, created_at')
                 .order('fecha_inicio', { ascending: false });
 
             if (error) throw new Error(error.message);
             return data;
+>>>>>>> origin/dev
         }
     });
 
     const createCertificacion = useMutation({
         mutationFn: async (formData: CertificacionFormData) => {
-            // 1. Insert into certificaciones
-            // eslint-disable-next-line @typescript-eslint/no-unused-vars
-            const { id, ...dataToInsert } = formData;
-            const { data: cert, error: certErr } = await supabase
-                .from('certificaciones')
-                .insert(dataToInsert)
-                .select()
-                .single();
-
-            if (certErr) throw new Error(certErr.message);
-
-            // 2. Update existing asistencia records overlapping the dates
-            const { error: asistErr } = await supabase
-                .from('asistencia')
-                .update({ estado: 'certificado' })
-                .eq('funcionario_id', formData.funcionario_id)
-                .in('estado', ['pendiente', 'ausente', 'no_citado'])
-                .gte('fecha', formData.fecha_inicio)
-                .lte('fecha', formData.fecha_fin);
-
-            if (asistErr) console.warn("Failed to auto-update attendance:", asistErr);
-
-            return cert;
+            return await certificacionService.createCertificacion(formData);
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['certificaciones'] });
@@ -69,13 +55,7 @@ export function useCertificaciones(funcionarioId?: string) {
 
     const deleteCertificacion = useMutation({
         mutationFn: async (id: string) => {
-            const { error } = await supabase
-                .from('certificaciones')
-                .delete()
-                .eq('id', id);
-
-            if (error) throw new Error(error.message);
-            return true;
+            return await certificacionService.deleteCertificacion(id);
         },
         onSuccess: () => {
              queryClient.invalidateQueries({ queryKey: ['certificaciones'] });

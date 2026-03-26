@@ -4,8 +4,20 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ErrorBoundary } from '@/components/layout/ErrorBoundary';
+import * as Sentry from "@sentry/react";
 import './index.css';
 import App from './App.tsx';
+
+Sentry.init({
+  dsn: (import.meta as any).env.VITE_SENTRY_DSN || "https://examplePublicKey@o0.ingest.sentry.io/0",
+  integrations: [
+    Sentry.browserTracingIntegration(),
+    Sentry.replayIntegration(),
+  ],
+  tracesSampleRate: 1.0,
+  replaysSessionSampleRate: 0.1,
+  replaysOnErrorSampleRate: 1.0,
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {

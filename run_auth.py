@@ -1,1 +1,0 @@
-from notebooklm_mcp_server.auth import main; main()

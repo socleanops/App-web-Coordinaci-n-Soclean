@@ -132,6 +132,8 @@ export function FuncionarioCertificacionesDialog({ open, onOpenChange, funcionar
                                                 size="icon" 
                                                 className="h-8 w-8 text-red-500 hover:bg-red-50 hover:text-red-600"
                                                 onClick={() => handleDelete(cert.id)}
+                                                aria-label="Eliminar certificación"
+                                                title="Eliminar certificación"
                                             >
                                                 <Trash2 className="h-4 w-4" />
                                             </Button>

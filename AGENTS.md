@@ -45,9 +45,10 @@ src/
 │   ├── facturacion/
 │   └── nomina/
 ├── pages/               → Una página por módulo
-├── hooks/               → Custom hooks (useAuth, useFuncionarios, etc.)
+├── hooks/               → React Query hooks (Llaman a services, NO a Supabase directamente)
 ├── lib/
-│   ├── supabase.ts      → ⚠️ ARCHIVO CRÍTICO — No modificar sin plan aprobado
+│   ├── services/        → ⚠️ CAPA CRÍTICA — Toda la lógica de negocio y consultas a Supabase
+│   ├── supabase.ts      → Cliente de Supabase
 │   ├── utils.ts
 │   └── validations/     → Schemas Zod por módulo
 ├── stores/              → Zustand stores
@@ -67,10 +68,11 @@ src/
 - Máximo **200 líneas por archivo** — si supera ese límite, dividir en subcomponentes
 
 ### Base de datos
-- **Nunca modificar** el archivo `src/lib/supabase.ts` sin que el plan haya sido aprobado primero
-- **Nunca eliminar** tablas ni columnas directamente — solo proponer migraciones
-- Toda consulta a Supabase debe tener **manejo de errores** explícito
-- Las queries que afecten nómina o facturación deben incluir **transacciones**
+- **Centralización**: Toda consulta a Supabase DEBE vivir en `src/lib/services/`.
+- **Hooks Limpios**: Los hooks en `src/hooks/` solo deben coordinar el estado de React Query llamando a los servicios.
+- **Nunca modificar** el archivo `src/lib/supabase.ts` sin un plan aprobado.
+- **Transacciones**: Lógica compleja (nómina, facturación) debe ser atómica en el servicio correspondiente.
+- **Manejo de Errores**: Todo servicio debe capturar y formatear errores para que la UI los muestre amigablemente.
 
 ### UI / Estilos
 - Respetar la paleta de colores definida en `tailwind.config.ts`

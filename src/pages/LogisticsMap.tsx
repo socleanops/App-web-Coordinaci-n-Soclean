@@ -47,6 +47,7 @@ export default function LogisticsMap() {
         const geocoder = new window.google.maps.Geocoder();
         // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
         const fetchGeocodes = async () => {
+<<<<<<< HEAD
             const newMarkers[] = [];
             for (const s of activeServices) {
                 try {
@@ -66,6 +67,32 @@ export default function LogisticsMap() {
             if (newMarkers.length > 0) {
                 setServiceMarkers(newMarkers);
             }
+=======
+            const results = await Promise.allSettled(
+                activeServices.map(async (s) => {
+                    try {
+                        const res = await geocoder.geocode({ address: `${s.direccion}, Montevideo, Uruguay` });
+                        if (res.results && res.results[0]) {
+                            return {
+                                id: s.id,
+                                title: `${s.clientes?.razon_social || ''} - ${s.nombre}`,
+                                lat: res.results[0].geometry.location.lat(),
+                                lng: res.results[0].geometry.location.lng()
+                            };
+                        }
+                    } catch (error) {
+                        console.log(`Geocoding error for ${s.direccion}`, error);
+                    }
+                    return null;
+                })
+            );
+
+            const newMarkers = results
+                .filter((r): r is PromiseFulfilledResult<any> => r.status === 'fulfilled' && r.value !== null)
+                .map(r => r.value);
+
+            setServiceMarkers(newMarkers);
+>>>>>>> origin/dev
         };
         fetchGeocodes();
     }, [isLoaded, activeServices, serviceMarkers.length, hasAttemptedGeocode]);
@@ -231,7 +258,7 @@ export default function LogisticsMap() {
                                                 key={m.id} 
                                                 position={{lat: m.lat, lng: m.lng}} 
                                                 title={m.title}
-                                                icon="http://maps.google.com/mapfiles/ms/icons/green-dot.png" 
+                                                icon="https://maps.google.com/mapfiles/ms/icons/green-dot.png"
                                             />
                                         ))}
                                     </GoogleMap>
@@ -293,7 +320,7 @@ export default function LogisticsMap() {
                                                 key={m.id} 
                                                 position={{lat: m.lat, lng: m.lng}} 
                                                 title={m.title}
-                                                icon="http://maps.google.com/mapfiles/ms/icons/green-dot.png" 
+                                                icon="https://maps.google.com/mapfiles/ms/icons/green-dot.png"
                                             />
                                         ))}
                                     </GoogleMap>

@@ -99,6 +99,7 @@ export const ClientesTable = memo(function ClientesTable({ clientes, isLoading, 
             </CardHeader>
             <CardContent>
                 <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-background/50 overflow-hidden">
+<<<<<<< HEAD
                     {/* Header */}
                     <div className="flex w-full bg-muted/50 border-b border-slate-200 dark:border-slate-800 font-medium text-sm text-muted-foreground">
                         <div className="flex-1 min-w-0 px-4 py-3">Razón Social o Nombre / Fantasía</div>
@@ -130,6 +131,75 @@ export const ClientesTable = memo(function ClientesTable({ clientes, isLoading, 
                             style={{ width: '100%' }}
                         />
                     )}
+=======
+                    <Table>
+                        <TableHeader className="bg-muted/50">
+                            <TableRow>
+                                <TableHead className="w-[250px]">Razón Social o Nombre / Fantasía</TableHead>
+                                <TableHead>RUT / Cédula</TableHead>
+                                <TableHead>Contacto</TableHead>
+                                <TableHead>Acuerdo Op.</TableHead>
+                                <TableHead>Teléfono / Email</TableHead>
+                                <TableHead>Estado</TableHead>
+                                <TableHead className="text-right">Acciones</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
+                                        Cargando clientes...
+                                    </TableCell>
+                                </TableRow>
+                            ) : filteredClientes.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={7} className="text-center h-24 text-muted-foreground">
+                                        No se encontraron clientes activos.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                filteredClientes.map((emp) => (
+                                    <TableRow key={emp.id} className="group hover:bg-muted/30 transition-colors">
+                                        <TableCell>
+                                            <div className="font-medium text-slate-800 dark:text-slate-200">{emp.razon_social}</div>
+                                            <div className="text-xs text-muted-foreground">{emp.nombre_fantasia || 'Sin nombre fantasía'}</div>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground font-mono text-sm">{emp.rut}</TableCell>
+                                        <TableCell className="text-muted-foreground text-sm">{emp.contacto_principal || '-'}</TableCell>
+                                        <TableCell>
+                                            <div className="font-semibold text-coreops-primary dark:text-blue-400 text-sm">{emp.frecuencia_visita || '-'}</div>
+                                            <div className="text-xs text-muted-foreground">{emp.carga_horaria || ''}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="text-sm">{emp.telefono || '-'}</div>
+                                            <div className="text-xs text-muted-foreground">{emp.email || '-'}</div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${emp.estado === 'activo'
+                                                ? 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800'
+                                                : 'bg-slate-100 text-slate-800 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700'
+                                                }`}>
+                                                {emp.estado.charAt(0).toUpperCase() + emp.estado.slice(1)}
+                                            </span>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => onEdit(emp)}
+                                                className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                                aria-label="Editar cliente"
+                                                title="Editar cliente"
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
+                        </TableBody>
+                    </Table>
+>>>>>>> origin/dev
                 </div>
             </CardContent>
         </Card>

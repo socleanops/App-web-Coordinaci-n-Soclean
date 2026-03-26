@@ -55,8 +55,12 @@ export function ClienteBulkImportDialog({ open, onOpenChange }: Props) {
             const worksheet = workbook.Sheets[firstSheetName];
 
             // Convert to JSON
+<<<<<<< HEAD
             // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
             const data = utils.sheet_to_json<any>(worksheet);
+=======
+            const data = utils.sheet_to_json<Record<string, string | number | undefined>>(worksheet);
+>>>>>>> origin/dev
 
             if (!data || data.length === 0) {
                 toast.error("El archivo está vacío o no se pudo leer.");
@@ -94,9 +98,18 @@ export function ClienteBulkImportDialog({ open, onOpenChange }: Props) {
                         estado: 'activo'
                     });
 
+<<<<<<< HEAD
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- Justificación: Tipo dinámico heredado
                 } catch (err) {
                     newErrors.push(err.message || `Fila ${i + 2}: Error desconocido al procesar cliente`);
+=======
+                } catch (err) {
+                    if (err instanceof Error) {
+                        newErrors.push(err.message || `Fila ${i + 2}: Error desconocido al procesar cliente`);
+                    } else {
+                        newErrors.push(`Fila ${i + 2}: Error desconocido al procesar cliente`);
+                    }
+>>>>>>> origin/dev
                 }
 
                 currentProgress++;

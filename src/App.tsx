@@ -45,7 +45,7 @@ function App() {
         if (error) {
           console.error("Session fetch error:", error);
           // If the session is invalid or corrupted (which causes the need to clear cookies), force sign out
-          localStorage.clear(); // Bruteforce clear the bad token cache
+          localStorage.removeItem('soclean-coordinacion-auth'); // Specifically clear the bad token cache
           await supabase.auth.signOut().catch(() => { });
           if (mounted) {
             setUser(null);
