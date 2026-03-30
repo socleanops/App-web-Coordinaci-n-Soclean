@@ -75,7 +75,6 @@ export function useFuncionarios() {
                 const randomSuffix = generateSecureRandomString(6);
                 const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
                 const safePassword = formData.password?.trim() || generateComplexPassword(12);
-                const safePassword = formData.password?.trim() || generateComplexPassword();
 
                 // 1. Create Auth User if it's new
                 if (!profileId) {
@@ -260,6 +259,23 @@ export function useFuncionarios() {
         }
     });
 
+    const deleteFuncionario = useMutation({
+        mutationFn: async ({ id, profileId }: { id: string; profileId: string }) => {
+            // Delete the profile, which should cascade delete the funcionario record
+            // depending on foreign key constraints. If not, we delete both.
+            const { error: profileError } = await supabase
+                .from('profiles')
+                .delete()
+                .eq('id', profileId);
+
+            if (profileError) throw new Error(profileError.message);
+            return true;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['funcionarios'] });
+        },
+    });
+
     return {
         getFuncionarios,
         getDepartamentos,
@@ -267,5 +283,6 @@ export function useFuncionarios() {
         createFuncionario,
         updateFuncionario,
         resetPassword,
+        deleteFuncionario,
     };
 }

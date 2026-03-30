@@ -45,9 +45,6 @@ function formatDateStr(d: Date): string {
 // Recreating Intl.DateTimeFormat objects during map loops or renders is expensive.
 // Instantiating them once here avoids performance bottlenecks in the UI.
 const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
-const longDateFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
-const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
-const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
 const timeFormatter = new Intl.DateTimeFormat('es-UY', { hour: '2-digit', minute: '2-digit', hour12: false });
 const weekLabelStartFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short' });
 const weekLabelEndFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short', year: 'numeric' });

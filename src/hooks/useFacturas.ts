@@ -39,7 +39,14 @@ export function useFacturas() {
                 .order('fecha_emision', { ascending: false });
 
             if (error) throw new Error(error.message);
-            return data as (Factura & { items: FacturaItem[] })[];
+            return (data as unknown as any[]).map(f => ({
+                ...f,
+                clientes: Array.isArray(f.clientes) ? f.clientes[0] : f.clientes,
+                items: (f.items || []).map((item: any) => ({
+                    ...item,
+                    servicios: Array.isArray(item.servicios) ? item.servicios[0] : item.servicios
+                }))
+            })) as (Factura & { items: FacturaItem[] })[];
         },
     });
 

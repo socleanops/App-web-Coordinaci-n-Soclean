@@ -1,5 +1,6 @@
 # AGENTS.md — Instrucciones para Jules
-# Proyecto: CoreOps — App Web de Gestión Empresarial
+
+## Proyecto: CoreOps — App Web de Gestión Empresarial
 
 ---
 
@@ -31,7 +32,7 @@ Está diseñada para ser modular, escalable y de fácil uso.
 
 ## 📁 ESTRUCTURA DE CARPETAS
 
-```
+```text
 src/
 ├── components/
 │   ├── ui/              → Componentes shadcn/ui (NO modificar sin autorización)
@@ -60,6 +61,7 @@ src/
 ## ✅ REGLAS OBLIGATORIAS — SIEMPRE RESPETAR
 
 ### Código
+
 - TypeScript **estricto**: prohibido usar `any`, `unknown` sin justificación documentada
 - Todos los componentes deben tener sus **tipos definidos explícitamente**
 - Naming en **camelCase** para variables/funciones, **PascalCase** para componentes
@@ -67,18 +69,21 @@ src/
 - Máximo **200 líneas por archivo** — si supera ese límite, dividir en subcomponentes
 
 ### Base de datos
+
 - **Nunca modificar** el archivo `src/lib/supabase.ts` sin que el plan haya sido aprobado primero
 - **Nunca eliminar** tablas ni columnas directamente — solo proponer migraciones
 - Toda consulta a Supabase debe tener **manejo de errores** explícito
 - Las queries que afecten nómina o facturación deben incluir **transacciones**
 
 ### UI / Estilos
+
 - Respetar la paleta de colores definida en `tailwind.config.ts`
 - **No instalar** librerías de UI adicionales sin consultar (solo usar shadcn/ui ya instalada)
 - Todos los textos visibles al usuario deben estar **en español**
 - Los mensajes de error al usuario deben ser **claros y amigables** (no mostrar errores técnicos crudos)
 
 ### Seguridad
+
 - **Nunca** hardcodear credenciales, tokens ni URLs de Supabase en el código
 - Usar siempre las variables de entorno definidas en `.env.local`
 - Las variables de entorno empiezan con `VITE_` para ser accesibles en el frontend
@@ -102,19 +107,22 @@ src/
 ## 🔍 MÓDULOS DEL SISTEMA — PRIORIDADES
 
 ### 🔴 CRÍTICOS (máxima precaución en cambios)
+
 1. **Nómina** — Afecta pagos reales a empleados. Cualquier cambio requiere tests exhaustivos.
 2. **Facturación** — Afecta cobros a clientes. Verificar cálculos de impuestos y totales.
 3. **Autenticación / Roles** — No modificar la lógica de permisos sin plan aprobado.
 
 ### 🟡 IMPORTANTES (precaución normal)
-4. **Asistencia** — Los datos alimentan el cálculo de nómina.
-5. **Funcionarios** — Tabla central referenciada por casi todos los módulos.
-6. **Clientes** — Referenciados en servicios y facturas.
+
+1. **Asistencia** — Los datos alimentan el cálculo de nómina.
+2. **Funcionarios** — Tabla central referenciada por casi todos los módulos.
+3. **Clientes** — Referenciados en servicios y facturas.
 
 ### 🟢 ESTÁNDAR (cambios más libres con tests)
-7. **Servicios** — Catálogo de servicios prestados.
-8. **Horarios** — Gestión de turnos.
-9. **Dashboard** — Solo lectura, sin escritura a base de datos.
+
+1. **Servicios** — Catálogo de servicios prestados.
+2. **Horarios** — Gestión de turnos.
+3. **Dashboard** — Solo lectura, sin escritura a base de datos.
 
 ---
 
@@ -150,7 +158,7 @@ Jules puede y debe tomar la iniciativa en estas áreas sin necesitar prompt espe
 
 Todo PR de Jules debe incluir en su descripción:
 
-```
+```markdown
 ## ¿Qué hace este PR?
 (Descripción breve en 1-2 líneas)
 
@@ -189,11 +197,11 @@ Jules **siempre** abre sus PRs hacia `dev`, nunca hacia `main`.
 
 ## 🔗 REFERENCIAS ÚTILES
 
-- Documentación Supabase: https://supabase.com/docs
-- shadcn/ui: https://ui.shadcn.com/docs
-- TanStack Table: https://tanstack.com/table/latest
-- Zod: https://zod.dev
-- Vitest: https://vitest.dev
+- Documentación Supabase: <https://supabase.com/docs>
+- shadcn/ui: <https://ui.shadcn.com/docs>
+- TanStack Table: <https://tanstack.com/table/latest>
+- Zod: <https://zod.dev>
+- Vitest: <https://vitest.dev>
 
 ---
 

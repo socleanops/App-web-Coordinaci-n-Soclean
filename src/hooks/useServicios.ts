@@ -24,7 +24,10 @@ export function useServicios() {
                 .order('created_at', { ascending: false });
 
             if (error) throw new Error(error.message);
-            return data as Servicio[];
+            return (data as unknown as any[]).map(s => ({
+                ...s,
+                clientes: Array.isArray(s.clientes) ? s.clientes[0] : s.clientes
+            })) as unknown as Servicio[];
         },
     });
 

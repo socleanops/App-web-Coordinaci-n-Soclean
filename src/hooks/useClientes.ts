@@ -58,9 +58,25 @@ export function useClientes() {
         },
     });
 
+    const deleteCliente = useMutation({
+        mutationFn: async (id: string) => {
+            const { error } = await supabase
+                .from('clientes')
+                .delete()
+                .eq('id', id);
+
+            if (error) throw new Error(error.message);
+            return true;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['clientes'] });
+        },
+    });
+
     return {
         getClientes,
         createCliente,
         updateCliente,
+        deleteCliente,
     };
 }

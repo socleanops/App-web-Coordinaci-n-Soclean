@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Map, MapPin, User, Navigation, Loader2 } from 'lucide-react';
 import { useServicios } from '@/hooks/useServicios';

@@ -3,24 +3,31 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Pencil, Printer, KeyRound, Stethoscope } from 'lucide-react';
+import { Search, Pencil, Printer, KeyRound, Stethoscope, Trash2 } from 'lucide-react';
+import { useAuthStore } from '@/stores/authStore';
+import type { Funcionario } from '@/types';
 import { FuncionarioPrintDialog } from './FuncionarioPrintDialog';
 
+
 interface FuncionariosTableProps {
-    employees: any[];
+    employees: Funcionario[];
     isLoading: boolean;
-    onEdit: (funcionario: any) => void;
-    onResetPassword: (funcionario: any) => void;
-    onCertificaciones: (funcionario: any) => void;
+    onEdit: (funcionario: Funcionario) => void;
+    onResetPassword: (funcionario: Funcionario) => void;
+    onCertificaciones: (funcionario: Funcionario) => void;
+    onDelete?: (funcionario: Funcionario) => void;
 }
 
-export function FuncionariosTable({ employees, isLoading, onEdit, onResetPassword, onCertificaciones }: FuncionariosTableProps) {
+
+export function FuncionariosTable({ employees, isLoading, onEdit, onResetPassword, onCertificaciones, onDelete }: FuncionariosTableProps) {
+    const { role } = useAuthStore();
+    const isSuperAdmin = role?.toLowerCase() === 'superadmin';
     const [searchTerm, setSearchTerm] = useState('');
     const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
 
     // Optimize array filtering by memoizing it to prevent recalculation on every render
     const filteredEmployees = useMemo(() => {
-        return employees.filter((emp: any) => {
+        return employees.filter((emp: Funcionario) => {
             const search = searchTerm.toLowerCase();
             const n = emp?.profiles?.nombre?.toLowerCase() || '';
             const a = emp?.profiles?.apellido?.toLowerCase() || '';
@@ -88,7 +95,7 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                filteredEmployees.map((emp: any) => (
+                                filteredEmployees.map((emp: Funcionario) => (
                                     <TableRow key={emp.id} className="group hover:bg-muted/30 transition-colors">
                                         <TableCell>
                                             <div className="font-medium">{emp.profiles?.nombre} {emp.profiles?.apellido}</div>
@@ -144,6 +151,23 @@ export function FuncionariosTable({ employees, isLoading, onEdit, onResetPasswor
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
+
+                                            {isSuperAdmin && onDelete && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => {
+                                                        if (confirm(`¿Estás seguro de eliminar a ${emp.profiles?.nombre} ${emp.profiles?.apellido}? Esta acción es irreversible.`)) {
+                                                            onDelete(emp);
+                                                        }
+                                                    }}
+                                                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity ml-1"
+                                                    title="Eliminar Funcionario permanentemente"
+                                                    aria-label="Eliminar Funcionario"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))

@@ -11,12 +11,21 @@ export default function Clientes() {
     const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
     const [editingCliente, setEditingCliente] = useState<Cliente | null>(null);
 
-    const { getClientes } = useClientes();
+    const { getClientes, deleteCliente } = useClientes();
     const { data: clientes = [], isLoading } = getClientes;
 
     const handleEdit = (cliente: Cliente) => {
         setEditingCliente(cliente);
         setIsDialogOpen(true);
+    };
+
+    const handleDelete = async (cliente: Cliente) => {
+        try {
+            await deleteCliente.mutateAsync(cliente.id);
+            // toast.success('Cliente eliminado correctamente');
+        } catch (error: any) {
+            // toast.error('Error al eliminar cliente: ' + error.message);
+        }
     };
 
     const handleAddNew = () => {
@@ -35,6 +44,7 @@ export default function Clientes() {
                 clientes={clientes}
                 isLoading={isLoading}
                 onEdit={handleEdit}
+                onDelete={handleDelete}
             />
 
             <ClienteFormDialog

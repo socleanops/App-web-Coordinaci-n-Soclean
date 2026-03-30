@@ -44,7 +44,11 @@ export function useHorarios() {
                 .order('hora_entrada', { ascending: true });
 
             if (error) throw new Error(error.message);
-            return data as Horario[];
+            return (data as unknown as any[]).map(h => ({
+                ...h,
+                funcionarios: Array.isArray(h.funcionarios) ? h.funcionarios[0] : h.funcionarios,
+                servicios: Array.isArray(h.servicios) ? h.servicios[0] : h.servicios
+            })) as unknown as Horario[];
         },
     });
 

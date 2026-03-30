@@ -3,16 +3,20 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Pencil } from 'lucide-react';
+import { Search, Pencil, Trash2 } from 'lucide-react';
+import { useAuthStore } from '@/stores/authStore';
 import type { Cliente } from '@/types';
 
 interface ClientesTableProps {
     clientes: Cliente[];
     isLoading: boolean;
     onEdit: (cliente: Cliente) => void;
+    onDelete?: (cliente: Cliente) => void;
 }
 
-export function ClientesTable({ clientes, isLoading, onEdit }: ClientesTableProps) {
+export function ClientesTable({ clientes, isLoading, onEdit, onDelete }: ClientesTableProps) {
+    const { role } = useAuthStore();
+    const isSuperAdmin = role?.toLowerCase() === 'superadmin';
     const [searchTerm, setSearchTerm] = useState('');
 
     const filteredClientes = clientes.filter((cli) => {
@@ -102,6 +106,23 @@ export function ClientesTable({ clientes, isLoading, onEdit }: ClientesTableProp
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
+
+                                            {isSuperAdmin && onDelete && (
+                                                <Button
+                                                    variant="ghost"
+                                                    size="icon"
+                                                    onClick={() => {
+                                                        if (confirm(`¿Estás seguro de eliminar a ${emp.razon_social}? Esta acción es irreversible.`)) {
+                                                            onDelete(emp);
+                                                        }
+                                                    }}
+                                                    className="text-muted-foreground hover:text-destructive opacity-0 group-hover:opacity-100 transition-opacity ml-1"
+                                                    title="Eliminar Cliente permanentemente"
+                                                    aria-label="Eliminar Cliente"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            )}
                                         </TableCell>
                                     </TableRow>
                                 ))

@@ -23,12 +23,24 @@ export default function Employees() {
     const [certDialogOpen, setCertDialogOpen] = useState(false);
     const [funcionarioToCert, setFuncionarioToCert] = useState<Funcionario | null>(null);
 
-    const { getFuncionarios, resetPassword } = useFuncionarios();
+    const { getFuncionarios, resetPassword, deleteFuncionario } = useFuncionarios();
     const { data: employees = [], isLoading } = getFuncionarios;
 
     const handleEdit = (funcionario: Funcionario) => {
         setEditingFuncionario(funcionario);
         setIsDialogOpen(true);
+    };
+
+    const handleDelete = async (funcionario: Funcionario) => {
+        try {
+            await deleteFuncionario.mutateAsync({ 
+                id: funcionario.id, 
+                profileId: funcionario.profile_id 
+            });
+            toast.success('Funcionario eliminado correctamente');
+        } catch (error: any) {
+            toast.error('Error al eliminar funcionario: ' + error.message);
+        }
     };
 
     const handleResetPasswordClick = (funcionario: Funcionario) => {
@@ -79,6 +91,7 @@ export default function Employees() {
                 onEdit={handleEdit}
                 onResetPassword={handleResetPasswordClick}
                 onCertificaciones={handleCertificacionesClick}
+                onDelete={handleDelete}
             />
 
             <FuncionarioFormDialog
