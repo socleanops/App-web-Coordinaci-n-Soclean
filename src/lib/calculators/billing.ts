@@ -1,4 +1,4 @@
-import { Asistencia } from '@/types';
+import type { Asistencia } from '@/types';
 
 export interface ReportRow {
     fecha: string;
@@ -15,7 +15,7 @@ export interface FacturacionResultado {
     totalHoras: number;
 }
 
-export function procesarFacturacion(data: any[]): FacturacionResultado {
+export function procesarFacturacion(data: Asistencia[]): FacturacionResultado {
     const rows: ReportRow[] = [];
     let sumatoriaHorasDecimal = 0;
 
