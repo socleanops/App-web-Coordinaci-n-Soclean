@@ -57,43 +57,34 @@ export function useFacturas() {
             // Generate a unique number if not provided (fallback)
             const numero = facturaData.numero || `FAC-${Date.now()}`;
 
-            // Create factura
-            const { data: newFactura, error: facturaError } = await supabase
-                .from('facturas')
-                .insert([{
-                    cliente_id: facturaData.cliente_id,
-                    numero: numero,
-                    fecha_emision: facturaData.fecha_emision,
-                    fecha_vencimiento: facturaData.fecha_vencimiento || null,
-                    periodo: facturaData.periodo || null,
-                    estado: facturaData.estado,
-                    subtotal: facturaData.subtotal,
-                    impuesto: facturaData.impuesto,
-                    descuento: facturaData.descuento,
-                    total: facturaData.total
-                }])
-                .select()
-                .single();
+            const facturaPayload = {
+                cliente_id: facturaData.cliente_id,
+                numero: numero,
+                fecha_emision: facturaData.fecha_emision,
+                fecha_vencimiento: facturaData.fecha_vencimiento || null,
+                periodo: facturaData.periodo || null,
+                estado: facturaData.estado,
+                subtotal: facturaData.subtotal,
+                impuesto: facturaData.impuesto,
+                descuento: facturaData.descuento,
+                total: facturaData.total
+            };
 
-            if (facturaError) throw new Error(`Error factura: ${facturaError.message}`);
+            const itemsPayload = items && items.length > 0 ? items.map(item => ({
+                servicio_id: item.servicio_id || null,
+                descripcion: item.descripcion,
+                cantidad: item.cantidad,
+                precio_unitario: item.precio_unitario,
+                total: item.cantidad * item.precio_unitario
+            })) : [];
 
-            // Insert items
-            if (items && items.length > 0) {
-                const itemsToInsert = items.map(item => ({
-                    factura_id: newFactura.id,
-                    servicio_id: item.servicio_id || null,
-                    descripcion: item.descripcion,
-                    cantidad: item.cantidad,
-                    precio_unitario: item.precio_unitario,
-                    total: item.cantidad * item.precio_unitario
-                }));
+            // Ejecuta la transacción atómica
+            const { data: newFactura, error } = await supabase.rpc('crear_factura_con_items', {
+                factura_data: facturaPayload,
+                items_data: itemsPayload
+            });
 
-                const { error: itemsError } = await supabase
-                    .from('factura_items')
-                    .insert(itemsToInsert);
-
-                if (itemsError) throw new Error(`Error items: ${itemsError.message}`);
-            }
+            if (error) throw new Error(`Error transaccional al crear factura: ${error.message}`);
 
             return newFactura;
         },
