@@ -39,7 +39,7 @@ export function useFacturas() {
                 .order('fecha_emision', { ascending: false });
 
             if (error) throw new Error(error.message);
-            return data as (Factura & { items: FacturaItem[] })[];
+            return data as any;
         },
     });
 

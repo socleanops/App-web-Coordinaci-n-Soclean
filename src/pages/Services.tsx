@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Pencil, Search, MapPin } from 'lucide-react';
@@ -26,19 +26,15 @@ export default function Services() {
         setIsDialogOpen(true);
     };
 
-    // ⚡ Bolt: Optimize array filtering by memoizing it to prevent recalculation on every render.
-    // O(N) filtering operations block the main thread; caching the result reduces re-render times by ~30% for large lists.
-    const filteredServicios = useMemo(() => {
-        return servicios.filter((serv: Servicio) => {
-            const search = searchTerm.toLowerCase();
-            const nm = serv.nombre?.toLowerCase() || '';
-            const dir = serv.direccion?.toLowerCase() || '';
-            // Because fields are joined from the queries
-            const clRazon = serv.clientes?.razon_social?.toLowerCase() || '';
-            const clFantasia = serv.clientes?.nombre_fantasia?.toLowerCase() || '';
-            return nm.includes(search) || dir.includes(search) || clRazon.includes(search) || clFantasia.includes(search);
-        });
-    }, [servicios, searchTerm]);
+    const filteredServicios = servicios.filter((serv: Servicio) => {
+        const search = searchTerm.toLowerCase();
+        const nm = serv.nombre?.toLowerCase() || '';
+        const dir = serv.direccion?.toLowerCase() || '';
+        // Because fields are joined from the queries
+        const clRazon = serv.clientes?.razon_social?.toLowerCase() || '';
+        const clFantasia = serv.clientes?.nombre_fantasia?.toLowerCase() || '';
+        return nm.includes(search) || dir.includes(search) || clRazon.includes(search) || clFantasia.includes(search);
+    });
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
@@ -131,8 +127,6 @@ export default function Services() {
                                                     size="icon"
                                                     onClick={() => handleEdit(serv)}
                                                     className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    aria-label="Editar servicio"
-                                                    title="Editar servicio"
                                                 >
                                                     <Pencil className="h-4 w-4" />
                                                 </Button>
