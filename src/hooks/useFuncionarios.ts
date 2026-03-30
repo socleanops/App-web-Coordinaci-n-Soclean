@@ -3,7 +3,7 @@ import { supabase } from '@/lib/supabase';
 import type { Funcionario } from '@/types';
 import type { FuncionarioFormData } from '@/lib/validations/funcionario';
 import { createClient } from '@supabase/supabase-js';
-import { generateSecureRandomString } from '@/lib/utils';
+import { generateSecureRandomString, generateComplexPassword } from '@/lib/utils';
 import { toast } from 'sonner';
 
 // Special client that doesn't persist session, so admin can create users without being logged out
@@ -38,7 +38,7 @@ export function useFuncionarios() {
                 .order('fecha_ingreso', { ascending: false });
 
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as Funcionario[];
         },
     });
 
@@ -69,18 +69,16 @@ export function useFuncionarios() {
             
             // Start actual process with an internal timeout race
             const processPromise = (async () => {
-                console.log("[useFuncionarios] Starting createFuncionario at", new Date().toISOString(), "Data:", formData);
                 let profileId = formData.id; // if it already exists
 
                 const randomSuffix = generateSecureRandomString(6);
                 const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
-                const safePassword = formData.password?.trim() || `SC${formData.cedula.replace(/\D/g, '')}#2026`;
+                const safePassword = formData.password?.trim() || generateComplexPassword();
 
                 // 1. Create Auth User if it's new
                 if (!profileId) {
                     currentStep = '2/5 Buscando perfil existente...';
                     toast.loading(currentStep, { id: tid });
-                    console.log("[useFuncionarios] No profileId, creating Auth. SafeEmail:", safeEmail);
                     // Check if profile exists (recovery mode)
                     const { data: existingProfile } = await supabase
                         .from('profiles')
@@ -88,12 +86,9 @@ export function useFuncionarios() {
                         .eq('email', safeEmail)
                         .maybeSingle();
 
-                    console.log("[useFuncionarios] existingProfile check done:", existingProfile);
-
                     if (existingProfile) {
                         currentStep = '2/5 Validando funcionario existente...';
                         toast.loading(currentStep, { id: tid });
-                        console.log("[useFuncionarios] Profile exists, checking funcionario...");
                         // Check if they already have a funcionario
                         const { data: existingFunc } = await supabase
                             .from('funcionarios')
@@ -101,10 +96,8 @@ export function useFuncionarios() {
                             .eq('profile_id', existingProfile.id)
                             .maybeSingle();
 
-                        console.log("[useFuncionarios] existingFunc check done:", existingFunc);
-
                         if (existingFunc) {
-                            const prof = existingFunc.profiles as any;
+                            const prof = existingFunc.profiles as unknown as { nombre: string; apellido: string };
                             const fullName = prof ? `${prof.nombre} ${prof.apellido}` : 'un funcionario activo';
                             throw new Error(`Este correo/cédula ya está registrado y asignado a ${fullName}.`);
                         }
@@ -114,7 +107,6 @@ export function useFuncionarios() {
                     } else {
                         currentStep = '2/5 Registrando cuenta (Auth)...';
                         toast.loading(currentStep, { id: tid });
-                        console.log("[useFuncionarios] Calling authClient.auth.signUp...");
                         const { data: authData, error: authError } = await authClient.auth.signUp({
                             email: safeEmail,
                             password: safePassword,
@@ -126,7 +118,6 @@ export function useFuncionarios() {
                             }
                         });
 
-                        console.log("[useFuncionarios] authClient.auth.signUp finished. Error:", authError?.message, "Data:", !!authData?.user);
                         if (authError) throw new Error(`Auth Error: ${authError.message}`);
                         if (authData.user && authData.user.identities && authData.user.identities.length === 0) {
                             throw new Error('La cuenta ya existe o está en estado de protección (Intente de nuevo en unos minutos o reintente).');
@@ -143,7 +134,6 @@ export function useFuncionarios() {
 
                 currentStep = '3/5 Sincronizando Perfil de usuario...';
                 toast.loading(currentStep, { id: tid });
-                console.log("[useFuncionarios] Calling profiles upsert for ID:", profileId);
                 // 2. Upsert Role securely (Creates it if the DB trigger failed or doesn't exist)
                 const { error: profileError } = await supabase
                     .from('profiles')
@@ -155,7 +145,6 @@ export function useFuncionarios() {
                         apellido: formData.apellido
                     }, { onConflict: 'id' });
 
-                console.log("[useFuncionarios] profiles upsert finished. Error:", profileError?.message);
                 if (profileError) {
                     toast.error(`Error Perfil: ${profileError.message}`, { id: tid });
                     throw new Error(`Profile Error: ${profileError.message}`);
@@ -163,7 +152,6 @@ export function useFuncionarios() {
 
                 currentStep = '4/5 Creando Ficha de Funcionario...';
                 toast.loading(currentStep, { id: tid });
-                console.log("[useFuncionarios] Calling funcionarios insert");
                 // 3. Create Funcionario record
                 const { data: funcData, error: funcError } = await supabase
                     .from('funcionarios')
@@ -181,13 +169,17 @@ export function useFuncionarios() {
                     .select()
                     .single();
 
-                console.log("[useFuncionarios] funcionarios insert finished. Error:", funcError?.message, "Result OK:", !!funcData);
                 if (funcError) {
                     toast.error(`Error Funcionario: ${funcError.message}`, { id: tid });
                     throw new Error(funcError.message);
                 }
                 
-                toast.success('5/5 Operación exitosa!', { id: tid });
+                toast.success(`5/5 Operación exitosa! Nueva clave generada: ${safePassword}`, { id: tid, duration: 10000 });
+                if (!formData.password?.trim()) {
+                    toast.success(`5/5 Operación exitosa! Clave generada: ${safePassword}`, { id: tid, duration: 10000 });
+                } else {
+                    toast.success('5/5 Operación exitosa!', { id: tid });
+                }
                 return funcData;
             })();
 
