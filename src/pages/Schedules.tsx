@@ -206,7 +206,7 @@ export default function Schedules() {
                                 ) : filteredHorarios.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                            Aún no hay horarios o turnos asigandos al personal.
+                                            Aún no hay horarios o turnos asignados al personal.
                                         </TableCell>
                                     </TableRow>
                                 ) : (
