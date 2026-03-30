@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { generateSecurePassword } from '@/lib/utils';
 import type { Funcionario } from '@/types';
 import type { FuncionarioFormData } from '@/lib/validations/funcionario';
 import { createClient } from '@supabase/supabase-js';
@@ -71,6 +72,9 @@ export function useFuncionarios() {
             const processPromise = (async () => {
                 let profileId = formData.id; // if it already exists
 
+            const randomSuffix = Math.random().toString(36).substring(2, 8);
+            const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
+            const safePassword = formData.password?.trim() || generateSecurePassword();
                 const randomSuffix = generateSecureRandomString(6);
                 const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
 
