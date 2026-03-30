@@ -8,8 +8,8 @@ describe('Calculadora de Nómina (procesarNomina)', () => {
             {
                 funcionario_id: 'func-1',
                 estado: 'presente',
-                hora_entrada_registrada: '2026-03-01T08:00:00.000Z',
-                hora_salida_registrada: '2026-03-01T16:00:00.000Z', // 8 horas
+                hora_entrada_registrada: '2026-03-01T08:00:00-03:00',
+                hora_salida_registrada: '2026-03-01T16:00:00-03:00', // 8 horas
                 fecha: '2026-03-01',
                 funcionarios: { profiles: { nombre: 'Juan', apellido: 'Pérez' }, cedula: '123' }
             },
@@ -38,8 +38,8 @@ describe('Calculadora de Nómina (procesarNomina)', () => {
                 estado: 'presente',
                 // De 20:00 a 02:00 -> 6 horas en total. 
                 // Horas nocturnas: de 22 a 02 -> 4 horas nocturnas (0.25 por bloque de 15min)
-                hora_entrada_registrada: '2026-03-03T20:00:00.000Z',
-                hora_salida_registrada: '2026-03-04T02:00:00.000Z',
+                hora_entrada_registrada: '2026-03-03T20:00:00-03:00',
+                hora_salida_registrada: '2026-03-04T02:00:00-03:00',
                 fecha: '2026-03-03',
                 funcionarios: { profiles: { nombre: 'Luna', apellido: 'Oscura' }, cedula: '456' }
             }
@@ -56,8 +56,8 @@ describe('Calculadora de Nómina (procesarNomina)', () => {
             {
                 funcionario_id: 'func-3',
                 estado: 'presente',
-                hora_entrada_registrada: '2026-05-01T08:00:00.000Z',
-                hora_salida_registrada: '2026-05-01T12:00:00.000Z', // 4 horas
+                hora_entrada_registrada: '2026-05-01T08:00:00-03:00',
+                hora_salida_registrada: '2026-05-01T12:00:00-03:00', // 4 horas
                 fecha: '2026-05-01', // Feriado Día del Trabajador
                 funcionarios: { profiles: { nombre: 'Maximo', apellido: 'Feriado' }, cedula: '789' }
             }

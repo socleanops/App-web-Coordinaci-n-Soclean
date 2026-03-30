@@ -9,22 +9,16 @@ import { useClientes } from '@/hooks/useClientes';
 import { supabase } from '@/lib/supabase';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { procesarFacturacion } from '@/lib/calculators/billing';
+import type { ReportRow } from '@/lib/calculators/billing';
 
 const dateFormatter = new Intl.DateTimeFormat('es-UY');
 
-interface ReportRow {
-    fecha: string;
-    funcionario: string;
-    servicio: string;
-    entrada: string;
-    salida: string;
-    horasDecimal: number;
-    horasDisplay: string;
-}
+// Removed local ReportRow interface in favor of the imported one
 
 export default function HorasPorCliente() {
     const { getClientes } = useClientes();
-    const clientes = getClientes.data?.filter(c => c.estado === 'activo') || [];
+    const clientes = getClientes.data?.filter((c: any) => c.estado === 'activo') || [];
 
     const [clienteId, setClienteId] = useState<string>('');
     const [desde, setDesde] = useState<string>(new Date().toISOString().substring(0, 8) + '01');
@@ -76,51 +70,10 @@ export default function HorasPorCliente() {
                 return;
             }
 
-            const rows: ReportRow[] = [];
-            let sumatoriaHorasDecimal = 0;
-
-            data.forEach((a: any) => {
-                const est = a.estado;
-                // Calculamos solo presentes o justificados para facturación
-                if (est === 'presente' || est === 'tardanza' || est === 'salida_anticipada' || est === 'justificado') {
-                    const servicioNombre = a.horarios.servicios.nombre;
-                    const nombreFunc = `${a.funcionarios?.profiles?.nombre} ${a.funcionarios?.profiles?.apellido}`;
-                    const hEntrada = a.horarios.hora_entrada?.substring(0, 5) || '--:--';
-                    const hSalida = a.horarios.hora_salida?.substring(0, 5) || '--:--';
-                    
-                    let horasDecimal = 0;
-                    let horasDisplay = '0 hs';
-
-                    if (hEntrada !== '--:--' && hSalida !== '--:--') {
-                        const [eh, em] = hEntrada.split(':').map(Number);
-                        const [sh, sm] = hSalida.split(':').map(Number);
-                        
-                        let totalHoras = (sh + sm / 60) - (eh + em / 60);
-                        if (totalHoras < 0) totalHoras += 24; // Turnos noche
-                        
-                        horasDecimal = totalHoras;
-                        
-                        const h = Math.floor(horasDecimal);
-                        const m = Math.round((horasDecimal - h) * 60);
-                        horasDisplay = m === 0 ? `${h}h` : `${h}h ${m}m`;
-                    }
-
-                    sumatoriaHorasDecimal += horasDecimal;
-
-                    rows.push({
-                        fecha: a.fecha,
-                        funcionario: nombreFunc,
-                        servicio: servicioNombre,
-                        entrada: hEntrada,
-                        salida: hSalida,
-                        horasDecimal,
-                        horasDisplay
-                    });
-                }
-            });
+            const { rows, totalHoras: th } = procesarFacturacion(data);
 
             setReportData(rows);
-            setTotalHoras(sumatoriaHorasDecimal);
+            setTotalHoras(th);
             setHasGenerated(true);
             if(rows.length > 0){
                 toast.success(`Reporte generado: ${rows.length} turnos procesados.`);
@@ -128,8 +81,8 @@ export default function HorasPorCliente() {
                 toast.info('Los turnos encontrados no aplican para cobro (Ej: Ausentes).');
             }
 
-        } catch (err: any) {
-            toast.error(err.message || 'Error al obtener los datos.');
+        } catch (err) {
+            toast.error(err instanceof Error ? err.message : 'Error al obtener los datos.');
         } finally {
             setIsLoading(false);
         }
@@ -166,7 +119,7 @@ export default function HorasPorCliente() {
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Reporte Horas");
         
-        const clientName = clientes.find(c => c.id === clienteId)?.razon_social || 'cliente';
+        const clientName = clientes.find((c: any) => c.id === clienteId)?.razon_social || 'cliente';
         XLSX.writeFile(workbook, `Horas_${clientName}_${desde}_al_${hasta}.xlsx`);
     };
 
@@ -204,7 +157,7 @@ export default function HorasPorCliente() {
                                     <SelectValue placeholder="Seleccionar cliente..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {clientes.map(c => (
+                                    {clientes.map((c: any) => (
                                         <SelectItem key={c.id} value={c.id}>
                                             {c.razon_social}
                                         </SelectItem>
