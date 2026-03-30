@@ -12,26 +12,9 @@ export function useHorarios() {
             const { data, error } = await supabase
                 .from('horarios')
                 .select(`
-                    id,
-                    funcionario_id,
-                    servicio_id,
-                    dia_semana,
-                    hora_entrada,
-                    hora_salida,
-                    vigente_desde,
-                    vigente_hasta,
-                    created_at,
+                    *,
                     funcionarios(
-                        id,
-                        profile_id,
-                        cedula,
-                        cargo,
-                        departamento_id,
-                        direccion,
-                        fecha_ingreso,
-                        tipo_contrato,
-                        salario_base,
-                        estado,
+                        *,
                         profiles(nombre, apellido)
                     ),
                     servicios(
@@ -44,7 +27,7 @@ export function useHorarios() {
                 .order('hora_entrada', { ascending: true });
 
             if (error) throw new Error(error.message);
-            return data as Horario[];
+            return data as any;
         },
     });
 

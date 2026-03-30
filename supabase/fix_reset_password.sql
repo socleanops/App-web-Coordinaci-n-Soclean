@@ -23,8 +23,5 @@ BEGIN
   SET encrypted_password = extensions.crypt(new_password, extensions.gen_salt('bf'))
   WHERE id = target_user_id;
 
-  -- Invalidar sesiones existentes
-  DELETE FROM auth.sessions WHERE user_id = target_user_id;
-
 END;
 $$;

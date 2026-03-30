@@ -11,7 +11,7 @@ export function useClientes() {
         queryFn: async (): Promise<Cliente[]> => {
             const { data, error } = await supabase
                 .from('clientes')
-                .select('id, razon_social, nombre, nombre_fantasia, rut, direccion, telefono, email, contacto_principal, frecuencia_visita, carga_horaria, estado, created_at')
+                .select('*')
                 .order('razon_social', { ascending: true });
 
             if (error) throw new Error(error.message);

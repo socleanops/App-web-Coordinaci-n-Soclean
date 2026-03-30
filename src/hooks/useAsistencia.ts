@@ -12,28 +12,9 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
             let query = supabase
                 .from('asistencia')
                 .select(`
-                    id,
-                    funcionario_id,
-                    horario_id,
-                    fecha,
-                    hora_entrada_registrada,
-                    hora_salida_registrada,
-                    distancia_entrada_metros,
-                    distancia_salida_metros,
-                    estado,
-                    observaciones,
-                    created_at,
+                    *,
                     funcionarios(
-                        id,
-                        profile_id,
-                        cedula,
-                        cargo,
-                        departamento_id,
-                        direccion,
-                        fecha_ingreso,
-                        tipo_contrato,
-                        salario_base,
-                        estado,
+                        *,
                         profiles(nombre, apellido)
                     ),
                     horarios(
@@ -54,7 +35,7 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
             const { data, error } = await query;
             if (error) throw new Error(error.message);
-            return data as Asistencia[];
+            return data as any;
         },
     });
 
@@ -99,11 +80,14 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
             const { data: horariosRaw, error: horariosErr } = await supabase
                 .from('horarios')
-                .select('id, funcionario_id, servicio_id, dia_semana, hora_entrada, hora_salida, vigente_desde, vigente_hasta, created_at')
+                .select('*')
                 .eq('dia_semana', diaSemana)
                 .lte('vigente_desde', fecha);
 
             const horarios = horariosRaw?.filter(h => !h.vigente_hasta || h.vigente_hasta >= fecha);
+
+            console.log("[generarPlanillaDia] Fecha:", fecha, "diaSemana:", diaSemana);
+            console.log("[generarPlanillaDia] Horarios found from DB:", horarios?.length, horarios);
 
             if (horariosErr) throw new Error(horariosErr.message);
             if (!horarios || horarios.length === 0) return { count: 0 };
@@ -135,6 +119,8 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
                     estado: certsSet.has(h.funcionario_id) ? 'certificado' : 'pendiente'
                 }));
 
+            console.log("[generarPlanillaDia] Nuevos a insertar:", nuevosRegistros.length, nuevosRegistros);
+
             if (nuevosRegistros.length === 0) return { count: 0 };
 
             const { error: insErr } = await supabase
@@ -150,59 +136,43 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
         }
     });
 
-    // Generate sheets for an entire week range using batch queries (Option A)
+    // Generate sheets for an entire week range
     const generarPlanillaSemana = useMutation({
         mutationFn: async ({ desde, hasta }: { desde: string; hasta: string }) => {
-            const [horariosRawRes, existentesRes, certsRes] = await Promise.all([
-                supabase
-                    .from('horarios')
-                    .select('id, funcionario_id, servicio_id, dia_semana, hora_entrada, hora_salida, vigente_desde, vigente_hasta, created_at')
-                    .lte('vigente_desde', hasta),
-                supabase
-                    .from('asistencia')
-                    .select('horario_id, fecha')
-                    .gte('fecha', desde)
-                    .lte('fecha', hasta),
-                supabase
-                    .from('certificaciones')
-                    .select('funcionario_id, fecha_inicio, fecha_fin')
-                    .lte('fecha_inicio', hasta)
-                    .gte('fecha_fin', desde)
-            ]);
-
-            const horariosRaw = horariosRawRes.data || [];
-            const existentes = existentesRes.data || [];
-            const certs = certsRes.data || [];
-
             let totalCreated = 0;
             const current = new Date(desde + 'T12:00:00');
             const end = new Date(hasta + 'T12:00:00');
-
-            const nuevosRegistros: any[] = [];
 
             while (current <= end) {
                 const fechaStr = current.toISOString().split('T')[0];
                 const dateObj = new Date(fechaStr + 'T12:00:00Z');
                 const diaSemana = dateObj.getUTCDay();
 
-                // Filtrar horarios activos para este día de la semana y fecha
-                const horarios = horariosRaw.filter(h =>
-                    h.dia_semana === diaSemana &&
-                    h.vigente_desde <= fechaStr &&
-                    (!h.vigente_hasta || h.vigente_hasta >= fechaStr)
-                );
+                const { data: horariosRaw } = await supabase
+                    .from('horarios')
+                    .select('*')
+                    .eq('dia_semana', diaSemana)
+                    .lte('vigente_desde', fechaStr);
 
-                if (horarios.length > 0) {
-                    const existingSet = new Set(
-                        existentes.filter(e => e.fecha === fechaStr).map(e => e.horario_id)
-                    );
+                const horarios = horariosRaw?.filter(h => !h.vigente_hasta || h.vigente_hasta >= fechaStr);
 
-                    const certsSet = new Set(
-                        certs.filter(c => c.fecha_inicio <= fechaStr && c.fecha_fin >= fechaStr)
-                             .map(c => c.funcionario_id)
-                    );
+                if (horarios && horarios.length > 0) {
+                    const { data: existentes } = await supabase
+                        .from('asistencia')
+                        .select('horario_id')
+                        .eq('fecha', fechaStr);
 
-                    const nuevosDia = horarios
+                    const existingSet = new Set(existentes?.map(e => e.horario_id));
+
+                    // Check certificaciones para esa fecha
+                    const { data: certs } = await supabase
+                        .from('certificaciones')
+                        .select('funcionario_id')
+                        .lte('fecha_inicio', fechaStr)
+                        .gte('fecha_fin', fechaStr);
+                    const certsSet = new Set(certs?.map(c => c.funcionario_id) || []);
+
+                    const nuevos = horarios
                         .filter(h => !existingSet.has(h.id))
                         .map(h => ({
                             funcionario_id: h.funcionario_id,
@@ -211,17 +181,13 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
                             estado: certsSet.has(h.funcionario_id) ? 'certificado' : 'pendiente'
                         }));
 
-                    nuevosRegistros.push(...nuevosDia);
+                    if (nuevos.length > 0) {
+                        await supabase.from('asistencia').insert(nuevos);
+                        totalCreated += nuevos.length;
+                    }
                 }
 
                 current.setDate(current.getDate() + 1);
-            }
-
-            if (nuevosRegistros.length > 0) {
-                // Bulk insert all records at once to save even more DB roundtrips
-                const { error } = await supabase.from('asistencia').insert(nuevosRegistros);
-                if (error) throw new Error(error.message);
-                totalCreated = nuevosRegistros.length;
             }
 
             return { count: totalCreated };

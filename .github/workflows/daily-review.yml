@@ -1,267 +1,40 @@
-name: Daily Review — Tests, PRs y Jules
+name: Daily Code Review and E2E Tests
 
-# ─────────────────────────────────────────
-# Corre todos los días a las 23:00 UY (02:00 UTC)
-# También se puede disparar manualmente desde Actions
-# ─────────────────────────────────────────
 on:
   schedule:
-    - cron: '0 2 * * *'   # 02:00 UTC = 23:00 Uruguay (UTC-3)
-  workflow_dispatch:        # Disparo manual desde GitHub Actions UI
+    # 23:00 Uruguay Time is 02:00 UTC next day
+    - cron: '0 2 * * *'
+  workflow_dispatch:
 
 jobs:
-
-  # ─────────────────────────────────────────
-  # JOB 1: Correr tests y reportar resultados
-  # ─────────────────────────────────────────
-  run-tests:
-    name: 🧪 Tests diarios
+  test-and-review:
     runs-on: ubuntu-latest
 
-    # CORRECCIÓN 1: Permisos explícitos para este job
-    permissions:
-      contents: read
-
-    outputs:
-      test_status: ${{ steps.test-run.outputs.status }}
-      test_summary: ${{ steps.test-run.outputs.summary }}
-      coverage:     ${{ steps.test-run.outputs.coverage }}
-
     steps:
-      - name: Checkout del código (rama dev)
+      - name: Checkout repository
         uses: actions/checkout@v4
-        with:
-          ref: dev
 
-      - name: Configurar Node.js 22
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: '20'
+          cache: 'npm'
 
-      - name: Instalar pnpm (versión fija)
-        uses: pnpm/action-setup@v4
-        with:
-          version: 9
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Instalar dependencias
-        # CORRECCIÓN 2: --no-frozen-lockfile para evitar ERR_PNPM_NO_LOCKFILE
-        run: pnpm install --no-frozen-lockfile
+      - name: Run ESLint
+        run: npm run lint
+        continue-on-error: true
 
-      - name: Correr tests con cobertura
-        id: test-run
-        run: |
-          set +e
-          pnpm test --reporter=verbose --coverage > test-output.txt 2>&1
-          EXIT_CODE=$?
-          set -e
+      - name: Run Unit Tests
+        run: npx vitest run
 
-          if [ $EXIT_CODE -eq 0 ]; then
-            echo "status=✅ Tests OK" >> $GITHUB_OUTPUT
-          else
-            echo "status=❌ Tests fallando" >> $GITHUB_OUTPUT
-          fi
+      - name: Build Project
+        run: npm run build
 
-          COVERAGE=$(grep -E "^All files" test-output.txt | awk '{print $4}' || echo "N/A")
-          echo "coverage=${COVERAGE}%" >> $GITHUB_OUTPUT
-
-          SUMMARY=$(tail -20 test-output.txt | tr '\n' '|')
-          echo "summary=${SUMMARY}" >> $GITHUB_OUTPUT
-
-          exit $EXIT_CODE
-
-      - name: Subir reporte de tests
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-report-${{ github.run_id }}
-          path: test-output.txt
-          retention-days: 7
-
-  # ─────────────────────────────────────────
-  # JOB 2: Revisar PRs abiertos y comentar
-  # ─────────────────────────────────────────
-  review-prs:
-    name: 🔍 Revisión de PRs abiertos
-    runs-on: ubuntu-latest
-    needs: run-tests
-    if: always()
-
-    # CORRECCIÓN 3: Permisos explícitos para leer y comentar PRs
-    permissions:
-      pull-requests: write
-      contents: read
-
-    outputs:
-      pr_count:   ${{ steps.check-prs.outputs.pr_count }}
-      pr_summary: ${{ steps.check-prs.outputs.pr_summary }}
-
-    steps:
-      - name: Listar PRs abiertos hacia dev
-        id: check-prs
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          PRS=$(gh pr list \
-            --repo "$GITHUB_REPOSITORY" \
-            --base dev \
-            --state open \
-            --json number,title,author,createdAt,reviewDecision \
-            --limit 20)
-
-          PR_COUNT=$(echo "$PRS" | jq length)
-          echo "pr_count=${PR_COUNT}" >> $GITHUB_OUTPUT
-
-          if [ "$PR_COUNT" -eq 0 ]; then
-            echo "pr_summary=Sin PRs abiertos hacia dev." >> $GITHUB_OUTPUT
-          else
-            SUMMARY=$(echo "$PRS" | jq -r '.[] | "PR #\(.number): \(.title) — @\(.author.login)"' | head -10 | tr '\n' '|')
-            echo "pr_summary=${SUMMARY}" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Comentar en PRs sin actividad en +3 días
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          STALE_DATE=$(date -d '3 days ago' --iso-8601)
-
-          gh pr list \
-            --repo "$GITHUB_REPOSITORY" \
-            --base dev \
-            --state open \
-            --json number,createdAt,reviewDecision \
-            --limit 20 | \
-          jq -r --arg date "$STALE_DATE" \
-            '.[] | select(.createdAt < $date and .reviewDecision == null) | .number' | \
-          while read -r PR_NUMBER; do
-            gh pr comment "$PR_NUMBER" \
-              --repo "$GITHUB_REPOSITORY" \
-              --body "⏰ **Recordatorio automático:** Este PR lleva más de 3 días sin revisión. ¿Necesita atención o puede ser asignado a Jules?" \
-              2>/dev/null || true
-          done
-
-  # ─────────────────────────────────────────
-  # JOB 3: Asignar tareas a Jules
-  # ─────────────────────────────────────────
-  assign-jules:
-    name: 🤖 Tareas para Jules
-    runs-on: ubuntu-latest
-    needs: [run-tests, review-prs]
-    if: always()
-
-    # CORRECCIÓN 4: Permisos para crear issues
-    permissions:
-      issues: write
-      contents: read
-
-    steps:
-      - name: Checkout del código
-        uses: actions/checkout@v4
-        with:
-          ref: dev
-
-      - name: Buscar TODOs y FIXMEs en el código
-        id: find-todos
-        run: |
-          TODOS=$(grep -rn "TODO\|FIXME\|HACK\|XXX" \
-            --include="*.ts" --include="*.tsx" --include="*.js" \
-            --exclude-dir=node_modules --exclude-dir=.git \
-            . 2>/dev/null | head -15 || echo "")
-
-          if [ -z "$TODOS" ]; then
-            echo "has_todos=false" >> $GITHUB_OUTPUT
-          else
-            echo "has_todos=true" >> $GITHUB_OUTPUT
-            echo "$TODOS" > todos.txt
-          fi
-
-      - name: Crear issue de tareas para Jules
-        if: steps.find-todos.outputs.has_todos == 'true'
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          TODAY=$(date '+%d/%m/%Y')
-          TODOS_CONTENT=$(cat todos.txt | head -15)
-
-          EXISTING=$(gh issue list \
-            --repo "$GITHUB_REPOSITORY" \
-            --label "jules-task" \
-            --state open \
-            --search "Daily Jules ${TODAY}" \
-            --json number | jq length)
-
-          if [ "$EXISTING" -eq 0 ]; then
-            gh issue create \
-              --repo "$GITHUB_REPOSITORY" \
-              --title "🤖 Daily Jules ${TODAY} — Tareas automáticas" \
-              --label "jules-task" \
-              --body "## Tareas detectadas automáticamente
-
-          ### 🔧 TODOs y FIXMEs encontrados en el código
-          \`\`\`
-          ${TODOS_CONTENT}
-          \`\`\`
-
-          ### 📋 Estado de tests
-          ${{ needs.run-tests.outputs.test_status }} | Cobertura: ${{ needs.run-tests.outputs.coverage }}
-
-          ### 📌 PRs abiertos: ${{ needs.review-prs.outputs.pr_count }}
-
-          ---
-          *Issue generado automáticamente por daily-review.yml · ${TODAY}*
-          *Jules: por favor revisá estos items y creá PRs hacia \`dev\` con las correcciones.*"
-          fi
-
-  # ─────────────────────────────────────────
-  # JOB 4: Notificación resumen
-  # ─────────────────────────────────────────
-  notify:
-    name: 📣 Notificación diaria
-    runs-on: ubuntu-latest
-    needs: [run-tests, review-prs, assign-jules]
-    if: always()
-
-    permissions:
-      contents: read
-
-    steps:
-      - name: Enviar resumen a Slack
-        if: ${{ vars.SLACK_ENABLED == 'true' }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          TODAY=$(date '+%d/%m/%Y')
-
-          curl -s -X POST "$SLACK_WEBHOOK_URL" \
-            -H 'Content-type: application/json' \
-            --data "{
-              \"text\": \"*📊 Daily Review — CoreOps ${TODAY}*\",
-              \"blocks\": [
-                {
-                  \"type\": \"section\",
-                  \"text\": {
-                    \"type\": \"mrkdwn\",
-                    \"text\": \"*📊 Daily Review — ${TODAY}*\n${{ needs.run-tests.outputs.test_status }}\n📁 PRs abiertos: ${{ needs.review-prs.outputs.pr_count }}\n🔗 <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Ver reporte completo>\"
-                  }
-                }
-              ]
-            }"
-
-      - name: Resumen en GitHub Actions UI
-        run: |
-          TODAY=$(date '+%d/%m/%Y')
-          cat >> $GITHUB_STEP_SUMMARY << EOF
-          # 📊 Daily Review — ${TODAY}
-
-          ## 🧪 Tests
-          **Estado:** ${{ needs.run-tests.outputs.test_status }}
-          **Cobertura:** ${{ needs.run-tests.outputs.coverage }}
-
-          ## 🔍 PRs abiertos hacia \`dev\`
-          **Cantidad:** ${{ needs.review-prs.outputs.pr_count }}
-
-          ## 🤖 Jules
-          Issue de tareas creado automáticamente si se encontraron TODOs.
-
-          ---
-          [Ver reporte completo de tests](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
-          EOF
+      # Optional: In the future, you can add Playwright or Cypress here to test the live site at https://app.soclean.business
+      # - name: Run E2E Tests on Live Site
+      #   run: npx playwright test --config=playwright.config.ts
+      #   env:
+      #     BASE_URL: https://app.soclean.business
