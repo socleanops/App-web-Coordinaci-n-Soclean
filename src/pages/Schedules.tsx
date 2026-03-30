@@ -273,7 +273,7 @@ export default function Schedules() {
                                                         onClick={() => handleEdit(h)}
                                                         className="text-muted-foreground hover:text-primary"
                                                         title="Editar"
-                                                        aria-label="Editar"
+                                                        aria-label="Editar horario"
                                                     >
                                                         <Pencil className="h-4 w-4" />
                                                     </Button>
