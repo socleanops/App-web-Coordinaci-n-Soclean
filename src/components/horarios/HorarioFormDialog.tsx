@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -66,18 +66,23 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
     // Multi-day selection for batch creation mode
     const [selectedDays, setSelectedDays] = useState<number[]>([1]); // Default: Monday
 
-    const funcionarios = getFuncionarios.data?.filter(f => f.estado === 'activo') || [];
-    const servicios = getServicios.data?.filter(s => s.estado === 'activo') || [];
+    // ⚡ Bolt: Optimize array mapping and filtering by memoizing them.
+    // Prevents expensive array operations on every keystroke in the form.
+    const funcionarioOptions = useMemo(() => {
+        const funcionarios = getFuncionarios.data?.filter(f => f.estado === 'activo') || [];
+        return funcionarios.map(f => ({
+            value: f.id,
+            label: `${f.profiles?.nombre} ${f.profiles?.apellido} - ${f.cargo}`,
+        }));
+    }, [getFuncionarios.data]);
 
-    const funcionarioOptions = funcionarios.map(f => ({
-        value: f.id,
-        label: `${f.profiles?.nombre} ${f.profiles?.apellido} - ${f.cargo}`,
-    }));
-
-    const servicioOptions = servicios.map(s => ({
-        value: s.id,
-        label: `${s.clientes?.razon_social} - ${s.nombre}`,
-    }));
+    const servicioOptions = useMemo(() => {
+        const servicios = getServicios.data?.filter(s => s.estado === 'activo') || [];
+        return servicios.map(s => ({
+            value: s.id,
+            label: `${s.clientes?.razon_social} - ${s.nombre}`,
+        }));
+    }, [getServicios.data]);
 
     const form = useForm<HorarioFormData>({
         resolver: zodResolver(horarioSchema),
