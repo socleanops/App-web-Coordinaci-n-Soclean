@@ -35,6 +35,7 @@ export function Header({ isSupervisor = false }: HeaderProps) {
                         <div className="md:hidden">
                             <Sheet>
                                 <SheetTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="mr-0.5" aria-label="Abrir menú">
                                     <Button variant="ghost" size="icon" className="mr-0.5" aria-label="Abrir menú de navegación">
                                         <Menu className="h-6 w-6" />
                                     </Button>
