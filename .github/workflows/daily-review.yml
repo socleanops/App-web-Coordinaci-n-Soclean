@@ -45,10 +45,10 @@ jobs:
       - name: Correr tests con cobertura
         id: test-run
         run: |
-          # Correr tests y guardar resultado
+          # Correr tests y guardar resultado visible en consola
           set +e
-          pnpm test --reporter=verbose --coverage > test-output.txt 2>&1
-          EXIT_CODE=$?
+          pnpm test --reporter=verbose --coverage | tee test-output.txt
+          EXIT_CODE=${PIPESTATUS[0]}
           set -e
 
           if [ $EXIT_CODE -eq 0 ]; then
@@ -57,8 +57,8 @@ jobs:
             echo "status=❌ Tests fallando" >> $GITHUB_OUTPUT
           fi
 
-          # Extraer línea de cobertura (adaptar si usás Jest en lugar de Vitest)
-          COVERAGE=$(grep -E "^All files" test-output.txt | awk '{print $4}' || echo "N/A")
+          # Extraer línea de cobertura, tolerando espacios al inicio
+          COVERAGE=$(grep -E "\s*All files" test-output.txt | awk '{print $4}' || echo "N/A")
           echo "coverage=${COVERAGE}%" >> $GITHUB_OUTPUT
 
           # Resumen compacto (últimas 20 líneas)
