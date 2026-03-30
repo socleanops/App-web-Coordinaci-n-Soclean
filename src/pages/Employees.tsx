@@ -10,6 +10,7 @@ import { FuncionarioCertificacionesDialog } from '@/components/funcionarios/Func
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { generateSecureRandomString } from '@/lib/utils';
 import { generateComplexPassword } from '@/lib/utils';
 import { Loader2 } from 'lucide-react';
 
@@ -46,6 +47,8 @@ export default function Employees() {
         if (!funcionarioToReset || !funcionarioToReset.profile_id) return;
 
         try {
+            // Se genera una nueva contraseña segura temporal
+            const newPassword = `Sc${generateSecureRandomString(8)}#`;
             const newPassword = generateComplexPassword();
             // Se genera una nueva clave segura
             const newPassword = generateComplexPassword(12);
@@ -111,6 +114,7 @@ export default function Employees() {
                     </DialogHeader>
 
                     <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 p-4 border border-amber-200 dark:border-amber-800 rounded-md text-sm mt-2 mb-4">
+                        Esto invalidará su sesión actual y se generará una nueva contraseña segura temporal. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
                         Esto invalidará su sesión actual y se le asignará una nueva contraseña segura aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
                         Esto invalidará su sesión actual y se generará una nueva contraseña compleja y aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
                         Esto invalidará su sesión actual y se generará una nueva contraseña segura de forma aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.

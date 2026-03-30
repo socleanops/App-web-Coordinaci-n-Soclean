@@ -1,3 +1,7 @@
+## 2024-05-15 - Prevent Predictable Default Passwords
+**Vulnerability:** Predictable default passwords generated using user ID/Cédula (`SC${cedula}#2026`) allow unauthorized access.
+**Learning:** Default passwords must be securely randomized using `window.crypto` to prevent guessing.
+**Prevention:** Use `generateSecureRandomString` combined with strong password requirements for initial credentials and resets.
 ## 2024-05-24 - Exposed Sensitive Data in Logs
 **Vulnerability:** The application was logging sensitive user information, including Personally Identifiable Information (PII) and passwords, directly to the browser console during the user creation process (`console.log("Data:", formData)`).
 **Learning:** Logging entire objects, especially those originating from forms handling user credentials or personal data, creates a severe information leakage vulnerability on the client side.
