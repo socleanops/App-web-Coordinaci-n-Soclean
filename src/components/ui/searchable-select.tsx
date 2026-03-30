@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown, Search, X } from 'lucide-react';
 
 interface SearchableSelectProps {
@@ -21,11 +21,16 @@ export function SearchableSelect({
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const selectedLabel = options.find(o => o.value === value)?.label || '';
+    const selectedLabel = useMemo(() => {
+        return options.find(o => o.value === value)?.label || '';
+    }, [options, value]);
 
-    const filtered = options.filter(o =>
-        o.label.toLowerCase().includes(search.toLowerCase())
-    );
+    // ⚡ Bolt: Optimize array filtering by memoizing it and hoisting search.toLowerCase()
+    // O(N) filtering operations block the main thread; caching the result reduces re-render times.
+    const filtered = useMemo(() => {
+        const searchLower = search.toLowerCase();
+        return options.filter(o => o.label.toLowerCase().includes(searchLower));
+    }, [options, search]);
 
     // Close on outside click
     useEffect(() => {
@@ -75,7 +80,7 @@ export function SearchableSelect({
                             className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                         />
                         {search && (
-                            <button type="button" onClick={() => setSearch('')} className="text-muted-foreground hover:text-foreground">
+                            <button type="button" onClick={() => setSearch('')} className="text-muted-foreground hover:text-foreground" aria-label="Limpiar búsqueda">
                                 <X className="h-3 w-3" />
                             </button>
                         )}

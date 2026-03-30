@@ -1,26 +1,16 @@
-## 2024-05-24 - Hardcoded Default Password during Bulk Import
-**Vulnerability:** Predictable default passwords (user's ID/cedula) used in bulk import enabled unauthorized access to newly created accounts.
-**Learning:** System-generated initial passwords must always use secure, unguessable randomness that meets complexity requirements, forcing users to use reset-password flows for their first login.
-**Prevention:** Use `window.crypto.getRandomValues()` (via `generateSecureRandomString`) to securely generate temporary complex passwords instead of falling back to default IDs.
-
-## 2024-05-24 - Hardcoded Predictable Password during User Creation and Reset
-**Vulnerability:** A predictable default password pattern (`SC${cedula}#2026`) was hardcoded into user creation and password reset flows, making accounts vulnerable to unauthorized access if a user's document ID is known.
-**Learning:** System-generated passwords for user creation and resets must not use predictable patterns or user-specific information. Manual string concatenations involving user data introduce severe security risks.
-**Prevention:** Always use cryptographically secure methods like `window.crypto.getRandomValues()` (via `generateComplexPassword`) to create strong, unguessable default passwords for new users and password resets.
-## 2024-05-24 - Hardcoded Default Password during New User Creation and Reset
-**Vulnerability:** Predictable default passwords ('SC' + user's ID/cedula + '#2026') used during user creation and administrative password resets enabled unauthorized access to newly created accounts and reset accounts.
-**Learning:** System-generated initial and reset passwords must always use secure, unguessable randomness that meets complexity requirements, forcing users to use reset-password flows for their first login or communicate securely.
-**Prevention:** Use `window.crypto.getRandomValues()` (via `generateComplexPassword`) to securely generate temporary complex passwords instead of falling back to default IDs. Ensure existing sessions are deleted when resetting a password via RPC.
-## 2026-03-22 - Prevent predictable default passwords
-**Vulnerability:** Predictable default passwords based on user ID.
-**Learning:** The application was using an insecure deterministic string like SC[cedula]#2026 for password defaults, which can be easily guessed.
-**Prevention:** Use a cryptographically secure random password generator (like generateComplexPassword using crypto.getRandomValues) and display it securely.
-## 2024-05-24 - Fix predictable default passwords
-**Vulnerability:** Default and reset passwords used a predictable pattern (`SC${cedula}#2026`), allowing unauthorized access if an attacker knows a user's ID/cédula.
-**Learning:** Default fallback passwords must be cryptographically secure and surfaced clearly in the UI, rather than relying on predictable patterns.
-**Prevention:** Use a secure password generator using `window.crypto.getRandomValues()` and ensure the UI conveys the generated password securely.
-
-## 2025-05-15 - Mixed Content Vulnerability with Google Maps Icons
-**Vulnerability:** Serving assets (Google Maps markers) over insecure HTTP in an HTTPS application.
-**Learning:** Insecure asset requests can be blocked by browsers or lead to mixed content vulnerabilities, compromising the security context of the page.
-**Prevention:** Always use HTTPS for external asset URLs to ensure they load correctly in secure contexts.
+## 2024-05-15 - Prevent Predictable Default Passwords
+**Vulnerability:** Predictable default passwords generated using user ID/Cédula (`SC${cedula}#2026`) allow unauthorized access.
+**Learning:** Default passwords must be securely randomized using `window.crypto` to prevent guessing.
+**Prevention:** Use `generateSecureRandomString` combined with strong password requirements for initial credentials and resets.
+## 2024-05-24 - Exposed Sensitive Data in Logs
+**Vulnerability:** The application was logging sensitive user information, including Personally Identifiable Information (PII) and passwords, directly to the browser console during the user creation process (`console.log("Data:", formData)`).
+**Learning:** Logging entire objects, especially those originating from forms handling user credentials or personal data, creates a severe information leakage vulnerability on the client side.
+**Prevention:** Never log entire form data objects. If debugging is necessary, log only specific, non-sensitive properties (like an ID or an action name) and ensure all debug logs are removed or sanitized before code is deployed.
+## 2026-03-27 - Exposed Sensitive Data in Console Logs
+**Vulnerability:** Found remaining instance of hardcoded console logs (`console.log`) in `src/hooks/useAsistencia.ts` that logged schedules and details that could include PII or sensitive timing info.
+**Learning:** Found an edge case where schedule objects containing foreign keys, statuses, and full entities can be dumped.
+**Prevention:** Avoid debugging tools (`console.log`) in production code handling API results, and remove them promptly when found, relying on robust error tracking or dedicated audit mechanisms if they must exist.
+## 2024-05-24 - Fix XSS Vulnerability in Print Dialogs
+**Vulnerability:** User-controlled data (e.g., employee names, client names, service addresses) from Supabase was being directly interpolated into raw HTML string templates (`tableHtml += ...`) in `FuncionarioPrintDialog.tsx` and `HorarioPrintDialog.tsx` before being rendered in a new window for printing.
+**Learning:** Directly concatenating dynamic data into HTML strings, even for internal reports or print views, bypasses React's automatic escaping and introduces Cross-Site Scripting (XSS) risks.
+**Prevention:** Always use a utility function like `escapeHtml` to sanitize user inputs before inserting them into dynamically constructed HTML strings.

@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { read, utils } from 'xlsx';
 import { UploadCloud, FileType2, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { generateSecurePassword } from '@/lib/utils';
 import {
     Dialog,
     DialogContent,
@@ -115,6 +116,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
 
                     // Default role for bulk or grab from excel
                     const rol = (row.rol || row.Rol || row.ROL || 'funcionario').toLowerCase();
+                    const password = row.password || row.Password || row.PASSWORD || generateSecurePassword();
 
                     // Generate a random secure password and require password reset on first login.
                     // Complexity rule requires min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char.
