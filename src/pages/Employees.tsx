@@ -2,7 +2,6 @@ import { useState } from 'react';
 import { FuncionarioFormDialog } from '@/components/funcionarios/FuncionarioFormDialog';
 import { FuncionarioBulkImportDialog } from '@/components/funcionarios/FuncionarioBulkImportDialog';
 import { useFuncionarios } from '@/hooks/useFuncionarios';
-import { generateComplexPassword } from '@/lib/utils';
 import type { Funcionario } from '@/types';
 import { FuncionariosHeader } from '@/components/funcionarios/FuncionariosHeader';
 import { FuncionariosTable } from '@/components/funcionarios/FuncionariosTable';
@@ -11,7 +10,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { generateComplexPassword } from '@/lib/utils';
-import { Loader2 } from 'lucide-react';
 
 export default function Employees() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -47,8 +45,6 @@ export default function Employees() {
 
         try {
             const newPassword = generateComplexPassword();
-            // Se genera una nueva clave segura
-            const newPassword = generateComplexPassword(12);
 
             await resetPassword.mutateAsync({
                 profileId: funcionarioToReset.profile_id,
@@ -111,10 +107,7 @@ export default function Employees() {
                     </DialogHeader>
 
                     <div className="bg-amber-50 dark:bg-amber-900/20 text-amber-800 dark:text-amber-400 p-4 border border-amber-200 dark:border-amber-800 rounded-md text-sm mt-2 mb-4">
-                        Esto invalidará su sesión actual y se le asignará una nueva contraseña segura aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
-                        Esto invalidará su sesión actual y se generará una nueva contraseña compleja y aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
-                        Esto invalidará su sesión actual y se generará una nueva contraseña segura de forma aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
-                        Esto invalidará su sesión actual y se generará una nueva contraseña segura y aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
+                        Esto invalidará su sesión actual y generará una nueva contraseña segura aleatoria. Podrás indicarle manualmente cuál es su nueva clave para que vuelva a entrar de inmediato.
                     </div>
 
                     <DialogFooter className="sm:justify-end gap-2">
@@ -127,7 +120,7 @@ export default function Employees() {
                             onClick={confirmResetPassword}
                             disabled={resetPassword.isPending}
                         >
-                            {resetPassword.isPending ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Aplicando...</> : 'Confirmar Reseteo'}
+                            {resetPassword.isPending ? 'Aplicando...' : 'Confirmar Reseteo'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>

@@ -35,8 +35,7 @@ export function Header({ isSupervisor = false }: HeaderProps) {
                         <div className="md:hidden">
                             <Sheet>
                                 <SheetTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="mr-0.5" aria-label="Abrir menú">
-                                    <Button variant="ghost" size="icon" className="mr-0.5" aria-label="Abrir menú de navegación">
+                                    <Button variant="ghost" size="icon" className="mr-0.5">
                                         <Menu className="h-6 w-6" />
                                     </Button>
                                 </SheetTrigger>
@@ -59,9 +58,9 @@ export function Header({ isSupervisor = false }: HeaderProps) {
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full" aria-label="Abrir menú de usuario">
+                            <Button variant="ghost" size="icon" className="rounded-full">
                                 <UserCircle className="h-7 w-7 text-muted-foreground" />
-                                <span className="sr-only">Menú de usuario</span>
+                                <span className="sr-only">Toggle user menu</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">

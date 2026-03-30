@@ -28,7 +28,7 @@ function getTomorrowStr(): string {
     return d.toISOString().split('T')[0]; // YYYY-MM-DD
 }
 
-const dateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+const dateFormatter = new Intl.DateTimeFormat('es-UY');
 
 export default function Schedules() {
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -56,7 +56,7 @@ export default function Schedules() {
     const fechaLabel = useMemo(() => {
         if (!fechaFiltro) return '';
         const d = new Date(fechaFiltro + 'T12:00:00');
-        return dateFormatter.format(d);
+        return d.toLocaleDateString('es-UY', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
     }, [fechaFiltro]);
 
     const handleEdit = (horario: Horario) => {
@@ -80,25 +80,21 @@ export default function Schedules() {
         }
     };
 
-    // ⚡ Bolt: Optimize array filtering by memoizing it to prevent recalculation on every render.
-    // O(N) filtering operations block the main thread; caching the result reduces re-render times by ~30% for large lists.
-    const filteredHorarios = useMemo(() => {
-        return horarios.filter((h: Horario) => {
-            // Filter by day of week if a date is selected
-            if (diaSemanaFiltro !== null && h.dia_semana !== diaSemanaFiltro) return false;
+    const filteredHorarios = horarios.filter((h: Horario) => {
+        // Filter by day of week if a date is selected
+        if (diaSemanaFiltro !== null && h.dia_semana !== diaSemanaFiltro) return false;
 
-            // Filter by vigencia: must be active on the selected date
-            if (!showAll && fechaFiltro) {
-                if (h.vigente_desde && fechaFiltro < h.vigente_desde) return false;
-                if (h.vigente_hasta && fechaFiltro > h.vigente_hasta) return false;
-            }
+        // Filter by vigencia: must be active on the selected date
+        if (!showAll && fechaFiltro) {
+            if (h.vigente_desde && fechaFiltro < h.vigente_desde) return false;
+            if (h.vigente_hasta && fechaFiltro > h.vigente_hasta) return false;
+        }
 
-            const search = searchTerm.toLowerCase();
-            const func = h.funcionarios?.profiles?.nombre?.toLowerCase() + ' ' + h.funcionarios?.profiles?.apellido?.toLowerCase();
-            const serv = h.servicios?.clientes?.razon_social?.toLowerCase() + ' ' + h.servicios?.nombre?.toLowerCase();
-            return func.includes(search) || serv.includes(search);
-        });
-    }, [horarios, searchTerm, diaSemanaFiltro, fechaFiltro, showAll]);
+        const search = searchTerm.toLowerCase();
+        const func = h.funcionarios?.profiles?.nombre?.toLowerCase() + ' ' + h.funcionarios?.profiles?.apellido?.toLowerCase();
+        const serv = h.servicios?.clientes?.razon_social?.toLowerCase() + ' ' + h.servicios?.nombre?.toLowerCase();
+        return func.includes(search) || serv.includes(search);
+    });
 
     const openWhatsApp = (h: Horario) => {
         const nombreFuncionario = `${h.funcionarios?.profiles?.nombre} ${h.funcionarios?.profiles?.apellido}`;
@@ -206,7 +202,7 @@ export default function Schedules() {
                                 ) : filteredHorarios.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                            Aún no hay horarios o turnos asignados al personal.
+                                            Aún no hay horarios o turnos asigandos al personal.
                                         </TableCell>
                                     </TableRow>
                                 ) : (
@@ -263,7 +259,6 @@ export default function Schedules() {
                                                         onClick={() => openWhatsApp(h)}
                                                         className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
                                                         title="Enviar por WhatsApp"
-                                                        aria-label="Enviar por WhatsApp"
                                                     >
                                                         <Smartphone className="h-4 w-4" />
                                                     </Button>
@@ -273,8 +268,6 @@ export default function Schedules() {
                                                         onClick={() => handleEdit(h)}
                                                         className="text-muted-foreground hover:text-primary"
                                                         title="Editar"
-                                                        aria-label="Editar"
-                                                        aria-label="Editar horario"
                                                     >
                                                         <Pencil className="h-4 w-4" />
                                                     </Button>
@@ -284,7 +277,6 @@ export default function Schedules() {
                                                         onClick={() => handleDelete(h.id)}
                                                         className="text-muted-foreground hover:text-red-500"
                                                         title="Eliminar"
-                                                        aria-label="Eliminar"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
