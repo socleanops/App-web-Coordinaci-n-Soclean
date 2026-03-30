@@ -37,7 +37,7 @@ jobs:
       - name: Instalar pnpm (versión fija)
         uses: pnpm/action-setup@v4
         with:
-          version: 9          # ← Fijá aquí tu versión de pnpm
+          version: 10          # ← Fijá aquí tu versión de pnpm
 
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
