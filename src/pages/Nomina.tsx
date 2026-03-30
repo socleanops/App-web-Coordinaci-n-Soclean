@@ -5,6 +5,7 @@ import { Search, Clock, FileSpreadsheet } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { useAsistencia } from '@/hooks/useAsistencia';
+import { procesarNomina } from '@/lib/calculators/nomina';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 
@@ -24,101 +25,11 @@ export default function Nomina() {
         return asistencias;
     }, [asistencias]);
 
-    // Group hours by employee
+    const asisAux = asistenciasMes || [];
+    // Group hours by employee using helper function
     const horasPorFuncionario = useMemo(() => {
-        const agrupar: Record<string, { id: string, nombreCompleto: string, cedula: string, totalHoras: number, horasNocturnas: number, horasFeriado: number, diasTrabajados: number, faltas: number, certificados: number }> = {};
-
-        asistenciasMes.forEach(a => {
-            const funcId = a.funcionario_id;
-            if (!agrupar[funcId]) {
-                agrupar[funcId] = {
-                    id: funcId,
-                    nombreCompleto: `${a.funcionarios?.profiles?.nombre} ${a.funcionarios?.profiles?.apellido}`,
-                    cedula: a.funcionarios?.cedula || '',
-                    totalHoras: 0,
-                    horasNocturnas: 0,
-                    horasFeriado: 0,
-                    diasTrabajados: 0,
-                    faltas: 0,
-                    certificados: 0
-                };
-            }
-
-            if (a.estado === 'presente' || a.estado === 'tardanza' || a.estado === 'salida_anticipada') {
-                agrupar[funcId].diasTrabajados += 1;
-
-                // Calculate hours done today
-                let hours = 0;
-                let nightHours = 0;
-
-                if (a.hora_entrada_registrada && a.hora_salida_registrada) {
-                    const start = new Date(a.hora_entrada_registrada);
-                    const end = new Date(a.hora_salida_registrada);
-
-                    hours = Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60));
-
-                    // Precision: iterate in 15-minute blocks for accurate nocturnal calculation
-                    const current = new Date(start.getTime());
-                    while (current < end) {
-                        const h = current.getHours();
-                        if (h >= 22 || h < 6) nightHours += 0.25;
-                        current.setTime(current.getTime() + 15 * 60 * 1000); // +15 min
-                    }
-                } else if (a.horarios?.hora_entrada && a.horarios?.hora_salida) {
-                    const [hIn, mIn] = a.horarios.hora_entrada.split(':').map(Number);
-                    const [hOut, mOut] = a.horarios.hora_salida.split(':').map(Number);
-
-                    let endHours = hOut + mOut / 60;
-                    const startHours = hIn + mIn / 60;
-
-                    if (endHours < startHours) endHours += 24;
-                    hours = endHours - startHours;
-
-                    // 15-minute precision for schedule-based calculation
-                    for (let mins = startHours * 60; mins < endHours * 60; mins += 15) {
-                        const actualHour = Math.floor(mins / 60) % 24;
-                        if (actualHour >= 22 || actualHour < 6) nightHours += 0.25;
-                    }
-                }
-
-                agrupar[funcId].totalHoras += Math.max(0, hours);
-                agrupar[funcId].horasNocturnas += Math.max(0, nightHours);
-
-                // Feriados de Uruguay (fijos + móviles 2026)
-                // Fijos: 1/1, 1/5, 18/7, 25/8, 25/12
-                // Móviles aprox: Carnaval, Semana Turismo, etc.
-                const FERIADOS_UY = [
-                    '01-01', '01-06', // Año Nuevo, Día de Reyes
-                    '02-16', '02-17', // Carnaval (aprox)
-                    '04-06', '04-07', '04-08', '04-09', '04-10', // Semana de Turismo
-                    '04-19', // Desembarco de los 33
-                    '05-01', // Día del Trabajador
-                    '05-18', // Batalla de las Piedras
-                    '06-19', // Natalicio de Artigas
-                    '07-18', // Jura de la Constitución
-                    '08-25', // Declaratoria de Independencia
-                    '10-12', // Día de la Diversidad Cultural
-                    '11-02', // Día de los Difuntos
-                    '12-25', // Navidad
-                ];
-                const mmdd = a.fecha.substring(5); // YYYY-MM-DD → MM-DD
-                if (FERIADOS_UY.includes(mmdd)) {
-                    agrupar[funcId].horasFeriado += Math.max(0, hours);
-                }
-
-            } else if (a.estado === 'ausente') {
-                agrupar[funcId].faltas += 1;
-            } else if (a.estado === 'certificado') {
-                agrupar[funcId].certificados += 1;
-            }
-        });
-
-        return Object.values(agrupar).filter(f => {
-            const search = searchTerm.toLowerCase();
-            return f.nombreCompleto.toLowerCase().includes(search) || f.cedula.includes(search);
-        }).sort((a, b) => b.totalHoras - a.totalHoras);
-
-    }, [asistenciasMes, searchTerm]);
+        return procesarNomina(asisAux, searchTerm);
+    }, [asisAux, searchTerm]);
 
 
     const totales = useMemo(() => {
