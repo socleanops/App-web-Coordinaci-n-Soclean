@@ -40,6 +40,11 @@ function formatDateStr(d: Date): string {
     return d.toISOString().split('T')[0];
 }
 
+const shortDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'short', day: 'numeric', month: 'short' });
+const longDateFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'long' });
+const fullDateFormatter = new Intl.DateTimeFormat('es-UY');
+const weekStartFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short' });
+const weekEndFormatter = new Intl.DateTimeFormat('es-UY', { day: 'numeric', month: 'short', year: 'numeric' });
 // ⚡ Bolt: Cache Intl formatters outside the render cycle
 // Recreating Intl.DateTimeFormat objects during map loops or renders is expensive.
 // Instantiating them once here avoids performance bottlenecks in the UI.
@@ -192,6 +197,7 @@ export default function Attendance() {
         return asistencias.filter((a: Asistencia) => ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado)).length;
     }, [asistencias]);
 
+    const weekLabel = `${weekStartFormatter.format(weekStart)} — ${weekEndFormatter.format(weekEnd)}`;
     const weekLabel = `${weekLabelStartFormatter.format(weekStart)} — ${weekLabelEndFormatter.format(weekEnd)}`;
 
     return (
@@ -298,6 +304,7 @@ export default function Attendance() {
                         <CardTitle className="text-lg flex-1">
                             {viewMode === 'semana'
                                 ? `Registros de la Semana (${filteredAsistencias.length} entradas)`
+                                : `Registros del Día: ${fullDateFormatter.format(new Date(singleDate + 'T12:00:00'))}`
                                 : `Registros del Día: ${defaultDateFormatter.format(new Date(singleDate + 'T12:00:00'))}`
                             }
                         </CardTitle>
