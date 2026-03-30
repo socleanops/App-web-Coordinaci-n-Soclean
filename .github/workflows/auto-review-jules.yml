@@ -23,7 +23,9 @@ jobs:
           node-version: 22
 
       - name: Instalar pnpm
-        run: npm install -g pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
