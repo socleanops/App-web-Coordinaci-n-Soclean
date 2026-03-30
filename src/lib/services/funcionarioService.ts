@@ -43,6 +43,7 @@ export const funcionarioService = {
    */
   async createFuncionario(formData: FuncionarioFormData, onStepChange?: (step: string) => void) {
     let profileId = formData.id;
+    let isNewAccount = false;
 
     const randomSuffix = generateSecureRandomString(6);
     const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
@@ -86,46 +87,56 @@ export const funcionarioService = {
           throw new Error('La cuenta ya existe o está en estado de protección.');
         }
         profileId = authData.user.id;
+        isNewAccount = true;
       }
     }
 
     if (!profileId) throw new Error('Fallo al crear ID de perfil');
 
-    // 2. Upsert profile
-    onStepChange?.('3/5 Sincronizando Perfil de usuario...');
-    const { error: profileError } = await supabase
-      .from('profiles')
-      .upsert({
-        id: profileId,
-        email: safeEmail,
-        rol: formData.rol,
-        nombre: formData.nombre,
-        apellido: formData.apellido,
-      }, { onConflict: 'id' });
-    
-    if (profileError) throw new Error(`Error Perfil: ${profileError.message}`);
+    try {
+      // 2. Upsert profile
+      onStepChange?.('3/5 Sincronizando Perfil de usuario...');
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: profileId,
+          email: safeEmail,
+          rol: formData.rol,
+          nombre: formData.nombre,
+          apellido: formData.apellido,
+        }, { onConflict: 'id' });
+      
+      if (profileError) throw profileError;
 
-    // 3. Create Funcionario record
-    onStepChange?.('4/5 Creando Ficha de Funcionario...');
-    const { data: funcData, error: funcError } = await supabase
-      .from('funcionarios')
-      .insert({
-        profile_id: profileId,
-        cedula: formData.cedula,
-        cargo: formData.cargo,
-        departamento_id: formData.departamento_id,
-        direccion: formData.direccion,
-        fecha_ingreso: formData.fecha_ingreso,
-        tipo_contrato: formData.tipo_contrato,
-        salario_base: 0,
-        estado: formData.estado,
-      })
-      .select()
-      .single();
+      // 3. Create Funcionario record
+      onStepChange?.('4/5 Creando Ficha de Funcionario...');
+      const { data: funcData, error: funcError } = await supabase
+        .from('funcionarios')
+        .insert({
+          profile_id: profileId,
+          cedula: formData.cedula,
+          cargo: formData.cargo,
+          departamento_id: formData.departamento_id,
+          direccion: formData.direccion,
+          fecha_ingreso: formData.fecha_ingreso,
+          tipo_contrato: formData.tipo_contrato,
+          salario_base: 0,
+          estado: formData.estado,
+        })
+        .select()
+        .single();
 
-    if (funcError) throw new Error(`Error Funcionario: ${funcError.message}`);
+      if (funcError) throw funcError;
 
-    return funcData;
+      return funcData;
+    } catch (error: unknown) {
+      if (isNewAccount && profileId) {
+        // Rollback sintético para purgar la cuenta de Auth que acabamos de crear exitosamente
+        await supabase.rpc('delete_auth_user', { target_user_id: profileId });
+      }
+      const errMessage = error instanceof Error ? error.message : String(error);
+      throw new Error(`Fallo en la creación del funcionario: ${errMessage}`);
+    }
   },
 
   async updateFuncionario(id: string, data: Partial<FuncionarioFormData>) {
@@ -179,10 +190,10 @@ export const funcionarioService = {
     const { error: funcErr } = await supabase.from('funcionarios').delete().eq('id', id);
     if (funcErr) throw new Error(funcErr.message);
 
-    // 3. Delete profile (if it was a test user)
+    // 3. Delete profile and auth credentials via RPC
     if (func.profile_id) {
-      const { error: profErr } = await supabase.from('profiles').delete().eq('id', func.profile_id);
-      if (profErr) console.warn('Perfil no pudo ser eliminado (podría tener otras dependencias):', profErr.message);
+      const { error: profErr } = await supabase.rpc('delete_auth_user', { target_user_id: func.profile_id });
+      if (profErr) console.warn('Perfil Auth no pudo ser eliminado (podría estar bloqueado o ya borrado):', profErr.message);
     }
 
     return true;
