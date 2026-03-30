@@ -1,3 +1,5 @@
+import { Asistencia } from '@/types';
+
 export interface ReportRow {
     fecha: string;
     funcionario: string;

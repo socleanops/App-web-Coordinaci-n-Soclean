@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
 import { procesarFacturacion } from '@/lib/calculators/billing';
 import type { ReportRow } from '@/lib/calculators/billing';
+import type { Cliente } from '@/types';
 
 const dateFormatter = new Intl.DateTimeFormat('es-UY');
 
@@ -18,7 +19,7 @@ const dateFormatter = new Intl.DateTimeFormat('es-UY');
 
 export default function HorasPorCliente() {
     const { getClientes } = useClientes();
-    const clientes = getClientes.data?.filter((c: any) => c.estado === 'activo') || [];
+    const clientes = getClientes.data?.filter((c: Cliente) => c.estado === 'activo') || [];
 
     const [clienteId, setClienteId] = useState<string>('');
     const [desde, setDesde] = useState<string>(new Date().toISOString().substring(0, 8) + '01');
@@ -105,7 +106,7 @@ export default function HorasPorCliente() {
         const m = Math.round((totalHoras - h) * 60);
         const hsDisplayFinal = m === 0 ? `${h}h` : `${h}h ${m}m`;
 
-        dataToExport.push({} as any);
+        dataToExport.push({} as Record<string, string>);
         dataToExport.push({
             'Día': 'TOTAL GENERAL:',
             'Servicio Realizado': '',
@@ -119,7 +120,7 @@ export default function HorasPorCliente() {
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Reporte Horas");
         
-        const clientName = clientes.find((c: any) => c.id === clienteId)?.razon_social || 'cliente';
+        const clientName = clientes.find((c: Cliente) => c.id === clienteId)?.razon_social || 'cliente';
         XLSX.writeFile(workbook, `Horas_${clientName}_${desde}_al_${hasta}.xlsx`);
     };
 
@@ -157,7 +158,7 @@ export default function HorasPorCliente() {
                                     <SelectValue placeholder="Seleccionar cliente..." />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {clientes.map((c: any) => (
+                                    {clientes.map((c: Cliente) => (
                                         <SelectItem key={c.id} value={c.id}>
                                             {c.razon_social}
                                         </SelectItem>
