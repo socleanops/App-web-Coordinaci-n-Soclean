@@ -79,20 +79,25 @@ export function FuncionarioFormDialog({ open, onOpenChange, funcionarioToEdit }:
 
     const onSubmit = async (data: FuncionarioFormData) => {
         const isEditing = !!funcionarioToEdit;
-        const loadingId = toast.loading(isEditing ? 'Actualizando funcionario...' : 'Creando perfil y registrando funcionario...');
+        const loadingId = toast.loading(isEditing ? 'Actualizando funcionario...' : 'Validando datos...');
 
         try {
+            // Let the mutation handle its own timeout if we want, or do it here
+            const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Tiempo de espera agotado en Supabase al procesar.')), 20000));
+            
             if (isEditing) {
-                await updateFuncionario.mutateAsync({ id: funcionarioToEdit!.id, data });
+                await Promise.race([updateFuncionario.mutateAsync({ id: funcionarioToEdit!.id, data }), timeoutPromise]);
                 toast.success('Funcionario actualizado correctamente', { id: loadingId });
             } else {
-                await createFuncionario.mutateAsync(data);
-                toast.success('Usuario y funcionario creados correctamente', { id: loadingId });
+                toast.loading('Iniciando guardado remoto...', { id: loadingId });
+                await Promise.race([createFuncionario.mutateAsync(data), timeoutPromise]);
+                // the mutation itself shows a success toast for "5/5" and hides "Iniciando guardado remoto..."
             }
             onOpenChange(false);
         } catch (error: any) {
             console.error("Form Submit Error:", error);
-            toast.error(`Error: ${error.message || 'No se pudo guardar la información'}`, { id: loadingId, duration: 8000 });
+            const msg = error.message || 'No se pudo guardar la información';
+            toast.error(`Error: ${msg}`, { id: loadingId, duration: 10000 });
         }
     };
 

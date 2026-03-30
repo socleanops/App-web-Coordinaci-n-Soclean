@@ -17,6 +17,7 @@ const Billing = lazy(() => import('./pages/Billing'));
 const Reports = lazy(() => import('./pages/Reports'));
 const Nomina = lazy(() => import('./pages/Nomina'));
 const Settings = lazy(() => import('./pages/Settings'));
+const SupervisorMobile = lazy(() => import('./pages/SupervisorMobile'));
 
 const PageLoader = () => (
   <div className="flex flex-col h-screen w-full items-center justify-center bg-background/50 backdrop-blur-sm">
@@ -28,7 +29,11 @@ import { supabase } from './lib/supabase';
 import { useAuthStore } from './stores/authStore';
 
 function App() {
-  const { setUser, setRole, setLoading, user } = useAuthStore();
+  const setUser = useAuthStore((s) => s.setUser);
+  const setRole = useAuthStore((s) => s.setRole);
+  const setLoading = useAuthStore((s) => s.setLoading);
+  const user = useAuthStore((s) => s.user);
+  const role = useAuthStore((s) => s.role);
 
   useEffect(() => {
     let mounted = true;
@@ -40,7 +45,7 @@ function App() {
         if (error) {
           console.error("Session fetch error:", error);
           // If the session is invalid or corrupted (which causes the need to clear cookies), force sign out
-          localStorage.clear(); // Bruteforce clear the bad token cache
+          localStorage.removeItem('soclean-coordinacion-auth'); // Specifically clear the bad token cache
           await supabase.auth.signOut().catch(() => { });
           if (mounted) {
             setUser(null);
@@ -63,11 +68,19 @@ function App() {
 
           if (!profileErr && data && mounted) {
             setRole(data.rol);
+          } else if (profileErr && mounted) {
+             console.error("Failed to fetch profile role:", profileErr);
+             // Default to lowest priviledge if failed but session exists to prevent infinite load
+             setRole('funcionario');
           }
         }
       } catch (err) {
         console.error("Critical Auth Init Error:", err);
-        await supabase.auth.signOut();
+        try {
+            await supabase.auth.signOut();
+        } catch (signOutErr) {
+            console.error("SignOut error during critical failure:", signOutErr);
+        }
       } finally {
         if (mounted) setLoading(false);
       }
@@ -100,6 +113,9 @@ function App() {
 
           if (!error && data && mounted) {
             setRole(data.rol);
+          } else if (error && mounted) {
+             console.error("Failed to fetch profile role on change:", error);
+             setRole('funcionario');
           }
         }
       } catch (err) {
@@ -126,7 +142,8 @@ function App() {
 
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<DashboardLayout />}>
-              <Route index element={<Dashboard />} />
+              <Route index element={role?.toLowerCase() === 'supervisor' ? <SupervisorMobile /> : <Dashboard />} />
+              <Route path="supervisor" element={role?.toLowerCase() === 'supervisor' ? <SupervisorMobile /> : <Navigate to="/" replace />} />
               <Route path="funcionarios" element={<Employees />} />
               <Route path="horarios" element={<Schedules />} />
               <Route path="clientes" element={<Clients />} />

@@ -9,8 +9,11 @@ if (!supabaseUrl || !supabaseAnonKey) {
     );
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient(supabaseUrl || 'https://placeholder-url.supabase.co', supabaseAnonKey || 'placeholder-key', {
     auth: {
-        storageKey: 'soclean-coordinacion-auth'
+        storageKey: 'soclean-coordinacion-auth',
+        // In case env vars are truly missing on Vercel, this prevents an instant crash
+        // but auth calls will obviously fail gracefully later
+        persistSession: true,
     }
 });

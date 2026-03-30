@@ -4,7 +4,7 @@ import { ModuleCard } from '@/components/dashboard/ModuleCard';
 import { DashboardSupportSection } from '@/components/dashboard/DashboardSupportSection';
 
 export default function Dashboard() {
-    const { role } = useAuthStore();
+    const role = useAuthStore(s => s.role);
     const isManager = role === 'superadmin' || role === 'admin';
 
     return (
@@ -71,7 +71,6 @@ export default function Dashboard() {
                     colorTheme="orange"
                     linkTo="/logistica"
                     linkText="Abrir Logística"
-                    isNew={true}
                 />
 
                 {isManager && (

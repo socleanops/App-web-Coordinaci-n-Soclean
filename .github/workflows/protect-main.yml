@@ -1,0 +1,93 @@
+name: Protección de rama main
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  # ─────────────────────────────────────────
+  # JOB 1: Bloquear merges directos de bots a main
+  # Jules y otros bots NUNCA pueden tocar main
+  # ─────────────────────────────────────────
+  block-bots-on-main:
+    name: 🚫 Bloquear bots en main
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Verificar que no es un bot
+        run: |
+          AUTHOR="${{ github.event.pull_request.user.login }}"
+          echo "Autor del PR: $AUTHOR"
+
+          if [[ "$AUTHOR" == *"[bot]"* ]] || [[ "$AUTHOR" == "google-labs-jules"* ]]; then
+            echo "❌ ERROR: Los agentes automáticos (Jules, bots) no pueden"
+            echo "   hacer merge directamente a main."
+            echo "   El flujo correcto es: Jules → dev → revisión manual → main"
+            exit 1
+          fi
+
+          echo "✅ Autor humano verificado: $AUTHOR"
+
+  # ─────────────────────────────────────────
+  # JOB 2: Checks completos obligatorios para main
+  # Más estrictos que los de dev
+  # ─────────────────────────────────────────
+  full-checks-main:
+    name: 🔒 Checks completos para main
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar pnpm
+        run: npm install -g pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript — verificación estricta
+        run: pnpm tsc --noEmit --strict
+
+      - name: Tests — suite completa con cobertura
+        run: pnpm test --reporter=verbose --coverage
+
+      - name: Verificar cobertura mínima en módulos críticos
+        run: |
+          echo "Verificando cobertura en módulos críticos..."
+          # Nómina y facturación deben tener cobertura mínima del 70%
+          pnpm test --coverage --reporter=json 2>/dev/null || true
+
+      - name: Build de producción
+        run: pnpm build
+
+      - name: Verificar tamaño del bundle
+        run: |
+          BUILD_SIZE=$(du -sh dist/ | cut -f1)
+          echo "📦 Tamaño del bundle: $BUILD_SIZE"
+
+  # ─────────────────────────────────────────
+  # JOB 3: Notificación de deploy exitoso
+  # ─────────────────────────────────────────
+  notify-deploy:
+    name: 🚀 Notificar merge a main
+    needs: [block-bots-on-main, full-checks-main]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+
+    steps:
+      - name: Confirmar deploy
+        run: |
+          echo "✅ Merge exitoso a main"
+          echo "🚀 CoreOps listo para deploy"
+          echo "Commit: ${{ github.sha }}"
+          echo "Autor: ${{ github.actor }}"

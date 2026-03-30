@@ -1,27 +1,41 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Pencil } from 'lucide-react';
+import { Search, Pencil, Printer, KeyRound, Stethoscope } from 'lucide-react';
+import { FuncionarioPrintDialog } from './FuncionarioPrintDialog';
 
 interface FuncionariosTableProps {
     employees: any[];
     isLoading: boolean;
     onEdit: (funcionario: any) => void;
+    onResetPassword: (funcionario: any) => void;
+    onCertificaciones: (funcionario: any) => void;
 }
 
-export function FuncionariosTable({ employees, isLoading, onEdit }: FuncionariosTableProps) {
+export function FuncionariosTable({ employees, isLoading, onEdit, onResetPassword, onCertificaciones }: FuncionariosTableProps) {
     const [searchTerm, setSearchTerm] = useState('');
+    const [isPrintDialogOpen, setIsPrintDialogOpen] = useState(false);
 
-    const filteredEmployees = employees.filter((emp: any) => {
-        const search = searchTerm.toLowerCase();
-        const n = emp?.profiles?.nombre?.toLowerCase() || '';
-        const a = emp?.profiles?.apellido?.toLowerCase() || '';
-        const cedula = emp?.cedula || '';
-        const cargo = emp?.cargo?.toLowerCase() || '';
-        return n.includes(search) || a.includes(search) || cedula.includes(search) || cargo.includes(search);
-    });
+    // Optimize array filtering by memoizing it to prevent recalculation on every render
+    const filteredEmployees = useMemo(() => {
+        return employees.filter((emp: any) => {
+            const search = searchTerm.toLowerCase();
+            const n = emp?.profiles?.nombre?.toLowerCase() || '';
+            const a = emp?.profiles?.apellido?.toLowerCase() || '';
+            const cedula = emp?.cedula || '';
+            const cargo = emp?.cargo?.toLowerCase() || '';
+            return n.includes(search) || a.includes(search) || cedula.includes(search) || cargo.includes(search);
+        });
+    }, [employees, searchTerm]);
+
+    // Pre-instantiate dateFormatter to avoid object allocation in .map()
+    const dateFormatter = useMemo(() => new Intl.DateTimeFormat(undefined, {
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric'
+    }), []);
 
     return (
         <Card className="border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
@@ -37,11 +51,18 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
                             onChange={(e) => setSearchTerm(e.target.value)}
                         />
                     </div>
+                    <Button
+                        variant="outline"
+                        onClick={() => setIsPrintDialogOpen(true)}
+                        disabled={filteredEmployees.length === 0}
+                    >
+                        <Printer className="h-4 w-4 mr-2" /> Imprimir
+                    </Button>
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-background/50 overflow-hidden">
-                    <Table>
+                <div className="rounded-md border border-slate-200 dark:border-slate-800 bg-background/50 overflow-x-auto overflow-y-hidden">
+                    <Table className="min-w-[800px]">
                         <TableHeader className="bg-muted/50">
                             <TableRow>
                                 <TableHead className="w-[200px]">Funcionario</TableHead>
@@ -81,7 +102,7 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
                                             </span>
                                         </TableCell>
                                         <TableCell className="text-muted-foreground text-sm">
-                                            {new Date(emp.fecha_ingreso).toLocaleDateString()}
+                                            {dateFormatter.format(new Date(emp.fecha_ingreso))}
                                         </TableCell>
                                         <TableCell>
                                             <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${emp.estado === 'activo' ? 'bg-emerald-100 text-emerald-800 border border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800' :
@@ -92,12 +113,34 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
                                                 {emp.estado.charAt(0).toUpperCase() + emp.estado.slice(1)}
                                             </span>
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right whitespace-nowrap">
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => onCertificaciones(emp)}
+                                                className="text-muted-foreground hover:text-cyan-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Certificaciones Médicas"
+                                                aria-label="Certificaciones Médicas"
+                                            >
+                                                <Stethoscope className="h-4 w-4" />
+                                            </Button>
+                                            <Button
+                                                variant="ghost"
+                                                size="icon"
+                                                onClick={() => onResetPassword(emp)}
+                                                className="text-muted-foreground hover:text-amber-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Forzar Reseteo de Contraseña"
+                                                aria-label="Forzar Reseteo de Contraseña"
+                                            >
+                                                <KeyRound className="h-4 w-4" />
+                                            </Button>
                                             <Button
                                                 variant="ghost"
                                                 size="icon"
                                                 onClick={() => onEdit(emp)}
                                                 className="text-muted-foreground hover:text-primary opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Editar Ficha"
+                                                aria-label="Editar Ficha"
                                             >
                                                 <Pencil className="h-4 w-4" />
                                             </Button>
@@ -109,6 +152,12 @@ export function FuncionariosTable({ employees, isLoading, onEdit }: Funcionarios
                     </Table>
                 </div>
             </CardContent>
+
+            <FuncionarioPrintDialog
+                open={isPrintDialogOpen}
+                onOpenChange={setIsPrintDialogOpen}
+                employees={filteredEmployees}
+            />
         </Card>
     );
 }

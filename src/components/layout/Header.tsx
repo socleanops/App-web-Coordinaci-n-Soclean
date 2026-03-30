@@ -1,4 +1,4 @@
-import { Bell, UserCircle } from 'lucide-react';
+import { UserCircle, Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabase';
 import { useNavigate } from 'react-router-dom';
@@ -10,8 +10,15 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { NotificationDropdown } from './NotificationDropdown';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Sidebar } from './Sidebar';
 
-export function Header() {
+interface HeaderProps {
+    isSupervisor?: boolean;
+}
+
+export function Header({ isSupervisor = false }: HeaderProps) {
     const navigate = useNavigate();
 
     const handleSignOut = async () => {
@@ -20,32 +27,48 @@ export function Header() {
     };
 
     return (
-        <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background px-6">
+        <header className="flex h-16 shrink-0 items-center justify-between border-b bg-background px-4 md:px-6">
             <div className="flex flex-1 items-center justify-between">
-                {/* Placeholder for Search or Breadcrumbs */}
-                <div className="text-xl font-semibold uppercase tracking-wider text-muted-foreground">
-                    Panel de Control
+                <div className="flex items-center gap-2">
+                    {/* Mobile Menu Trigger */}
+                    {!isSupervisor && (
+                        <div className="md:hidden">
+                            <Sheet>
+                                <SheetTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="mr-0.5" aria-label="Abrir menú">
+                                    <Button variant="ghost" size="icon" className="mr-0.5" aria-label="Abrir menú de navegación">
+                                        <Menu className="h-6 w-6" />
+                                    </Button>
+                                </SheetTrigger>
+                                <SheetContent side="left" className="p-0 w-64">
+                                    <Sidebar forceExpand />
+                                </SheetContent>
+                            </Sheet>
+                        </div>
+                    )}
+
+                    {/* Placeholder for Search or Breadcrumbs */}
+                    <div className="text-lg md:text-xl font-semibold uppercase tracking-wider text-muted-foreground line-clamp-1">
+                        {isSupervisor ? 'Mis Asignaciones' : 'Panel de Control'}
+                    </div>
                 </div>
 
                 {/* Right Nav */}
                 <div className="flex items-center space-x-4">
-                    <Button variant="ghost" size="icon" className="relative text-muted-foreground hover:text-foreground">
-                        <Bell className="h-5 w-5" />
-                        <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-600"></span>
-                    </Button>
+                    <NotificationDropdown />
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="rounded-full">
+                            <Button variant="ghost" size="icon" className="rounded-full" aria-label="Abrir menú de usuario">
                                 <UserCircle className="h-7 w-7 text-muted-foreground" />
-                                <span className="sr-only">Toggle user menu</span>
+                                <span className="sr-only">Menú de usuario</span>
                             </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Mi Perfil</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuItem>Configuración</DropdownMenuItem>
-                            <DropdownMenuItem>Soporte</DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => navigate('/configuracion')}>Configuración</DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => window.location.href = 'mailto:soporte@soclean.uy'}>Soporte</DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-red-500 cursor-pointer" onClick={handleSignOut}>Cerrar Sesión</DropdownMenuItem>
                         </DropdownMenuContent>
