@@ -54,7 +54,7 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
             const { data, error } = await query;
             if (error) throw new Error(error.message);
-            return data as any;
+            return data as Asistencia[];
         },
     });
 
@@ -105,9 +105,6 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
 
             const horarios = horariosRaw?.filter(h => !h.vigente_hasta || h.vigente_hasta >= fecha);
 
-            console.log("[generarPlanillaDia] Fecha:", fecha, "diaSemana:", diaSemana);
-            console.log("[generarPlanillaDia] Horarios found from DB:", horarios?.length, horarios);
-
             if (horariosErr) throw new Error(horariosErr.message);
             if (!horarios || horarios.length === 0) return { count: 0 };
 
@@ -137,8 +134,6 @@ export function useAsistencia(fechaDesde?: string, fechaHasta?: string) {
                     fecha: fecha,
                     estado: certsSet.has(h.funcionario_id) ? 'certificado' : 'pendiente'
                 }));
-
-            console.log("[generarPlanillaDia] Nuevos a insertar:", nuevosRegistros.length, nuevosRegistros);
 
             if (nuevosRegistros.length === 0) return { count: 0 };
 

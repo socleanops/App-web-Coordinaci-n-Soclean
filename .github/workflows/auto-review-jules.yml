@@ -1,0 +1,61 @@
+name: Auto Review Jules PRs
+
+on:
+  pull_request:
+    branches: [main, dev]
+
+jobs:
+  # ─────────────────────────────────────────
+  # JOB 1: Verificaciones automáticas
+  # Corre en TODOS los PRs (Jules y manuales)
+  # ─────────────────────────────────────────
+  auto-checks:
+    name: ✅ Verificaciones automáticas
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Instalar pnpm
+        run: npm install -g pnpm
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: TypeScript — verificar tipos
+        run: pnpm tsc --noEmit
+
+      - name: Tests — correr suite completa
+        run: pnpm test --reporter=verbose
+
+      - name: Build — verificar que compila
+        run: pnpm build
+
+  # ─────────────────────────────────────────
+  # JOB 2: Auto-merge solo para Jules → dev
+  # NUNCA hace merge hacia main
+  # ─────────────────────────────────────────
+  auto-merge:
+    name: 🤖 Auto-merge PRs de Jules
+    needs: auto-checks
+    runs-on: ubuntu-latest
+    if: |
+      github.event.pull_request.user.login == 'google-labs-jules[bot]' &&
+      github.base_ref == 'dev'
+
+    steps:
+      - name: Hacer merge automático
+        uses: pascalgn/automerge-action@v0.16.2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MERGE_METHOD: squash
+          MERGE_LABELS: ""
+          MERGE_COMMIT_MESSAGE: |
+            🤖 Auto-merge Jules PR #${{ github.event.pull_request.number }}:
+            ${{ github.event.pull_request.title }}
