@@ -43,11 +43,18 @@ jobs:
       - name: Correr tests con cobertura
         id: test-run
         run: |
-          # Correr tests y guardar resultado visible en consola
+          # Correr tests
           set +e
-          pnpm test --reporter=verbose --coverage | tee test-output.txt
-          EXIT_CODE=${PIPESTATUS[0]}
+          pnpm test --reporter=verbose --coverage > test-output.txt 2>&1
+          EXIT_CODE=$?
           set -e
+          
+          # IMPRIMIR LOS LOGS PARA PODER VER EL ERROR REAL EN GITHUB
+          echo "======================================"
+          echo "LOGS DE VITEST (SALIDA COMPLETA):"
+          echo "======================================"
+          cat test-output.txt
+          echo "======================================"
 
           if [ $EXIT_CODE -eq 0 ]; then
             echo "status=✅ Tests OK" >> $GITHUB_OUTPUT
@@ -55,7 +62,6 @@ jobs:
             echo "status=❌ Tests fallando" >> $GITHUB_OUTPUT
           fi
 
-          # Extraer línea de cobertura, tolerando espacios al inicio
           COVERAGE=$(grep -E "\s*All files" test-output.txt | awk '{print $4}' || echo "N/A")
           echo "coverage=${COVERAGE}%" >> $GITHUB_OUTPUT
 
