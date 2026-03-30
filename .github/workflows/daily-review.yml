@@ -32,10 +32,10 @@ jobs:
         with:
           node-version: 22
 
-      - name: Instalar pnpm (versión fija)
+      - name: Instalar pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 9          # ← Fijá aquí tu versión de pnpm
+          version: 10          # Coincidir con versión local
 
       - name: Instalar dependencias
         run: pnpm install --frozen-lockfile
