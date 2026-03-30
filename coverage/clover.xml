@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<coverage generated="1774906587484" clover="3.2.0">
-  <project timestamp="1774906587485" name="All files">
-    <metrics statements="855" coveredstatements="466" conditionals="503" coveredconditionals="172" methods="234" coveredmethods="89" elements="1592" coveredelements="727" complexity="0" loc="855" ncloc="855" packages="10" files="30" classes="30"/>
+<coverage generated="1774907405035" clover="3.2.0">
+  <project timestamp="1774907405036" name="All files">
+    <metrics statements="895" coveredstatements="466" conditionals="531" coveredconditionals="171" methods="242" coveredmethods="89" elements="1668" coveredelements="726" complexity="0" loc="895" ncloc="895" packages="10" files="31" classes="31"/>
     <package name="src">
       <metrics statements="70" coveredstatements="35" conditionals="48" coveredconditionals="4" methods="25" coveredmethods="11"/>
       <file name="App.tsx" path="C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinación\src\App.tsx">
@@ -765,7 +765,7 @@
       </file>
     </package>
     <package name="src.pages">
-      <metrics statements="193" coveredstatements="83" conditionals="141" coveredconditionals="41" methods="58" coveredmethods="15"/>
+      <metrics statements="233" coveredstatements="83" conditionals="169" coveredconditionals="40" methods="66" coveredmethods="15"/>
       <file name="Attendance.tsx" path="C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinación\src\pages\Attendance.tsx">
         <metrics statements="136" coveredstatements="46" conditionals="83" coveredconditionals="18" methods="40" coveredmethods="5"/>
         <line num="12" count="1" type="stmt"/>
@@ -905,8 +905,51 @@
         <line num="504" count="0" type="stmt"/>
         <line num="506" count="0" type="stmt"/>
       </file>
+      <file name="Login.tsx" path="C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinación\src\pages\Login.tsx">
+        <metrics statements="40" coveredstatements="0" conditionals="28" coveredconditionals="0" methods="8" coveredmethods="0"/>
+        <line num="23" count="0" type="stmt"/>
+        <line num="31" count="0" type="stmt"/>
+        <line num="32" count="0" type="stmt"/>
+        <line num="35" count="0" type="stmt"/>
+        <line num="36" count="0" type="stmt"/>
+        <line num="37" count="0" type="stmt"/>
+        <line num="39" count="0" type="stmt"/>
+        <line num="40" count="0" type="stmt"/>
+        <line num="41" count="0" type="stmt"/>
+        <line num="47" count="0" type="stmt"/>
+        <line num="51" count="0" type="stmt"/>
+        <line num="52" count="0" type="stmt"/>
+        <line num="53" count="0" type="stmt"/>
+        <line num="54" count="0" type="stmt"/>
+        <line num="55" count="0" type="stmt"/>
+        <line num="60" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="62" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="64" count="0" type="stmt"/>
+        <line num="70" count="0" type="cond" truecount="0" falsecount="4"/>
+        <line num="71" count="0" type="stmt"/>
+        <line num="74" count="0" type="stmt"/>
+        <line num="75" count="0" type="stmt"/>
+        <line num="78" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="80" count="0" type="stmt"/>
+        <line num="84" count="0" type="stmt"/>
+        <line num="85" count="0" type="stmt"/>
+        <line num="86" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="87" count="0" type="stmt"/>
+        <line num="88" count="0" type="stmt"/>
+        <line num="89" count="0" type="stmt"/>
+        <line num="92" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="93" count="0" type="stmt"/>
+        <line num="94" count="0" type="stmt"/>
+        <line num="95" count="0" type="stmt"/>
+        <line num="97" count="0" type="cond" truecount="0" falsecount="2"/>
+        <line num="99" count="0" type="stmt"/>
+        <line num="103" count="0" type="stmt"/>
+        <line num="138" count="0" type="stmt"/>
+        <line num="188" count="0" type="stmt"/>
+        <line num="196" count="0" type="stmt"/>
+      </file>
       <file name="LogisticsMap.tsx" path="C:\Users\leoma\OneDrive\Desktop\Apps\Soclean Coordinación\src\pages\LogisticsMap.tsx">
-        <metrics statements="57" coveredstatements="37" conditionals="58" coveredconditionals="23" methods="18" coveredmethods="10"/>
+        <metrics statements="57" coveredstatements="37" conditionals="58" coveredconditionals="22" methods="18" coveredmethods="10"/>
         <line num="10" count="1" type="stmt"/>
         <line num="11" count="1" type="stmt"/>
         <line num="14" count="2" type="stmt"/>
