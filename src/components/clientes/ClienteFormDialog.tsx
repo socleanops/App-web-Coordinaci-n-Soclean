@@ -4,12 +4,13 @@ import {
     DialogHeader,
     DialogTitle,
 } from '@/components/ui/dialog';
+import type { Cliente } from '@/types';
 import { ClienteForm } from './ClienteForm';
 
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    clienteToEdit?: any | null; // usually Cliente type
+    clienteToEdit?: Cliente | null;
 }
 
 export function ClienteFormDialog({ open, onOpenChange, clienteToEdit }: Props) {

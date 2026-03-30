@@ -19,12 +19,12 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import type { ClienteFormData } from '@/lib/validations/cliente';
-import { clienteSchema } from '@/lib/validations/cliente';
+import { ClienteFormData, clienteSchema } from '@/lib/validations/cliente';
 import { useClientes } from '@/hooks/useClientes';
+import type { Cliente } from '@/types';
 
 interface ClienteFormProps {
-    clienteToEdit?: any | null;
+    clienteToEdit?: Cliente | null;
     onSuccess?: () => void;
     onCancel?: () => void;
 }
@@ -33,7 +33,7 @@ export function ClienteForm({ clienteToEdit, onSuccess, onCancel }: ClienteFormP
     const { createCliente, updateCliente } = useClientes();
 
     const form = useForm<ClienteFormData>({
-        resolver: zodResolver(clienteSchema) as any,
+        resolver: zodResolver(clienteSchema),
         defaultValues: {
             razon_social: '',
             nombre_fantasia: '',
@@ -61,7 +61,7 @@ export function ClienteForm({ clienteToEdit, onSuccess, onCancel }: ClienteFormP
                 contacto_principal: clienteToEdit.contacto_principal || '',
                 frecuencia_visita: clienteToEdit.frecuencia_visita || '',
                 carga_horaria: clienteToEdit.carga_horaria || '',
-                estado: clienteToEdit.estado as any || 'activo',
+                estado: (clienteToEdit.estado as 'activo' | 'inactivo') || 'activo',
             });
         } else {
             form.reset({
@@ -94,7 +94,7 @@ export function ClienteForm({ clienteToEdit, onSuccess, onCancel }: ClienteFormP
                 toast.success('Cliente registrado exitosamente');
             }
             onSuccess?.();
-        } catch (error: any) {
+        } catch (error) {
             console.error("Form Submit Error:", error);
             toast.dismiss(loadingId);
             toast.error(`Error al revisar datos: ${error.message || 'No se pudo guardar la información'}`, { duration: 8000 });
