@@ -1,0 +1,86 @@
+import { supabase } from '@/lib/supabase';
+import type { Factura, FacturaItem } from '@/types';
+import type { FacturaFormData } from '@/lib/validations/facturacion';
+
+export const facturaService = {
+  async getFacturas(): Promise<(Factura & { items: FacturaItem[] })[]> {
+    const { data, error } = await supabase
+      .from('facturas')
+      .select(`
+        *,
+        clientes(razon_social, rut, direccion, email),
+        items:factura_items(
+          id,
+          servicio_id,
+          descripcion,
+          cantidad,
+          precio_unitario,
+          total,
+          servicios(nombre)
+        )
+      `)
+      .order('fecha_emision', { ascending: false });
+
+    if (error) throw new Error(error.message);
+    return data as any;
+  },
+
+  async createFactura(formData: FacturaFormData) {
+    const { items, ...facturaData } = formData;
+
+    // Generate a unique number if not provided (fallback)
+    const numero = facturaData.numero || `FAC-${Date.now()}`;
+
+    // 1. Create Factura Header
+    const { data: newFactura, error: facturaError } = await supabase
+      .from('facturas')
+      .insert([{
+        cliente_id: facturaData.cliente_id,
+        numero: numero,
+        fecha_emision: facturaData.fecha_emision,
+        fecha_vencimiento: facturaData.fecha_vencimiento || null,
+        periodo: facturaData.periodo || null,
+        estado: facturaData.estado,
+        subtotal: facturaData.subtotal,
+        impuesto: facturaData.impuesto,
+        descuento: facturaData.descuento,
+        total: facturaData.total
+      }])
+      .select()
+      .single();
+
+    if (facturaError) throw new Error(`Error factura: ${facturaError.message}`);
+
+    // 2. Insert Items if any
+    if (items && items.length > 0) {
+      const itemsToInsert = items.map(item => ({
+        factura_id: newFactura.id,
+        servicio_id: item.servicio_id || null,
+        descripcion: item.descripcion,
+        cantidad: item.cantidad,
+        precio_unitario: item.precio_unitario,
+        total: item.cantidad * item.precio_unitario
+      }));
+
+      const { error: itemsError } = await supabase
+        .from('factura_items')
+        .insert(itemsToInsert);
+
+      if (itemsError) throw new Error(`Error items: ${itemsError.message}`);
+    }
+
+    return newFactura;
+  },
+
+  async updateFacturaStatus(id: string, estado: Factura['estado']) {
+    const { data, error } = await supabase
+      .from('facturas')
+      .update({ estado, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw new Error(error.message);
+    return data;
+  }
+};
