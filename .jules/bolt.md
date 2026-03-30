@@ -1,3 +1,6 @@
 ## 2024-05-18 - Extracting Intl.DateTimeFormat instantiations from render loops
 **Learning:** Instantiating `Intl.DateTimeFormat` or calling `Date.prototype.toLocaleDateString()` with locale options inside React render cycles or list mapping functions creates a massive amount of unnecessary object allocations and causes significant rendering overhead. Each call requires the JS engine to resolve the locale data and re-parse the formatting options.
 **Action:** Always pre-instantiate and cache `Intl.DateTimeFormat` instances as module-level constants outside of React components. Use the cached `.format(date)` method inside render loops. Be careful to ensure that different formatting configurations (e.g., those requiring `{ weekday: 'long' }` vs those that do not) have their own dedicated formatter instances to prevent side-effects.
+## 2026-03-30 - Memoize expensive list operations in forms
+**Learning:** Filtering and mapping large lists inside a form component can cause performance bottlenecks due to frequent re-renders on keystrokes.
+**Action:** Use `useMemo` to cache the results of expensive array operations like mapping and filtering based on props or remote data, especially when used within UI elements like `SearchableSelect` that handle user input.
