@@ -106,7 +106,14 @@ export default function HorasPorCliente() {
         const m = Math.round((totalHoras - h) * 60);
         const hsDisplayFinal = m === 0 ? `${h}h` : `${h}h ${m}m`;
 
-        dataToExport.push({} as Record<string, string>);
+        dataToExport.push({
+            'Día': '',
+            'Servicio Realizado': '',
+            'Funcionario a Cargo': '',
+            'H. Entrada': '',
+            'H. Salida': '',
+            'Horas Totales': ''
+        });
         dataToExport.push({
             'Día': 'TOTAL GENERAL:',
             'Servicio Realizado': '',

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { procesarFacturacion } from '../../lib/calculators/billing';
+import type { Asistencia } from '@/types';
 
 describe('Calculadora de Facturación (procesarFacturacion)', () => {
     
@@ -19,7 +20,7 @@ describe('Calculadora de Facturación (procesarFacturacion)', () => {
             }
         ];
 
-        const { rows, totalHoras } = procesarFacturacion(dataMock);
+        const { rows, totalHoras } = procesarFacturacion(dataMock as unknown as Asistencia[]);
         expect(rows).toHaveLength(1);
         expect(totalHoras).toBe(8);
         expect(rows[0].horasDisplay).toBe('8h');
@@ -35,7 +36,7 @@ describe('Calculadora de Facturación (procesarFacturacion)', () => {
             }
         ];
 
-        const { rows, totalHoras } = procesarFacturacion(dataMock);
+        const { rows, totalHoras } = procesarFacturacion(dataMock as unknown as Asistencia[]);
         expect(rows).toHaveLength(1);
         expect(totalHoras).toBe(8); // (6 - 22) + 24 = 8
     });
@@ -50,7 +51,7 @@ describe('Calculadora de Facturación (procesarFacturacion)', () => {
             }
         ];
 
-        const { rows, totalHoras } = procesarFacturacion(dataMock);
+        const { rows, totalHoras } = procesarFacturacion(dataMock as unknown as Asistencia[]);
         expect(rows).toHaveLength(1);
         expect(totalHoras).toBeCloseTo(2.25); // 2 hrs 15 min
         expect(rows[0].horasDisplay).toBe('2h 15m');
