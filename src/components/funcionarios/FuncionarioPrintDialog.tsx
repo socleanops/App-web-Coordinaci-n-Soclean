@@ -91,6 +91,7 @@ export function FuncionarioPrintDialog({ open, onOpenChange, employees }: Props)
                 ${selectedColumns.cedula ? `<td>${escapeHtml(emp.cedula || '')}</td>` : ''}
                 ${selectedColumns.cargo ? `<td>${escapeHtml(emp.cargo || '')}</td>` : ''}
                 ${selectedColumns.departamento ? `<td>${escapeHtml(emp.departamentos?.nombre || '')}</td>` : ''}
+                ${selectedColumns.fecha_ingreso ? `<td>${emp.fecha_ingreso ? escapeHtml(dateFormatter.format(new Date(emp.fecha_ingreso))) : ''}</td>` : ''}
                 ${selectedColumns.fecha_ingreso ? `<td>${escapeHtml(emp.fecha_ingreso ? dateFormatter.format(new Date(emp.fecha_ingreso)) : '')}</td>` : ''}
                 ${selectedColumns.direccion ? `<td>${escapeHtml(emp.direccion || '')}</td>` : ''}
                 ${selectedColumns.email ? `<td>${escapeHtml(emp.profiles?.email || '')}</td>` : ''}
