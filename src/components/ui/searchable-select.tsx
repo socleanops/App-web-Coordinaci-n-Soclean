@@ -21,13 +21,16 @@ export function SearchableSelect({
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const selectedLabel = options.find(o => o.value === value)?.label || '';
+    const selectedLabel = useMemo(() => {
+        return options.find(o => o.value === value)?.label || '';
+    }, [options, value]);
 
-    // ⚡ Bolt: Optimize array filtering by memoizing it to prevent recalculation on every render.
-    // O(N) filtering operations block the main thread; caching the result reduces re-render times by ~30% for large lists.
-    const filtered = useMemo(() => options.filter(o =>
-        o.label.toLowerCase().includes(search.toLowerCase())
-    ), [options, search]);
+    // ⚡ Bolt: Optimize array filtering by memoizing it and hoisting search.toLowerCase()
+    // O(N) filtering operations block the main thread; caching the result reduces re-render times.
+    const filtered = useMemo(() => {
+        const searchLower = search.toLowerCase();
+        return options.filter(o => o.label.toLowerCase().includes(searchLower));
+    }, [options, search]);
 
     // Close on outside click
     useEffect(() => {
