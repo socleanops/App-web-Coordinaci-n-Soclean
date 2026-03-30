@@ -3,6 +3,7 @@ import { toast } from 'sonner';
 import { read, utils } from 'xlsx';
 import { UploadCloud, FileType2, Loader2, AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { generateSecurePassword } from '@/lib/utils';
 import {
     Dialog,
     DialogContent,
@@ -12,6 +13,7 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { useFuncionarios } from '@/hooks/useFuncionarios';
+import { generateComplexPassword } from '@/lib/utils';
 
 interface Props {
     open: boolean;
@@ -114,7 +116,12 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
 
                     // Default role for bulk or grab from excel
                     const rol = (row.rol || row.Rol || row.ROL || 'funcionario').toLowerCase();
-                    const password = row.password || row.Password || row.PASSWORD || cedula; // Default password is the ID
+                    const password = row.password || row.Password || row.PASSWORD || generateSecurePassword();
+
+                    // Generate a random secure password and require password reset on first login.
+                    // Complexity rule requires min 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char.
+                    const generatedSecurePassword = generateComplexPassword(12);
+                    const password = row.password || row.Password || row.PASSWORD || generatedSecurePassword;
 
                     let parsedFechaIngreso = new Date().toISOString().split('T')[0];
                     const rawFecha = row.fecha_ingreso || row.Fecha_ingreso || row.Fecha_Ingreso || row.FECHA_INGRESO || row.Ingreso || row.ingreso;
@@ -129,7 +136,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         parsedFechaIngreso = jsDate.toISOString().split('T')[0];
                     } else if (typeof rawFecha === 'string' && rawFecha.trim() !== '') {
                         // Try to fix DD/MM/YYYY string formats to YYYY-MM-DD for PostgreSQL
-                        let parts = rawFecha.includes('/') ? rawFecha.split('/') : rawFecha.split('-');
+                        const parts = rawFecha.includes('/') ? rawFecha.split('/') : rawFecha.split('-');
                         if (parts.length === 3) {
                             // Find the 4-digit year format
                             const yearIndex = parts.findIndex(p => p.length === 4);

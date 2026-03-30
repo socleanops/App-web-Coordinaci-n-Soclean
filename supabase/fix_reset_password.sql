@@ -25,6 +25,7 @@ BEGIN
   WHERE id = target_user_id;
 
   -- Expirar cualquier sesión existente para ese usuario (lo desloguea)
+  -- Invalidar sesiones existentes
   DELETE FROM auth.sessions WHERE user_id = target_user_id;
 
 END;

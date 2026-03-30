@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
@@ -66,18 +66,23 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
     // Multi-day selection for batch creation mode
     const [selectedDays, setSelectedDays] = useState<number[]>([1]); // Default: Monday
 
-    const funcionarios = getFuncionarios.data?.filter(f => f.estado === 'activo') || [];
-    const servicios = getServicios.data?.filter(s => s.estado === 'activo') || [];
+    // ⚡ Bolt: Optimize array mapping and filtering by memoizing them.
+    // Prevents expensive array operations on every keystroke in the form.
+    const funcionarioOptions = useMemo(() => {
+        const funcionarios = getFuncionarios.data?.filter(f => f.estado === 'activo') || [];
+        return funcionarios.map(f => ({
+            value: f.id,
+            label: `${f.profiles?.nombre} ${f.profiles?.apellido} - ${f.cargo}`,
+        }));
+    }, [getFuncionarios.data]);
 
-    const funcionarioOptions = funcionarios.map(f => ({
-        value: f.id,
-        label: `${f.profiles?.nombre} ${f.profiles?.apellido} - ${f.cargo}`,
-    }));
-
-    const servicioOptions = servicios.map(s => ({
-        value: s.id,
-        label: `${s.clientes?.razon_social} - ${s.nombre}`,
-    }));
+    const servicioOptions = useMemo(() => {
+        const servicios = getServicios.data?.filter(s => s.estado === 'activo') || [];
+        return servicios.map(s => ({
+            value: s.id,
+            label: `${s.clientes?.razon_social} - ${s.nombre}`,
+        }));
+    }, [getServicios.data]);
 
     const form = useForm<HorarioFormData>({
         resolver: zodResolver(horarioSchema),
@@ -267,6 +272,8 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                                             key={d.value}
                                             type="button"
                                             onClick={() => toggleDay(d.value)}
+                                            aria-pressed={selectedDays.includes(d.value)}
+                                            aria-label={`Alternar ${d.label}`}
                                             className={`px-3 py-2 rounded-lg text-sm font-semibold border transition-all ${selectedDays.includes(d.value)
                                                 ? 'bg-coreops-primary text-white border-coreops-primary shadow-sm'
                                                 : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700'
@@ -284,6 +291,7 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                                             key={p.label}
                                             type="button"
                                             onClick={() => applyPreset(p.days)}
+                                            aria-label={`Aplicar preajuste: ${p.label}`}
                                             className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-all flex items-center gap-1 ${JSON.stringify(selectedDays) === JSON.stringify(p.days)
                                                 ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700'
                                                 : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
