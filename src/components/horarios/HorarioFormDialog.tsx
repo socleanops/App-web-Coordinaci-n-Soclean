@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { Loader2, Zap } from 'lucide-react';
@@ -80,7 +80,7 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
     }));
 
     const form = useForm<HorarioFormData>({
-        resolver: zodResolver(horarioSchema),
+        resolver: zodResolver(horarioSchema) as Resolver<HorarioFormData>,
         defaultValues: {
             funcionario_id: '',
             servicio_id: '',
@@ -167,9 +167,10 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                 setIsBatchSaving(false);
             }
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error) {
+            const err = error as Error;
             setIsBatchSaving(false);
-            toast.error(error.message || 'Error al guardar el horario');
+            toast.error(err.message || 'Error al guardar el horario');
         }
     };
 

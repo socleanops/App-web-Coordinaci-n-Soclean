@@ -42,8 +42,7 @@ export const clienteService = {
   },
 
   async updateCliente(id: string, data: Partial<ClienteFormData>) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const payload: any = { ...data };
+    const payload: Partial<Cliente & { nombre?: string }> = { ...data };
     if (payload.razon_social) {
       payload.nombre = payload.razon_social;
     }

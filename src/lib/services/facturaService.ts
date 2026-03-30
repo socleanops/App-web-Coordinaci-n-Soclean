@@ -1,5 +1,5 @@
 import { supabase } from '@/lib/supabase';
-import type { Factura, FacturaItem } from '@/types';
+import type { Factura, FacturaItem, Cliente } from '@/types';
 import type { FacturaFormData } from '@/lib/validations/facturacion';
 
 export const facturaService = {
@@ -22,7 +22,7 @@ export const facturaService = {
       .order('fecha_emision', { ascending: false });
 
     if (error) throw new Error(error.message);
-    return data as any;
+    return data as (Factura & { items: FacturaItem[], clientes: Cliente })[];
   },
 
   async createFactura(formData: FacturaFormData) {

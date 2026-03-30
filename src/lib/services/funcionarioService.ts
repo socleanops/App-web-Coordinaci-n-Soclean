@@ -67,7 +67,7 @@ export const funcionarioService = {
 
         if (existingFunc) {
             // Handle profile extraction for error message
-            const profiles = existingFunc.profiles as any;
+            const profiles = existingFunc.profiles;
             const prof = Array.isArray(profiles) ? profiles[0] : profiles;
             const fullName = `${prof?.nombre || ''} ${prof?.apellido || ''}`.trim() || 'un funcionario activo';
             throw new Error(`Este correo/cédula ya está registrado y asignado a ${fullName}.`);
@@ -147,16 +147,12 @@ export const funcionarioService = {
     }
 
     // 3. Update Funcionario data
-    const updateData: any = { ...data };
-    delete updateData.nombre;
-    delete updateData.apellido;
-    delete updateData.email;
-    delete updateData.password;
-    delete updateData.rol;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { nombre, apellido, email, password, rol, ...updatePayload } = data;
 
     const { data: result, error } = await supabase
       .from('funcionarios')
-      .update(updateData)
+      .update(updatePayload)
       .eq('id', id)
       .select()
       .single();

@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,8 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { ClienteFormData, clienteSchema } from '@/lib/validations/cliente';
+import type { ClienteFormData } from '@/lib/validations/cliente';
+import { clienteSchema } from '@/lib/validations/cliente';
 import { useClientes } from '@/hooks/useClientes';
 import type { Cliente } from '@/types';
 
@@ -33,7 +34,7 @@ export function ClienteForm({ clienteToEdit, onSuccess, onCancel }: ClienteFormP
     const { createCliente, updateCliente } = useClientes();
 
     const form = useForm<ClienteFormData>({
-        resolver: zodResolver(clienteSchema),
+        resolver: zodResolver(clienteSchema) as Resolver<ClienteFormData>,
         defaultValues: {
             razon_social: '',
             nombre_fantasia: '',
@@ -96,8 +97,9 @@ export function ClienteForm({ clienteToEdit, onSuccess, onCancel }: ClienteFormP
             onSuccess?.();
         } catch (error) {
             console.error("Form Submit Error:", error);
+            const err = error as Error;
             toast.dismiss(loadingId);
-            toast.error(`Error al revisar datos: ${error.message || 'No se pudo guardar la información'}`, { duration: 8000 });
+            toast.error(`Error al revisar datos: ${err.message || 'No se pudo guardar la información'}`, { duration: 8000 });
         }
     };
 

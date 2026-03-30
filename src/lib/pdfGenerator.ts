@@ -1,8 +1,10 @@
 import { jsPDF } from 'jspdf';
-import 'jspdf-autotable';
-import type { Factura } from '@/types';
+import autoTable from 'jspdf-autotable';
+import type { Factura, FacturaItem, Cliente } from '@/types';
 
-export const generateRegistroPDF = (factura: Factura) => {
+type FacturaWithItems = Factura & { items?: FacturaItem[], clientes?: Cliente };
+
+export const generateRegistroPDF = (factura: FacturaWithItems) => {
     // Inicializar PDF (Vertical, milímetros, formato A4)
     const doc = new jsPDF('p', 'mm', 'a4');
     
@@ -32,25 +34,25 @@ export const generateRegistroPDF = (factura: Factura) => {
 
     // Tabla de Ítems (Conceptos)
     const tableColumn = ["Detalle del Servicio", "Cantidad de Horas"];
-    const tableRows: any[] = [];
+    const tableRows: (string | { content: string, styles: Record<string, unknown> })[][] = [];
     
     let totalCantidad = 0;
 
-    // Llenar datos de la tabla (usando cast any porque a veces TypeScript molesta con autoTable)
-    const items = (factura as any).items || [];
-    items.forEach((item: any) => {
+    // Llenar datos de la tabla
+    const items = factura.items || [];
+    items.forEach((item) => {
         const itemData = [
             item.descripcion || 'Sin descripción',
             item.cantidad.toString()
         ];
-        totalCantidad += parseFloat(item.cantidad) || 0;
+        totalCantidad += item.cantidad || 0;
         tableRows.push(itemData);
     });
 
     // Agregar Fila de Totales
     tableRows.push([{ content: 'Total de Horas Calculadas', styles: { fontStyle: 'bold', halign: 'right' } }, { content: totalCantidad.toString(), styles: { fontStyle: 'bold' } }]);
 
-    (doc as any).autoTable({
+    autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
         startY: 70,

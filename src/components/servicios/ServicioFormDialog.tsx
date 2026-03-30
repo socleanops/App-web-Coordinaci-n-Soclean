@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, type Resolver } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -30,11 +30,12 @@ import type { ServicioFormData } from '@/lib/validations/servicio';
 import { servicioSchema } from '@/lib/validations/servicio';
 import { useServicios } from '@/hooks/useServicios';
 import { useClientes } from '@/hooks/useClientes';
+import type { Servicio } from '@/types';
 
 interface Props {
     open: boolean;
     onOpenChange: (open: boolean) => void;
-    servicioToEdit?: any | null; // usually Servicio type
+    servicioToEdit?: Servicio | null;
 }
 
 export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props) {
@@ -43,7 +44,7 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
     const { data: clientes = [] } = getClientes;
 
     const form = useForm<ServicioFormData>({
-        resolver: zodResolver(servicioSchema) as any,
+        resolver: zodResolver(servicioSchema) as Resolver<ServicioFormData>,
         defaultValues: {
             nombre: '',
             cliente_id: '',
@@ -61,7 +62,7 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
                 cliente_id: servicioToEdit.cliente_id || '',
                 descripcion: servicioToEdit.descripcion || '',
                 direccion: servicioToEdit.direccion || '',
-                estado: servicioToEdit.estado as any || 'activo',
+                estado: (servicioToEdit.estado as ServicioFormData['estado']) || 'activo',
             });
         } else {
             form.reset({
@@ -89,10 +90,11 @@ export function ServicioFormDialog({ open, onOpenChange, servicioToEdit }: Props
                 toast.success('Servicio registrado exitosamente en el cliente');
             }
             onOpenChange(false);
-        } catch (error: any) {
+        } catch (error) {
             console.error("Form Submit Error:", error);
+            const err = error as Error;
             toast.dismiss(loadingId);
-            toast.error(`Error al revisar datos: ${error.message || 'No se pudo guardar la información'}`, { duration: 8000 });
+            toast.error(`Error al revisar datos: ${err.message || 'No se pudo guardar la información'}`, { duration: 8000 });
         }
     };
 
