@@ -38,6 +38,7 @@ export function useCertificaciones(funcionarioId?: string) {
     const createCertificacion = useMutation({
         mutationFn: async (formData: CertificacionFormData) => {
             // 1. Insert into certificaciones
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
             const { id, ...dataToInsert } = formData;
             const { data: cert, error: certErr } = await supabase
                 .from('certificaciones')
@@ -68,6 +69,29 @@ export function useCertificaciones(funcionarioId?: string) {
 
     const deleteCertificacion = useMutation({
         mutationFn: async (id: string) => {
+            // 1. Obtener los datos antes de borrar
+            const { data: cert, error: fetchErr } = await supabase
+                .from('certificaciones')
+                .select('funcionario_id, fecha_inicio, fecha_fin')
+                .eq('id', id)
+                .single();
+
+            if (fetchErr) throw new Error(fetchErr.message);
+
+            // 2. Revertir asistencia cruzada que hubiese quedado como "certificado"
+            if (cert) {
+                const { error: asistErr } = await supabase
+                    .from('asistencia')
+                    .update({ estado: 'ausente' }) // Regresa a ausente para revisión
+                    .eq('funcionario_id', cert.funcionario_id)
+                    .eq('estado', 'certificado')
+                    .gte('fecha', cert.fecha_inicio)
+                    .lte('fecha', cert.fecha_fin);
+
+                if (asistErr) console.warn('Error revirtiendo asistencias tras borrar certificado:', asistErr);
+            }
+
+            // 3. Borrar el registro real
             const { error } = await supabase
                 .from('certificaciones')
                 .delete()
@@ -78,6 +102,7 @@ export function useCertificaciones(funcionarioId?: string) {
         },
         onSuccess: () => {
              queryClient.invalidateQueries({ queryKey: ['certificaciones'] });
+             queryClient.invalidateQueries({ queryKey: ['asistencia'] });
         }
     });
 

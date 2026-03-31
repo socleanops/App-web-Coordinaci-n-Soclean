@@ -33,8 +33,8 @@ jobs:
       - name: TypeScript — verificar tipos
         run: pnpm tsc --noEmit
 
-      - name: Tests — correr suite completa
-        run: pnpm test --reporter=verbose
+      - name: Correr tests principales
+        run: TZ=America/Montevideo pnpm test --reporter=verbose
 
       - name: Build — verificar que compila
         run: pnpm build

@@ -2,6 +2,8 @@ import { Users, Calendar, ClipboardList, Briefcase, HelpCircle, Building2, Map, 
 import { useAuthStore } from '@/stores/authStore';
 import { ModuleCard } from '@/components/dashboard/ModuleCard';
 import { DashboardSupportSection } from '@/components/dashboard/DashboardSupportSection';
+import { OperationsOverviewWidget } from '@/components/dashboard/OperationsOverviewWidget';
+import { ContractAlertsWidget } from '@/components/dashboard/ContractAlertsWidget';
 
 export default function Dashboard() {
     const role = useAuthStore(s => s.role);
@@ -10,13 +12,17 @@ export default function Dashboard() {
     return (
         <main className="max-w-7xl mx-auto py-8 animate-in fade-in duration-500">
             {/* Title Section */}
-            <section className="mb-12">
+            <section className="mb-8">
                 <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white sm:text-4xl">Panel Principal</h2>
                 <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-3xl">
                     Selecciona un módulo para gestionar tu personal, asistencia, operaciones de limpieza y finanzas de la empresa.
                 </p>
             </section>
 
+            <OperationsOverviewWidget />
+            
+            <ContractAlertsWidget />
+            
             {/* Grid based on the Stitch exported design aesthetic */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <ModuleCard
