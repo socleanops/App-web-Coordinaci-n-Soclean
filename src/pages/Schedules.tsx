@@ -259,6 +259,7 @@ export default function Schedules() {
                                                         onClick={() => openWhatsApp(h)}
                                                         className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
                                                         title="Enviar por WhatsApp"
+                                                        aria-label="Enviar por WhatsApp"
                                                     >
                                                         <Smartphone className="h-4 w-4" />
                                                     </Button>
@@ -268,6 +269,7 @@ export default function Schedules() {
                                                         onClick={() => handleEdit(h)}
                                                         className="text-muted-foreground hover:text-primary"
                                                         title="Editar"
+                                                        aria-label="Editar horario"
                                                     >
                                                         <Pencil className="h-4 w-4" />
                                                     </Button>
@@ -277,6 +279,7 @@ export default function Schedules() {
                                                         onClick={() => handleDelete(h.id)}
                                                         className="text-muted-foreground hover:text-red-500"
                                                         title="Eliminar"
+                                                        aria-label="Eliminar horario"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
