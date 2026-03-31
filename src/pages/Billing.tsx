@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FileText, Download, Target, Printer, Clock } from 'lucide-react';
@@ -19,7 +19,7 @@ const dateFormatter = new Intl.DateTimeFormat('es-UY');
 
 export default function HorasPorCliente() {
     const { getClientes } = useClientes();
-    const clientes = getClientes.data?.filter((c: Cliente) => c.estado === 'activo') || [];
+    const clientes = useMemo(() => getClientes.data?.filter((c: Cliente) => c.estado === 'activo') || [], [getClientes.data]);
 
     const [clienteId, setClienteId] = useState<string>('');
     const [desde, setDesde] = useState<string>(new Date().toISOString().substring(0, 8) + '01');
