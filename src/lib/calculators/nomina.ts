@@ -43,9 +43,17 @@ export function procesarNomina(asistencias: any[], searchTerm: string = ''): Nom
 
                 // Precision: iterate in 15-minute blocks for accurate nocturnal calculation
                 const current = new Date(start.getTime());
+                const formatter = new Intl.DateTimeFormat('en-US', {
+                    timeZone: 'America/Montevideo',
+                    hour: 'numeric',
+                    hour12: false
+                });
+
                 while (current < end) {
-                    const h = current.getHours();
-                    if (h >= 22 || h < 6) nightHours += 0.25;
+                    const h = parseInt(formatter.format(current), 10);
+                    // Handle Intl.DateTimeFormat '24' vs '00' depending on environment
+                    const hourNormalized = h === 24 ? 0 : h;
+                    if (hourNormalized >= 22 || hourNormalized < 6) nightHours += 0.25;
                     current.setTime(current.getTime() + 15 * 60 * 1000); // +15 min
                 }
             } else if (a.horarios?.hora_entrada && a.horarios?.hora_salida) {
