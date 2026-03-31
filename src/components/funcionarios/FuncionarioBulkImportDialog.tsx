@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import { toast } from 'sonner';
-import { read, utils } from 'xlsx';
-import { UploadCloud, FileType2, Loader2, AlertCircle } from 'lucide-react';
+import { read, utils, writeFile } from 'xlsx';
+import { UploadCloud, FileType2, Loader2, AlertCircle, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     Dialog,
@@ -38,6 +38,25 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
         }
     };
 
+    const downloadTemplate = () => {
+        const templateData = [{
+            "Nombre": "Juan",
+            "Apellido": "Perez",
+            "Cedula": "12345678",
+            "Email": "info@ejemplo.com",
+            "Cargo": "Limpiador",
+            "Departamento": "Montevideo",
+            "Direccion": "Av. Principal 123",
+            "Rol": "funcionario",
+            "Fecha_ingreso": "1995-10-15",
+            "Tipo_contrato": "Indefinido"
+        }];
+        const ws = utils.json_to_sheet(templateData);
+        const wb = utils.book_new();
+        utils.book_append_sheet(wb, ws, "Funcionarios");
+        writeFile(wb, "Plantilla_Carga_Funcionarios.xlsx");
+    };
+
     const processImport = async () => {
         if (!file) {
             toast.error("Por favor selecciona un archivo.");
@@ -56,7 +75,7 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
             const worksheet = workbook.Sheets[firstSheetName];
 
             // Convert to JSON
-            const data = utils.sheet_to_json<any>(worksheet);
+            const data = utils.sheet_to_json<Record<string, string | number | undefined | Date>>(worksheet);
 
             if (!data || data.length === 0) {
                 toast.error("El archivo está vacío o no se pudo leer.");
@@ -100,11 +119,11 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         try {
                             matchedDepto = await createDepartamento.mutateAsync(reqDeptoNameOriginal);
                             if (matchedDepto) currentDeptos.push(matchedDepto);
-                        } catch (e: any) {
+                        } catch (e) {
                             if (currentDeptos.length > 0) {
                                 matchedDepto = currentDeptos[0]; // fallback
                             } else {
-                                throw new Error(`Fila ${i + 2}: No hay departamentos y error al crear '${reqDeptoNameOriginal}': ${e.message}`);
+                                throw new Error(`Fila ${i + 2}: No hay departamentos y error al crear '${reqDeptoNameOriginal}': ${e instanceof Error ? e.message : 'Error desconocido'}`);
                             }
                         }
                     }
@@ -179,15 +198,15 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
                         estado
                     });
 
-                } catch (err: any) {
-                    const msg = err.message || '';
+                } catch (err) {
+                    const msg = err instanceof Error ? err.message : '';
                     if (msg.includes('duplicate key value') || msg.includes('cedula_key')) {
                         const duplicateCedula = row.Cedula || row.cedula || row.CEDULA || 'especificada';
                         newErrors.push(`Fila ${i + 2}: El funcionario con la cédula ${duplicateCedula} ya se encuentra registrado.`);
                     } else if (msg.includes('date/time field value out of range')) {
                         newErrors.push(`Fila ${i + 2}: El formato de la fecha de ingreso es inválido o incomprensible.`);
                     } else {
-                        newErrors.push(msg || `Fila ${i + 2}: Error desconocido`);
+                        newErrors.push(msg || `Fila ${i + 2}: Error desconocido al crear funcionario`);
                     }
                 }
 
@@ -219,7 +238,13 @@ export function FuncionarioBulkImportDialog({ open, onOpenChange }: Props) {
         <Dialog open={open} onOpenChange={(val) => !isUploading && onOpenChange(val)}>
             <DialogContent className="sm:max-w-md">
                 <DialogHeader>
-                    <DialogTitle>Importación Masiva (Excel/CSV)</DialogTitle>
+                    <DialogTitle className="flex justify-between items-center pr-6">
+                        <span>Importación Masiva (Excel/CSV)</span>
+                        <Button variant="outline" size="sm" onClick={downloadTemplate} className="h-8 gap-1.5 text-xs text-coreops-primary hover:text-coreops-primary hover:bg-blue-50 dark:hover:bg-blue-900/20">
+                            <Download className="h-3.5 w-3.5" />
+                            Descargar Plantilla
+                        </Button>
+                    </DialogTitle>
                     <DialogDescription>
                         Sube un archivo de Google Sheets o Excel para registrar personal en lote. Las columnas esperadas son: Nombre, Apellido, Cedula, Cargo, Departamento, Direccion. (Email es Opcional).
                     </DialogDescription>

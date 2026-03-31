@@ -1,14 +1,36 @@
 
 [1m[46m RUN [49m[22m [36mv4.1.2 [39m[90mC:/Users/leoma/OneDrive/Desktop/Apps/Soclean Coordinación[39m
 
- [31m❯[39m src/__tests__/lib/nomina.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m2 failed[39m[2m)[22m[32m 22[2mms[22m[39m
-[31m     [31m×[31m Caso 1 (Regular): Suma horas correctamente y excluye ausencias de los totales de horas[39m[32m 15[2mms[22m[39m
-[31m     [31m×[31m Caso 2 (Extremo - Nocturno): Detecta y contabiliza correctamente las horas que caen en la franja nocturna (22hs a 6hs)[39m[32m 2[2mms[22m[39m
-     [32m✓[39m Caso 3 (Especial - Feriados): Agrega las horas trabajadas en una fecha catalogada como Feriado Nacional[32m 1[2mms[22m[39m
-     [32m✓[39m Caso 4 (Borde - Horarios Teóricos): Calcula correctamente leyendo "horarios" si falta horario registrado en vivo[32m 1[2mms[22m[39m
+ [31m❯[39m src/__tests__/lib/calculators/nomina.test.ts [2m([22m[2m4 tests[22m[2m | [22m[31m1 failed[39m[2m)[22m[32m 17[2mms[22m[39m
+[31m     [31m×[31m Caso Normal: Calcula correctamente las horas trabajadas en horario diurno[39m[32m 14[2mms[22m[39m
+     [32m✓[39m Caso Borde: Calcula correctamente horas nocturnas (cruzando la medianoche)[32m 0[2mms[22m[39m
+     [32m✓[39m Caso Feriados, Faltas y Certificados: Agrupa correctamente múltiples estados e identifica feriados[32m 0[2mms[22m[39m
+     [32m✓[39m Caso Búsqueda: Filtra correctamente por nombre o cédula[32m 1[2mms[22m[39m
+
+[31m⎯⎯⎯⎯⎯⎯⎯[39m[1m[41m Failed Tests 1 [49m[22m[31m⎯⎯⎯⎯⎯⎯⎯[39m
+
+[41m[1m FAIL [22m[49m src/__tests__/lib/calculators/nomina.test.ts[2m > [22mprocesarNomina[2m > [22mCaso Normal: Calcula correctamente las horas trabajadas en horario diurno
+[31m[1mAssertionError[22m: expected 1 to be +0 // Object.is equality[39m
+
+[32m- Expected[39m
+[31m+ Received[39m
+
+[32m- 0[39m
+[31m+ 1[39m
+
+[36m [2m❯[22m src/__tests__/lib/calculators/nomina.test.ts:[2m29:45[22m[39m
+    [90m 27|[39m         [34mexpect[39m(resultado)[33m.[39m[34mtoHaveLength[39m([34m1[39m)[33m;[39m
+    [90m 28|[39m         [34mexpect[39m(resultado[[34m0[39m][33m.[39mtotalHoras)[33m.[39m[34mtoBe[39m([34m8[39m)[33m;[39m
+    [90m 29|[39m         [34mexpect[39m(resultado[[34m0[39m][33m.[39mhorasNocturnas)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m   |[39m                                             [31m^[39m
+    [90m 30|[39m         [34mexpect[39m(resultado[[34m0[39m][33m.[39mhorasFeriado)[33m.[39m[34mtoBe[39m([34m0[39m)[33m;[39m
+    [90m 31|[39m         [34mexpect[39m(resultado[[34m0[39m][33m.[39mdiasTrabajados)[33m.[39m[34mtoBe[39m([34m1[39m)[33m;[39m
+
+[31m[2m⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯⎯[1/1]⎯[22m[39m
+
 
 [2m Test Files [22m [1m[31m1 failed[39m[22m[90m (1)[39m
-[2m      Tests [22m [1m[31m2 failed[39m[22m[2m | [22m[1m[32m2 passed[39m[22m[90m (4)[39m
-[2m   Start at [22m 18:14:04
-[2m   Duration [22m 3.74s[2m (transform 149ms, setup 521ms, import 83ms, tests 22ms, environment 2.57s)[22m
+[2m      Tests [22m [1m[31m1 failed[39m[22m[2m | [22m[1m[32m3 passed[39m[22m[90m (4)[39m
+[2m   Start at [22m 16:43:02
+[2m   Duration [22m 2.67s[2m (transform 375ms, setup 492ms, import 136ms, tests 17ms, environment 1.64s)[22m
 

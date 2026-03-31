@@ -30,9 +30,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">75% </span>
+                <span class="strong">87.5% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>18/24</span>
+                <span class='fraction'>21/24</span>
             </div>
         
             
@@ -147,40 +147,38 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">4x</span>
+<span class="cline-any cline-yes">7x</span>
+<span class="cline-any cline-yes">12x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">4x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">12x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
+<span class="cline-any cline-yes">8x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">9x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -190,7 +188,9 @@
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">3x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">7x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
@@ -222,13 +222,13 @@ export function procesarFacturacion(data: Asistencia[]): FacturacionResultado {
         if (est === 'presente' || est === 'tardanza' || est === 'salida_anticipada' || est === 'justificado') {
             const servicioNombre = a.horarios?.servicios?.nombre || <span class="branch-1 cbranch-no" title="branch not covered" >'Servicio Desconocido';</span>
             const nombreFunc = `${a.funcionarios?.profiles?.nombre || <span class="branch-1 cbranch-no" title="branch not covered" >''}</span> ${a.funcionarios?.profiles?.apellido || <span class="branch-1 cbranch-no" title="branch not covered" >''}</span>`.trim();
-            const hEntrada = a.horarios?.hora_entrada?.substring(0, 5) || <span class="branch-1 cbranch-no" title="branch not covered" >'--:--';</span>
-            const hSalida = a.horarios?.hora_salida?.substring(0, 5) || <span class="branch-1 cbranch-no" title="branch not covered" >'--:--';</span>
+            const hEntrada = a.horarios?.hora_entrada?.substring(0, 5) || '--:--';
+            const hSalida = a.horarios?.hora_salida?.substring(0, 5) || '--:--';
             
             let horasDecimal = 0;
             let horasDisplay = '0 hs';
 &nbsp;
-            <span class="missing-if-branch" title="else path not taken" >E</span>if (hEntrada !== '--:--' &amp;&amp; hSalida !== '--:--') {
+            if (hEntrada !== '--:--' &amp;&amp; hSalida !== '--:--') {
                 const [eh, em] = hEntrada.split(':').map(Number);
                 const [sh, sm] = hSalida.split(':').map(Number);
                 
@@ -268,7 +268,7 @@ export function procesarFacturacion(data: Asistencia[]): FacturacionResultado {
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2026-03-30T21:52:24.107Z
+                at 2026-03-31T19:49:17.663Z
             </div>
         <script src="../../../prettify.js"></script>
         <script>

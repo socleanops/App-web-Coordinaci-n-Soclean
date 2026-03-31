@@ -5,12 +5,13 @@ import { useAsistencia } from '@/hooks/useAsistencia';
 import type { Asistencia } from '@/types';
 import { toast } from 'sonner';
 import { Clock, RefreshCw, CheckCircle2, UserX, AlertTriangle, AlertCircle } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 
 const dailyDateFormatter = new Intl.DateTimeFormat('es-UY', { weekday: 'long', day: 'numeric', month: 'short' });
 
-const ESTADOS_MAP: Record<string, { label: string, color: string, icon: any }> = {
+const ESTADOS_MAP: Record<string, { label: string, color: string, icon: LucideIcon }> = {
     'presente': { label: 'Presente', color: 'bg-emerald-100 text-emerald-800 border-emerald-300', icon: CheckCircle2 },
     'ausente': { label: 'Ausente', color: 'bg-red-100 text-red-800 border-red-300', icon: UserX },
     'tardanza': { label: 'Tarde', color: 'bg-amber-100 text-amber-800 border-amber-300', icon: AlertTriangle },
@@ -69,7 +70,7 @@ export default function SupervisorMobile() {
 
     const handleActualizarEstado = async (a: Asistencia, nuevoEstado: string) => {
         try {
-            const dataToUpdate: any = { estado: nuevoEstado as any };
+            const dataToUpdate: Partial<Asistencia> = { estado: nuevoEstado as Asistencia['estado'] };
             
             // Auto-fill actual times if marking present and they are null
             if (nuevoEstado === 'presente' && a.horarios) {
@@ -85,8 +86,8 @@ export default function SupervisorMobile() {
 
             await updateAsistencia.mutateAsync({ id: a.id, data: dataToUpdate });
             toast.success(`${a.funcionarios?.profiles?.nombre} marcado como ${ESTADOS_MAP[nuevoEstado].label}`);
-        } catch (error: any) {
-            toast.error(error.message || 'Error al actualizar estado');
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : 'Error al actualizar estado');
         }
     };
 
@@ -96,7 +97,7 @@ export default function SupervisorMobile() {
             if (timeValue) {
                 finalValue = new Date(`${a.fecha}T${timeValue}:00`).toISOString();
             }
-            await updateAsistencia.mutateAsync({ id: a.id, data: { [field]: finalValue } as any });
+            await updateAsistencia.mutateAsync({ id: a.id, data: { [field]: finalValue } });
             toast.success('Hora guardada');
         } catch {
             toast.error('Error al guardar hora');
@@ -106,7 +107,7 @@ export default function SupervisorMobile() {
     const handleGuardarObs = async (a: Asistencia, newVal: string) => {
         if (newVal === a.observaciones) return;
         try {
-            await updateAsistencia.mutateAsync({ id: a.id, data: { observaciones: newVal } as any });
+            await updateAsistencia.mutateAsync({ id: a.id, data: { observaciones: newVal } });
             toast.success('Observación guardada');
         } catch {
             toast.error('Error');

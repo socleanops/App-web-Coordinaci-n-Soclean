@@ -1,0 +1,97 @@
+
+[1m[46m RUN [49m[22m [36mv4.1.2 [39m[90mC:/Users/leoma/OneDrive/Desktop/Apps/Soclean Coordinación[39m
+      [2mCoverage enabled with [22m[33mv8[39m
+
+ [32m✓[39m src/__tests__/lib/billing.test.ts [2m([22m[2m3 tests[22m[2m)[22m[32m 47[2mms[22m[39m
+ [32m✓[39m src/__tests__/lib/calculators/billing.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 51[2mms[22m[39m
+ [32m✓[39m src/__tests__/lib/calculators/nomina.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 29[2mms[22m[39m
+ [32m✓[39m src/__tests__/lib/nomina.test.ts [2m([22m[2m4 tests[22m[2m)[22m[32m 28[2mms[22m[39m
+ [32m✓[39m src/__tests__/lib/utils.test.ts [2m([22m[2m8 tests[22m[2m)[22m[32m 39[2mms[22m[39m
+ [32m✓[39m src/__tests__/useAsistencia.test.tsx [2m([22m[2m3 tests[22m[2m)[22m[33m 582[2mms[22m[39m
+     [33m[2m✓[22m[39m getAsistencias calls supabase with explicit columns instead of * [33m 510[2mms[22m[39m
+(node:45132) Warning: `--localstorage-file` was provided without a valid path
+(Use `node --trace-warnings ...` to show where the warning was created)
+ [32m✓[39m src/__tests__/pages/Attendance.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 336[2mms[22m[39m
+     [33m[2m✓[22m[39m should display empty state when there are no attendance records [33m 324[2mms[22m[39m
+[90mstdout[2m | src/__tests__/pages/LogisticsMapPerformance.test.tsx[2m > [22m[2mLogisticsMap Performance[2m > [22m[2mmeasures geocoding performance
+[22m[39mGeocoding duration for 5 services: 538ms
+
+ [32m✓[39m src/__tests__/pages/LogisticsMapPerformance.test.tsx [2m([22m[2m1 test[22m[2m)[22m[33m 573[2mms[22m[39m
+     [33m[2m✓[22m[39m measures geocoding performance [33m 561[2mms[22m[39m
+[90mstderr[2m | src/__tests__/components/clientes/ClienteFormDialog.test.tsx[2m > [22m[2mClienteFormDialog[2m > [22m[2mrenders correctly for creating a new client
+[22m[39mWarning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+
+[90mstderr[2m | src/__tests__/components/clientes/ClienteFormDialog.test.tsx[2m > [22m[2mClienteFormDialog[2m > [22m[2mrenders correctly for editing an existing client
+[22m[39mWarning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+
+[90mstderr[2m | src/__tests__/components/clientes/ClienteFormDialog.test.tsx[2m > [22m[2mClienteFormDialog[2m > [22m[2mshows validation errors when submitting empty required fields
+[22m[39mWarning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+
+[90mstderr[2m | src/__tests__/components/clientes/ClienteFormDialog.test.tsx[2m > [22m[2mClienteFormDialog[2m > [22m[2msubmits form successfully when creating a new client
+[22m[39mWarning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+
+[90mstderr[2m | src/__tests__/components/clientes/ClienteFormDialog.test.tsx[2m > [22m[2mClienteFormDialog[2m > [22m[2msubmits form successfully when updating an existing client
+[22m[39mWarning: Missing `Description` or `aria-describedby={undefined}` for {DialogContent}.
+
+ [32m✓[39m src/__tests__/components/clientes/ClienteFormDialog.test.tsx [2m([22m[2m5 tests[22m[2m)[22m[33m 7295[2mms[22m[39m
+     [33m[2m✓[22m[39m renders correctly for creating a new client [33m 1901[2mms[22m[39m
+     [33m[2m✓[22m[39m renders correctly for editing an existing client [33m 789[2mms[22m[39m
+     [33m[2m✓[22m[39m shows validation errors when submitting empty required fields [33m 1734[2mms[22m[39m
+     [33m[2m✓[22m[39m submits form successfully when creating a new client [33m 2253[2mms[22m[39m
+     [33m[2m✓[22m[39m submits form successfully when updating an existing client [33m 608[2mms[22m[39m
+ [32m✓[39m src/__tests__/App.test.tsx [2m([22m[2m2 tests[22m[2m)[22m[32m 158[2mms[22m[39m
+
+[2m Test Files [22m [1m[32m10 passed[39m[22m[90m (10)[39m
+[2m      Tests [22m [1m[32m35 passed[39m[22m[90m (35)[39m
+[2m   Start at [22m 16:48:50
+[2m   Duration [22m 26.67s[2m (transform 10.14s, setup 16.42s, import 38.34s, tests 9.14s, environment 88.84s)[22m
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   49.79 |    33.52 |   37.19 |    52.4 |                   
+ src               |   46.15 |     8.33 |      44 |      50 |                   
+  App.tsx          |   46.15 |     8.33 |      44 |      50 | 45-74,95-124      
+ ...nents/clientes |   86.11 |    83.33 |   93.75 |   86.11 |                   
+  ClienteForm.tsx  |   87.87 |    82.35 |     100 |   87.87 | 99-102            
+  ...ormDialog.tsx |   66.66 |      100 |   66.66 |   66.66 | 27                
+ ...ponents/layout |    7.81 |     4.68 |    4.16 |    8.92 |                   
+  ...ardLayout.tsx |       0 |        0 |       0 |       0 | 7-19              
+  Header.tsx       |       0 |        0 |       0 |       0 | 22-70             
+  ...nDropdown.tsx |       0 |        0 |       0 |       0 | 25-111            
+  ...ctedRoute.tsx |   83.33 |       75 |     100 |   83.33 | 23                
+  Sidebar.tsx      |       0 |        0 |       0 |       0 | 23-111            
+ src/components/ui |   86.66 |       60 |   55.76 |   86.66 |                   
+  button.tsx       |     100 |    66.66 |     100 |     100 | 45                
+  card.tsx         |   94.44 |      100 |   83.33 |   94.44 | 68                
+  dialog.tsx       |    90.9 |      100 |   66.66 |    90.9 | 72,101            
+  ...down-menu.tsx |   72.72 |        0 |       0 |   72.72 | ...22,146,162,174 
+  form.tsx         |   89.74 |    78.57 |   85.71 |   89.74 | 48,52,132-134     
+  input.tsx        |     100 |      100 |     100 |     100 |                   
+  label.tsx        |     100 |      100 |     100 |     100 |                   
+  select.tsx       |   91.66 |      100 |   71.42 |   91.66 | 104,138           
+  sheet.tsx        |   73.91 |        0 |       0 |   73.91 | ...,81,95,109,121 
+  table.tsx        |   91.66 |      100 |      75 |   91.66 | 43,103            
+ src/hooks         |   18.83 |    16.66 |    15.9 |   21.31 |                   
+  useAsistencia.ts |   45.55 |       32 |   31.81 |   53.24 | ...54,202,206-207 
+  ...ncionarios.ts |    0.89 |        4 |       0 |    0.97 | 17-279            
+  useServicios.ts  |       0 |        0 |       0 |       0 | 7-68              
+ src/lib           |    97.5 |    64.28 |     100 |   97.29 |                   
+  appInfo.ts       |     100 |      100 |     100 |     100 |                   
+  supabase.ts      |      80 |    58.33 |     100 |      80 | 7                 
+  utils.ts         |     100 |      100 |     100 |     100 |                   
+ ...ib/calculators |     100 |    90.32 |     100 |     100 |                   
+  billing.ts       |     100 |     87.5 |     100 |     100 | 26-27             
+  nomina.ts        |     100 |     92.1 |     100 |     100 | 22,51,83          
+ ...ib/validations |     100 |      100 |     100 |     100 |                   
+  cliente.ts       |     100 |      100 |     100 |     100 |                   
+ src/pages         |   33.85 |    23.66 |   22.72 |   35.62 |                   
+  Attendance.tsx   |   32.16 |    21.68 |    12.5 |   33.82 | ...85-186,208-506 
+  Login.tsx        |       0 |        0 |       0 |       0 | 23-196            
+  LogisticsMap.tsx |    60.6 |    37.93 |   55.55 |   64.91 | ...,94-98,164-265 
+ src/stores        |      50 |      100 |      40 |      40 |                   
+  authStore.ts     |      50 |      100 |      40 |      40 | 21-22,24          
+ src/types         |       0 |        0 |       0 |       0 |                   
+  index.ts         |       0 |        0 |       0 |       0 |                   
+-------------------|---------|----------|---------|---------|-------------------
