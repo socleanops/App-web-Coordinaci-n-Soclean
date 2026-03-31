@@ -45,7 +45,7 @@ jobs:
         run: |
           # Correr tests
           set +e
-          pnpm test --reporter=verbose --coverage > test-output.txt 2>&1
+          TZ=America/Montevideo pnpm test --reporter=verbose --coverage > test-output.txt 2>&1
           EXIT_CODE=$?
           set -e
           

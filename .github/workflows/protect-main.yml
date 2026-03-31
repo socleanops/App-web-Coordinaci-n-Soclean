@@ -60,8 +60,8 @@ jobs:
       - name: TypeScript — verificación estricta
         run: pnpm tsc --noEmit --strict
 
-      - name: Tests — suite completa con cobertura
-        run: pnpm test --reporter=verbose --coverage
+      - name: Correr tests principales
+        run: TZ=America/Montevideo pnpm test --reporter=verbose --coverage
 
       - name: Verificar cobertura mínima en módulos críticos
         run: |
