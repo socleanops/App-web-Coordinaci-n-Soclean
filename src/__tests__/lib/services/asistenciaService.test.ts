@@ -22,7 +22,7 @@ describe('asistenciaService - generarPlanillaDia', () => {
             select: vi.fn().mockReturnThis(),
             eq: eqMock,
             lte: lteMock,
-        } as any);
+        } as never);
 
         const result = await asistenciaService.generarPlanillaDia('2026-10-10');
 
@@ -47,15 +47,15 @@ describe('asistenciaService - generarPlanillaDia', () => {
 
         vi.mocked(supabase.from).mockImplementation((table) => {
             if (table === 'horarios') {
-                return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), lte: horariosMock } as any;
+                return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), lte: horariosMock } as never;
             }
             if (table === 'asistencia') {
-                return { select: vi.fn().mockReturnThis(), eq: asistenciaPrevMock, insert: insertMock } as any;
+                return { select: vi.fn().mockReturnThis(), eq: asistenciaPrevMock, insert: insertMock } as never;
             }
             if (table === 'certificaciones') {
-                return { select: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(), gte: certsMock } as any;
+                return { select: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(), gte: certsMock } as never;
             }
-            return {} as any;
+            return {} as never;
         });
 
         const result = await asistenciaService.generarPlanillaDia('2026-10-10');
@@ -89,15 +89,15 @@ describe('asistenciaService - generarPlanillaDia', () => {
 
         vi.mocked(supabase.from).mockImplementation((table) => {
             if (table === 'horarios') {
-                return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), lte: horariosMock } as any;
+                return { select: vi.fn().mockReturnThis(), eq: vi.fn().mockReturnThis(), lte: horariosMock } as never;
             }
             if (table === 'asistencia') {
-                return { select: vi.fn().mockReturnThis(), eq: asistenciaPrevMock, insert: insertMock } as any;
+                return { select: vi.fn().mockReturnThis(), eq: asistenciaPrevMock, insert: insertMock } as never;
             }
             if (table === 'certificaciones') {
-                return { select: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(), gte: certsMock } as any;
+                return { select: vi.fn().mockReturnThis(), lte: vi.fn().mockReturnThis(), gte: certsMock } as never;
             }
-            return {} as any;
+            return {} as never;
         });
 
         const result = await asistenciaService.generarPlanillaDia('2026-10-10');

@@ -219,29 +219,6 @@ jobs:
     if: always()
 
     steps:
-      - name: Enviar resumen a Slack
-        # REQUISITO: Agregar SLACK_WEBHOOK_URL en Settings → Secrets and variables → Actions
-        # Si no usás Slack, eliminá este paso
-        if: ${{ vars.SLACK_ENABLED == 'true' }}
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        run: |
-          TODAY=$(date '+%d/%m/%Y')
-
-          curl -s -X POST "$SLACK_WEBHOOK_URL" \
-            -H 'Content-type: application/json' \
-            --data "{
-              \"text\": \"*📊 Daily Review — CoreOps ${TODAY}*\",
-              \"blocks\": [
-                {
-                  \"type\": \"section\",
-                  \"text\": {
-                    \"type\": \"mrkdwn\",
-                    \"text\": \"*📊 Daily Review — ${TODAY}*\n${{ needs.run-tests.outputs.test_status }}\n📁 PRs abiertos: ${{ needs.review-prs.outputs.pr_count }}\n🔗 <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Ver reporte completo>\"
-                  }
-                }
-              ]
-            }"
 
       - name: Enviar resumen por email (GitHub nativo)
         # GitHub ya envía notificaciones al dueño del repo cuando un workflow falla.
