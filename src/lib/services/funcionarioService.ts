@@ -1,4 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
+import type { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
 import { generateSecureRandomString } from '@/lib/utils';
 import type { Funcionario } from '@/types';
@@ -134,7 +135,7 @@ export const funcionarioService = {
         // Rollback sintético para purgar la cuenta de Auth que acabamos de crear exitosamente
         await supabase.rpc('delete_auth_user', { target_user_id: profileId });
       }
-      const errMessage = error instanceof Error ? error.message : String(error);
+      const errMessage = error instanceof Error ? error.message : (error as PostgrestError).message ?? String(error);
       throw new Error(`Fallo en la creación del funcionario: ${errMessage}`);
     }
   },

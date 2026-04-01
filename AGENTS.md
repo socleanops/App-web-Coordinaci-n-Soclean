@@ -101,6 +101,10 @@ src/
 - Nombrar archivos de test: `nombreDelModulo.test.ts`
 - Cada función de cálculo numérico debe tener mínimo **3 casos de prueba** (caso normal, borde, error)
 - Ejecutar `pnpm test` antes de abrir cualquier PR
+- **Vitest Mocking**: Nunca usar `as any` al mockear servicios o llamadas a la API (Ej: Supabase). Usar `as never` para saltar las validaciones del linter manteniendo la integridad estructural requerida por el CI.
+- **Playwright (End-to-End)**:
+  - Nunca usar aserciones estáticas directas sobre elementos que puedan seguir hidratándose (ej. `expect(await locator.count()).toBe(X)`). Usar las aserciones de auto-reintento nativas (`await expect(locator).toHaveCount(X)` o `toBeVisible()`).
+  - Prevenir Race Conditions de hidratación de React esperando señales concretas post-fetch (ej: esperar que una tabla termine de renderizarse antes de clickear un botón de creación).
 
 ---
 

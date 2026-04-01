@@ -53,12 +53,10 @@ test("Flujo Crítico: Login y Verificación de Datos", async ({ page }) => {
   // Esperamos que haya al menos un elemento en el tbody o que pase el skeleton
   await page.locator('table').waitFor({ state: "visible", timeout: 15000 });
   
-  // En lugar de obtener el count una vez (que falla si está cargando), le pedimos al expect que reintente
-  // hasta que encuentre más de 1 fila (Header + 1 cliente mínimo) o usamos toPass()
-  await expect(async () => {
-    const rowCount = await page.locator('table tr').count();
-    expect(rowCount).toBeGreaterThan(1);
-  }).toPass({ timeout: 15000 });
+  // En lugar del closure manual, usamos aserciones nativas de Playwright.
+  // nth(1) espera a que exista y sea visible una segunda fila (índice 1), asegurando
+  // que hay un header (0) y al menos un dato (1).
+  await expect(page.locator('table tr').nth(1)).toBeVisible({ timeout: 15000 });
   
   console.log('✅ Verificación de datos completada exitosamente.');
 });
