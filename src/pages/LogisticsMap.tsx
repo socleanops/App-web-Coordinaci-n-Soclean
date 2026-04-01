@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Map, MapPin, User, Navigation, Loader2 } from 'lucide-react';
 import { useServicios } from '@/hooks/useServicios';
@@ -32,8 +32,9 @@ export default function LogisticsMap() {
     const selectedService = servicios.find(s => s.id === selectedServiceId);
     const selectedFuncionario = funcionarios.find(f => f.id === selectedFuncionarioId);
 
-    const activeServices = servicios.filter(s => s.estado === 'activo');
-    const activeFuncionarios = funcionarios.filter(f => f.estado === 'activo');
+    // Performance optimization: Memoize filtered array to prevent O(N) recalculations on every render.
+    const activeServices = useMemo(() => servicios.filter(s => s.estado === 'activo'), [servicios]);
+    const activeFuncionarios = useMemo(() => funcionarios.filter(f => f.estado === 'activo'), [funcionarios]);
 
     // Geocode active services to place green markers on the map
     useEffect(() => {
