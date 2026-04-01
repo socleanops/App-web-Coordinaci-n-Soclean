@@ -74,6 +74,11 @@ test("Operatividad: Apertura de Formulario de Creación", async ({ page }) => {
   await page.waitForFunction(() => !document.body.innerText.includes("Cargando"), { timeout: 15000 }).catch(() => {});
   
   // Solo probamos que el botón y el diálogo se abren correctamente (sin guardar para no ensuciar DB)
+  // Opción A: Esperar señal explícita post-hidratación / post-fetch
+  // Esperar a que la tabla se monte (y pase el estado inicial de loading)
+  await page.locator('table').waitFor({ state: "visible", timeout: 15000 });
+  await page.waitForLoadState("networkidle"); // Evita clicks mientras fetch.
+  
   // Añadido waitFor para la race condition de Supabase Auth validando el Rol para mostrar el botón
   const newClientBtn = page.getByRole("button", { name: /añadir cliente/i });
   await newClientBtn.waitFor({ state: "visible", timeout: 20000 });
