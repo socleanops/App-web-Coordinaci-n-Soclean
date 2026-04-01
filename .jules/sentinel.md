@@ -24,3 +24,8 @@
 **Vulnerability:** Serving assets (Google Maps markers) over insecure HTTP in an HTTPS application.
 **Learning:** Insecure asset requests can be blocked by browsers or lead to mixed content vulnerabilities, compromising the security context of the page.
 **Prevention:** Always use HTTPS for external asset URLs to ensure they load correctly in secure contexts.
+
+## 2024-05-24 - Information Leakage in Form Data Logging
+**Vulnerability:** The application logs the entire `formData` object (which may contain PII like cédula, names, email, and potentially passwords depending on the context) and raw error messages/data structures to the browser console during the creation of a new "Funcionario" via the `useFuncionarios` hook.
+**Learning:** Detailed logging of sensitive inputs, especially within client-side hooks interacting with forms or databases, inadvertently exposes sensitive information (PII/secrets) to anyone who can view the browser console or any scripts that capture console logs.
+**Prevention:** Never log entire user input objects (e.g., `formData`) or raw database/API payloads to the console. Log only safe, necessary debugging information (like operation names or step indicators), and ensure any sensitive properties (like passwords or PII) are explicitly omitted or redacted before logging.
