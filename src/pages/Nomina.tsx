@@ -1,13 +1,15 @@
 import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Search, Clock, FileSpreadsheet } from 'lucide-react';
+import { Search, Clock, FileSpreadsheet, Download } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
 import { useAsistencia } from '@/hooks/useAsistencia';
 import { procesarNomina } from '@/lib/calculators/nomina';
 import { toast } from 'sonner';
 import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+import autoTable from 'jspdf-autotable';
 
 export default function Nomina() {
     const [mes, setMes] = useState<string>(new Date().toISOString().substring(0, 7)); // YYYY-MM
@@ -84,6 +86,67 @@ export default function Nomina() {
             setIsExporting(false);
             toast.success("Reporte Excel exportado correctamente.");
         }, 1200);
+    };
+
+    // Definition matching the return shape of procesarNomina
+    type NominaRow = {
+        id?: string;
+        cedula: string;
+        nombreCompleto: string;
+        diasTrabajados: number;
+        faltas: number;
+        certificados: number;
+        totalHoras: number;
+        horasNocturnas: number;
+        horasFeriado: number;
+    };
+
+    const descargarReciboPDF = (f: NominaRow) => {
+        try {
+            const doc = new jsPDF();
+            
+            // Header
+            doc.setFontSize(22);
+            doc.setTextColor(41, 128, 185);
+            doc.text('Soclean - Recibo de Horas', 14, 22);
+
+            doc.setFontSize(12);
+            doc.setTextColor(0, 0, 0);
+            doc.text(`Período: ${mes}`, 14, 32);
+            doc.text(`Funcionario: ${f.nombreCompleto}`, 14, 40);
+            doc.text(`Cédula: ${f.cedula}`, 14, 48);
+            
+            // Resumen de asistencia
+            const hrNormales = f.totalHoras - f.horasNocturnas;
+            
+            autoTable(doc, {
+                startY: 55,
+                head: [['Concepto', 'Cantidad']],
+                body: [
+                    ['Días Asistidos', `${f.diasTrabajados} días`],
+                    ['Días de Falta/Ausencia', `${f.faltas} días`],
+                    ['Días Certificados', `${f.certificados} días`],
+                    ['Horas Normales', `${hrNormales > 0 ? hrNormales.toFixed(2) : 0} Hrs`],
+                    ['Horas Nocturnas', `${f.horasNocturnas > 0 ? f.horasNocturnas.toFixed(2) : 0} Hrs`],
+                    ['Horas Feriado / Irrenunciables', `${f.horasFeriado > 0 ? f.horasFeriado.toFixed(2) : 0} Hrs`],
+                    ['Total Horas General', `${f.totalHoras.toFixed(2)} Hrs`],
+                ],
+                theme: 'striped',
+                headStyles: { fillColor: [41, 128, 185] },
+            });
+
+            const finalY = (doc as unknown as { lastAutoTable: { finalY?: number } }).lastAutoTable?.finalY || 100;
+            
+            doc.setFontSize(10);
+            doc.setTextColor(100);
+            doc.text('Documento generado automáticamente por sistema CoreOps/Soclean Coordinación.', 14, finalY + 20);
+
+            doc.save(`Recibo_Horas_${f.cedula}_${mes}.pdf`);
+            toast.success(`PDF descargado para ${f.nombreCompleto}`);
+        } catch (error) {
+            console.error("Error al generar PDF", error);
+            toast.error("Error al generar el recibo PDF");
+        }
     };
 
     return (
@@ -182,7 +245,8 @@ export default function Nomina() {
                                     <TableHead className="text-center text-cyan-500">Certificados</TableHead>
                                     <TableHead className="text-right">Horas Nocturnas <br /><span className="text-[10px] font-normal text-slate-400">(22 a 06 hs)</span></TableHead>
                                     <TableHead className="text-right">Horas Feriado <br /><span className="text-[10px] font-normal text-slate-400">Irrenunciable</span></TableHead>
-                                    <TableHead className="text-right pr-6 font-bold text-coreops-primary">Suma Total Mensual</TableHead>
+                                    <TableHead className="text-right font-bold text-coreops-primary">Suma Total Mensual</TableHead>
+                                    <TableHead className="text-center w-24">Acciones</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
@@ -224,12 +288,24 @@ export default function Nomina() {
                                             <TableCell className="text-right font-medium text-amber-600 dark:text-amber-500">
                                                 {f.horasFeriado > 0 ? `${f.horasFeriado.toFixed(1)} Hrs` : '-'}
                                             </TableCell>
-                                            <TableCell className="text-right pr-6">
+                                            <TableCell className="text-right">
                                                 <div className="inline-flex flex-col items-end">
                                                     <div className="inline-flex items-center justify-center px-3 py-1 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300 font-bold border border-blue-100 dark:border-blue-800/50">
                                                         {f.totalHoras.toFixed(1)} Hrs
                                                     </div>
                                                 </div>
+                                            </TableCell>
+                                            <TableCell className="text-center">
+                                                <Button
+                                                    variant="secondary"
+                                                    size="sm"
+                                                    onClick={() => descargarReciboPDF(f)}
+                                                    className="w-full flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-700"
+                                                    title="Descargar PDF de Horas"
+                                                >
+                                                    <Download className="h-4 w-4" />
+                                                    <span className="sr-only sm:not-sr-only">PDF</span>
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))
