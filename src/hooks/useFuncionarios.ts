@@ -69,7 +69,7 @@ export function useFuncionarios() {
             
             // Start actual process with an internal timeout race
             const processPromise = (async () => {
-                console.log("[useFuncionarios] Starting createFuncionario at", new Date().toISOString(), "Data:", formData);
+                console.log("[useFuncionarios] Starting createFuncionario at", new Date().toISOString());
                 let profileId = formData.id; // if it already exists
 
                 const randomSuffix = generateSecureRandomString(6);
