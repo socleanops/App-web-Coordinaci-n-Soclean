@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, Pencil, Search, MapPin } from 'lucide-react';
@@ -26,15 +26,19 @@ export default function Services() {
         setIsDialogOpen(true);
     };
 
-    const filteredServicios = servicios.filter((serv: Servicio) => {
+    // Performance optimization: Memoize filtered array to prevent O(N) recalculations on every render.
+    // We also hoist the searchTerm lowercasing outside the loop so it only runs once per memoization.
+    const filteredServicios = useMemo(() => {
         const search = searchTerm.toLowerCase();
-        const nm = serv.nombre?.toLowerCase() || '';
-        const dir = serv.direccion?.toLowerCase() || '';
-        // Because fields are joined from the queries
-        const clRazon = serv.clientes?.razon_social?.toLowerCase() || '';
-        const clFantasia = serv.clientes?.nombre_fantasia?.toLowerCase() || '';
-        return nm.includes(search) || dir.includes(search) || clRazon.includes(search) || clFantasia.includes(search);
-    });
+        return servicios.filter((serv: Servicio) => {
+            const nm = serv.nombre?.toLowerCase() || '';
+            const dir = serv.direccion?.toLowerCase() || '';
+            // Because fields are joined from the queries
+            const clRazon = serv.clientes?.razon_social?.toLowerCase() || '';
+            const clFantasia = serv.clientes?.nombre_fantasia?.toLowerCase() || '';
+            return nm.includes(search) || dir.includes(search) || clRazon.includes(search) || clFantasia.includes(search);
+        });
+    }, [servicios, searchTerm]);
 
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
