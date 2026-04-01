@@ -77,6 +77,7 @@ test("Operatividad: Apertura de Formulario de Creación", async ({ page }) => {
   // Añadido waitFor para la race condition de Supabase Auth validando el Rol para mostrar el botón
   const newClientBtn = page.getByRole("button", { name: /añadir cliente/i });
   await newClientBtn.waitFor({ state: "visible", timeout: 20000 });
+  await expect(newClientBtn).toBeEnabled({ timeout: 10000 });
   await newClientBtn.click();
   
   await expect(page.locator('[role="dialog"]')).toBeVisible({ timeout: 10000 });
