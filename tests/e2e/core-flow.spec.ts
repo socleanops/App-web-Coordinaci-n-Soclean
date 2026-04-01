@@ -49,9 +49,16 @@ test("Flujo Crítico: Login y Verificación de Datos", async ({ page }) => {
   await page.getByRole("link", { name: /^clientes$/i }).click();
   await page.waitForURL(`${BASE_URL}/clientes`, { timeout: 15000 });
   
-  // Verificar que la tabla cargó registros (no está vacía)
-  const rows = page.locator('table tr');
-  await expect(rows.count()).toBeGreaterThan(1); // Header + al menos 1 cliente
+  // Verificar que la tabla cargó registros (retrying assertion para evitar fallos de race condition)
+  // Esperamos que haya al menos un elemento en el tbody o que pase el skeleton
+  await page.locator('table').waitFor({ state: "visible", timeout: 15000 });
+  
+  // En lugar de obtener el count una vez (que falla si está cargando), le pedimos al expect que reintente
+  // hasta que encuentre más de 1 fila (Header + 1 cliente mínimo) o usamos toPass()
+  await expect(async () => {
+    const rowCount = await page.locator('table tr').count();
+    expect(rowCount).toBeGreaterThan(1);
+  }).toPass({ timeout: 15000 });
   
   console.log('✅ Verificación de datos completada exitosamente.');
 });
