@@ -268,6 +268,7 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                                             key={d.value}
                                             type="button"
                                             onClick={() => toggleDay(d.value)}
+                                            aria-pressed={selectedDays.includes(d.value)}
                                             className={`px-3 py-2 rounded-lg text-sm font-semibold border transition-all ${selectedDays.includes(d.value)
                                                 ? 'bg-coreops-primary text-white border-coreops-primary shadow-sm'
                                                 : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700'
