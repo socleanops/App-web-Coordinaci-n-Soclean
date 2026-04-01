@@ -61,10 +61,23 @@ test("Flujo Crítico: Login y Verificación de Datos", async ({ page }) => {
 // ─────────────────────────────────────────────────────────
 test("Operatividad: Apertura de Formulario de Creación", async ({ page }) => {
   await loginAs(page, TEST_USER, TEST_PASS);
-  await page.getByRole("link", { name: /^clientes$/i }).click();
+  
+  // Esperar a que el link de clientes esté visible y hacer click
+  const clientLink = page.getByRole("link", { name: /^clientes$/i });
+  await clientLink.waitFor({ state: "visible", timeout: 15000 });
+  await clientLink.click();
+  
+  // Asegurarnos de estar en la URL correcta
+  await page.waitForURL(`${BASE_URL}/clientes`, { timeout: 15000 });
+  
+  // Esperar a que pase el skeleton screen o carga de la tabla
+  await page.waitForFunction(() => !document.body.innerText.includes("Cargando"), { timeout: 15000 }).catch(() => {});
   
   // Solo probamos que el botón y el diálogo se abren correctamente (sin guardar para no ensuciar DB)
+  // Añadido waitFor para la race condition de Supabase Auth validando el Rol para mostrar el botón
   const newClientBtn = page.getByRole("button", { name: /añadir cliente/i });
+  await newClientBtn.waitFor({ state: "visible", timeout: 20000 });
   await newClientBtn.click();
-  await expect(page.locator('[role="dialog"]')).toBeVisible();
+  
+  await expect(page.locator('[role="dialog"]')).toBeVisible({ timeout: 10000 });
 });
