@@ -1,11 +1,10 @@
 import { describe, it, expect } from 'vitest';
 import { procesarFacturacion } from '../../../lib/calculators/billing';
-import { Asistencia } from '../../../types';
 
 describe('procesarFacturacion', () => {
     
     // Helper para generar una asistencia base con menos repetición
-    const crearAsistencia = (estado: string, hora_entrada: string, hora_salida: string): any => ({
+    const crearAsistencia = (estado: string, hora_entrada: string, hora_salida: string) => ({
         estado,
         fecha: '2026-10-10',
         funcionarios: { profiles: { nombre: 'Ana', apellido: 'Paz' } },
