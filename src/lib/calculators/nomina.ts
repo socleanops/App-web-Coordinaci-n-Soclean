@@ -1,3 +1,9 @@
+const montevideoTimeFormatter = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'America/Montevideo',
+    hour: 'numeric',
+    hour12: false
+});
+
 export interface NominaFuncionario {
     id: string;
     nombreCompleto: string;
@@ -43,14 +49,9 @@ export function procesarNomina(asistencias: any[], searchTerm: string = ''): Nom
 
                 // Precision: iterate in 15-minute blocks for accurate nocturnal calculation
                 const current = new Date(start.getTime());
-                const formatter = new Intl.DateTimeFormat('en-US', {
-                    timeZone: 'America/Montevideo',
-                    hour: 'numeric',
-                    hour12: false
-                });
 
                 while (current < end) {
-                    const h = parseInt(formatter.format(current), 10);
+                    const h = parseInt(montevideoTimeFormatter.format(current), 10);
                     // Handle Intl.DateTimeFormat '24' vs '00' depending on environment
                     const hourNormalized = h === 24 ? 0 : h;
                     if (hourNormalized >= 22 || hourNormalized < 6) nightHours += 0.25;

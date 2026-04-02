@@ -38,8 +38,8 @@ describe('Calculadora de Nómina (procesarNomina)', () => {
                 estado: 'presente',
                 // De 20:00 a 02:00 -> 6 horas en total. 
                 // Horas nocturnas: de 22 a 02 -> 4 horas nocturnas (0.25 por bloque de 15min)
-                hora_entrada_registrada: '2026-03-03T20:00:00',
-                hora_salida_registrada: '2026-03-04T02:00:00',
+                hora_entrada_registrada: '2026-03-03T20:00:00-03:00',
+                hora_salida_registrada: '2026-03-04T02:00:00-03:00',
                 fecha: '2026-03-03',
                 funcionarios: { profiles: { nombre: 'Luna', apellido: 'Oscura' }, cedula: '456' }
             }

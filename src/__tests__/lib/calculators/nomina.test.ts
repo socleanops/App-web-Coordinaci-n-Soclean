@@ -18,8 +18,8 @@ describe('procesarNomina', () => {
             ...mockBaseFuncionario,
             estado: 'presente',
             fecha: '2026-06-15',
-            hora_entrada_registrada: '2026-06-15T08:00:00',
-            hora_salida_registrada: '2026-06-15T16:00:00'
+            hora_entrada_registrada: '2026-06-15T08:00:00-03:00',
+            hora_salida_registrada: '2026-06-15T16:00:00-03:00'
         }];
 
         const resultado = procesarNomina(asistencias);

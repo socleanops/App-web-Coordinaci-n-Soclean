@@ -190,7 +190,9 @@ export default function Attendance() {
         return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
     }, [filteredAsistencias]);
 
-    const pendingCount = asistencias.filter((a: Asistencia) => ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado)).length;
+    const pendingCount = useMemo(() => {
+        return asistencias.filter((a: Asistencia) => ['pendiente', 'ausente', 'tardanza', 'salida_anticipada'].includes(a.estado)).length;
+    }, [asistencias]);
 
     const weekLabel = `${weekLabelStartFormatter.format(weekStart)} — ${weekLabelEndFormatter.format(weekEnd)}`;
 
