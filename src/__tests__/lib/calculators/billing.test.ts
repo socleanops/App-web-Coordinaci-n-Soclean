@@ -13,7 +13,7 @@ describe('procesarFacturacion', () => {
             hora_salida,
             servicios: { nombre: 'Limpieza Base' }
         }
-    });
+    }) as never;
 
     it('Caso Normal: Calcula horas diurnas y formatea el texto de visualización', () => {
         const datos = [ crearAsistencia('presente', '09:00', '14:30') ];
@@ -61,5 +61,42 @@ describe('procesarFacturacion', () => {
         expect(resultado.rows).toHaveLength(1);
         expect(resultado.rows[0].horasDecimal).toBe(0);
         expect(resultado.rows[0].horasDisplay).toBe('0 hs');
+    });
+});
+
+import { calcularTotalesFactura } from '../../../lib/calculators/billing';
+
+describe('calcularTotalesFactura', () => {
+    it('Cálculo con descuento aplicado: Resta el descuento al subtotal antes de impuestos', () => {
+        const items = [{ cantidad: 2, precio_unitario: 1000 }]; // subtotal = 2000
+        const resultado = calcularTotalesFactura(items, 500, 22); // descuento = 500
+        
+        expect(resultado.subtotal).toBe(2000);
+        expect(resultado.descuento).toBe(500);
+        // Base imponible es 1500
+        expect(resultado.impuesto).toBe(330); // 1500 * 0.22
+        expect(resultado.total).toBe(1830);
+    });
+
+    it('Cálculo con impuesto cero: Suma de items puro', () => {
+        const items = [{ cantidad: 1, precio_unitario: 1500 }];
+        const resultado = calcularTotalesFactura(items, 0, 0); // sin impuesto
+        
+        expect(resultado.subtotal).toBe(1500);
+        expect(resultado.impuesto).toBe(0);
+        expect(resultado.total).toBe(1500);
+    });
+
+    it('Cálculo con múltiples items: Acumula correctamente las líneas', () => {
+        const items = [
+            { cantidad: 2, precio_unitario: 1000 }, // 2000
+            { cantidad: 5, precio_unitario: 200 },  // 1000
+            { cantidad: 1, precio_unitario: 500 }   // 500
+        ]; // subtotal = 3500
+        const resultado = calcularTotalesFactura(items, 0, 10);
+        
+        expect(resultado.subtotal).toBe(3500);
+        expect(resultado.impuesto).toBe(350);
+        expect(resultado.total).toBe(3850);
     });
 });

@@ -64,3 +64,16 @@ export function procesarFacturacion(data: Asistencia[]): FacturacionResultado {
         totalHoras: sumatoriaHorasDecimal
     };
 }
+
+export interface FacturaItemBasico {
+    cantidad: number;
+    precio_unitario: number;
+}
+
+export function calcularTotalesFactura(items: FacturaItemBasico[], descuento: number = 0, impuestoPorcentaje: number = 0) {
+    const subtotal = items.reduce((acc, item) => acc + (item.cantidad * Math.max(0, item.precio_unitario)), 0);
+    const subtotalConDescuento = Math.max(0, subtotal - descuento);
+    const impuesto = subtotalConDescuento * (impuestoPorcentaje / 100);
+    const total = subtotalConDescuento + impuesto;
+    return { subtotal, descuento, impuesto, total };
+}

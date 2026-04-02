@@ -36,7 +36,7 @@ describe('useAsistencia SELECT Optimization', () => {
       order: mockOrder,
       gte: mockGte,
       lte: mockLte,
-    } as any);
+    } as never);
 
     const { result } = renderHook(() => useAsistencia('2023-01-01', '2023-01-31'), { wrapper });
 
@@ -93,10 +93,10 @@ describe('useAsistencia SELECT Optimization', () => {
 
     // Depending on what is passed to `.from()`, we return different mocks
     vi.mocked(supabase.from).mockImplementation((table) => {
-      if (table === 'horarios') return { select: selectMock1 } as any;
-      if (table === 'asistencia') return { select: selectMock2, insert: insertMock } as any;
-      if (table === 'certificaciones') return { select: selectMock3 } as any;
-      return {} as any;
+      if (table === 'horarios') return { select: selectMock1 } as never;
+      if (table === 'asistencia') return { select: selectMock2, insert: insertMock } as never;
+      if (table === 'certificaciones') return { select: selectMock3 } as never;
+      return {} as never;
     });
 
     const { result } = renderHook(() => useAsistencia(), { wrapper });
@@ -132,10 +132,10 @@ describe('useAsistencia SELECT Optimization', () => {
     const insertMock = vi.fn().mockResolvedValue({ error: null });
 
     vi.mocked(supabase.from).mockImplementation((table) => {
-      if (table === 'horarios') return { select: selectMock1 } as any;
-      if (table === 'asistencia') return { select: selectMock2, insert: insertMock } as any;
-      if (table === 'certificaciones') return { select: selectMock3 } as any;
-      return {} as any;
+      if (table === 'horarios') return { select: selectMock1 } as never;
+      if (table === 'asistencia') return { select: selectMock2, insert: insertMock } as never;
+      if (table === 'certificaciones') return { select: selectMock3 } as never;
+      return {} as never;
     });
 
     const { result } = renderHook(() => useAsistencia(), { wrapper });

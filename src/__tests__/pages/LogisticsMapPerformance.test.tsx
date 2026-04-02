@@ -47,7 +47,7 @@ describe('LogisticsMap Performance', () => {
         });
 
         // Setup window.google
-        (window as any).google = {
+        (window as unknown as Record<string, unknown>).google = {
             maps: {
                 Geocoder: class {
                     geocode = mockGeocode;
@@ -59,7 +59,7 @@ describe('LogisticsMap Performance', () => {
             }
         };
 
-        vi.mocked(useJsApiLoader).mockReturnValue({ isLoaded: true, loadError: undefined } as any);
+        vi.mocked(useJsApiLoader).mockReturnValue({ isLoaded: true, loadError: undefined } as never);
 
         vi.mocked(useServicios).mockReturnValue({
             getServicios: {
@@ -71,11 +71,11 @@ describe('LogisticsMap Performance', () => {
                     { id: '5', nombre: 'S5', direccion: 'D5', estado: 'activo', clientes: { razon_social: 'C5' } },
                 ]
             }
-        } as any);
+        } as never);
 
         vi.mocked(useFuncionarios).mockReturnValue({
             getFuncionarios: { data: [] }
-        } as any);
+        } as never);
     });
 
     it('measures geocoding performance', async () => {

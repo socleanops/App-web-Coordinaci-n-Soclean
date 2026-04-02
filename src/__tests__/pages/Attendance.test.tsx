@@ -32,7 +32,7 @@ describe('Attendance Page', () => {
             deleteAsistencia: {
                 mutateAsync: vi.fn(),
             }
-        } as any);
+        } as never);
 
         render(<Attendance />);
 
