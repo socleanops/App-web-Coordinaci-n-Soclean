@@ -52,6 +52,8 @@ export function SearchableSelect({
             <button
                 type="button"
                 onClick={() => { setIsOpen(!isOpen); setSearch(''); }}
+                aria-haspopup="listbox"
+                aria-expanded={isOpen}
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
             >
                 <span className={selectedLabel ? 'text-foreground truncate' : 'text-muted-foreground truncate'}>
@@ -75,14 +77,20 @@ export function SearchableSelect({
                             className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                         />
                         {search && (
-                            <button type="button" onClick={() => setSearch('')} className="text-muted-foreground hover:text-foreground">
+                            <button
+                                type="button"
+                                onClick={() => setSearch('')}
+                                className="text-muted-foreground hover:text-foreground"
+                                aria-label="Limpiar búsqueda"
+                                title="Limpiar búsqueda"
+                            >
                                 <X className="h-3 w-3" />
                             </button>
                         )}
                     </div>
 
                     {/* Options list */}
-                    <div className="max-h-48 overflow-y-auto p-1">
+                    <div className="max-h-48 overflow-y-auto p-1" role="listbox">
                         {filtered.length === 0 ? (
                             <div className="px-3 py-4 text-sm text-muted-foreground text-center">
                                 No se encontraron resultados
@@ -92,6 +100,8 @@ export function SearchableSelect({
                                 <button
                                     key={option.value}
                                     type="button"
+                                    role="option"
+                                    aria-selected={option.value === value}
                                     onClick={() => {
                                         onValueChange(option.value);
                                         setIsOpen(false);
