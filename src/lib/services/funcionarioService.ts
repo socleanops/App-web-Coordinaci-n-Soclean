@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import type { PostgrestError } from '@supabase/supabase-js';
 import { supabase } from '@/lib/supabase';
-import { generateSecureRandomString } from '@/lib/utils';
+import { generateSecureRandomString, generateComplexPassword } from '@/lib/utils';
 import type { Funcionario } from '@/types';
 import type { FuncionarioFormData } from '@/lib/validations/funcionario';
 
@@ -48,7 +48,7 @@ export const funcionarioService = {
 
     const randomSuffix = generateSecureRandomString(6);
     const safeEmail = formData.email?.trim() || `ci_${formData.cedula.replace(/\D/g, '')}_${randomSuffix}@soclean.internal`;
-    const safePassword = formData.password?.trim() || `SC${formData.cedula.replace(/\D/g, '')}#2026`;
+    const safePassword = formData.password?.trim() || generateComplexPassword(12);
 
     // 1. Create Auth User if needed
     if (!profileId) {
