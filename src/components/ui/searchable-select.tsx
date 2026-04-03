@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useMemo } from 'react';
 import { ChevronDown, Search, X } from 'lucide-react';
 
 interface SearchableSelectProps {
@@ -21,11 +21,12 @@ export function SearchableSelect({
     const containerRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const selectedLabel = options.find(o => o.value === value)?.label || '';
+    const selectedLabel = useMemo(() => options.find(o => o.value === value)?.label || '', [options, value]);
 
-    const filtered = options.filter(o =>
-        o.label.toLowerCase().includes(search.toLowerCase())
-    );
+    const filtered = useMemo(() => {
+        const searchLower = search.toLowerCase();
+        return options.filter(o => o.label.toLowerCase().includes(searchLower));
+    }, [options, search]);
 
     // Close on outside click
     useEffect(() => {

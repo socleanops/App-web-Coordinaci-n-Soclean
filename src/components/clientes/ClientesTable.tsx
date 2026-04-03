@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Input } from '@/components/ui/input';
@@ -19,13 +19,15 @@ export function ClientesTable({ clientes, isLoading, onEdit, onDelete }: Cliente
     const isSuperAdmin = role?.toLowerCase() === 'superadmin';
     const [searchTerm, setSearchTerm] = useState('');
 
-    const filteredClientes = clientes.filter((cli) => {
+    const filteredClientes = useMemo(() => {
         const search = searchTerm.toLowerCase();
-        const rs = cli.razon_social?.toLowerCase() || '';
-        const nf = cli.nombre_fantasia?.toLowerCase() || '';
-        const rut = cli.rut || '';
-        return rs.includes(search) || nf.includes(search) || rut.includes(search);
-    });
+        return clientes.filter((cli) => {
+            const rs = cli.razon_social?.toLowerCase() || '';
+            const nf = cli.nombre_fantasia?.toLowerCase() || '';
+            const rut = cli.rut || '';
+            return rs.includes(search) || nf.includes(search) || rut.includes(search);
+        });
+    }, [clientes, searchTerm]);
 
     return (
         <Card className="border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 backdrop-blur-md shadow-sm">
