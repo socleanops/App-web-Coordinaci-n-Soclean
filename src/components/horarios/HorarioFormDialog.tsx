@@ -268,6 +268,7 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                                             key={d.value}
                                             type="button"
                                             onClick={() => toggleDay(d.value)}
+                                            aria-pressed={selectedDays.includes(d.value)}
                                             className={`px-3 py-2 rounded-lg text-sm font-semibold border transition-all ${selectedDays.includes(d.value)
                                                 ? 'bg-coreops-primary text-white border-coreops-primary shadow-sm'
                                                 : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700 dark:hover:bg-slate-700'
@@ -285,6 +286,7 @@ export function HorarioFormDialog({ open, onOpenChange, horarioToEdit }: Horario
                                             key={p.label}
                                             type="button"
                                             onClick={() => applyPreset(p.days)}
+                                            aria-pressed={JSON.stringify(selectedDays) === JSON.stringify(p.days)}
                                             className={`px-2.5 py-1 rounded-md text-xs font-medium border transition-all flex items-center gap-1 ${JSON.stringify(selectedDays) === JSON.stringify(p.days)
                                                 ? 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-700'
                                                 : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
