@@ -80,21 +80,26 @@ export default function Schedules() {
         }
     };
 
-    const filteredHorarios = horarios.filter((h: Horario) => {
-        // Filter by day of week if a date is selected
-        if (diaSemanaFiltro !== null && h.dia_semana !== diaSemanaFiltro) return false;
-
-        // Filter by vigencia: must be active on the selected date
-        if (!showAll && fechaFiltro) {
-            if (h.vigente_desde && fechaFiltro < h.vigente_desde) return false;
-            if (h.vigente_hasta && fechaFiltro > h.vigente_hasta) return false;
-        }
-
+    // ⚡ Bolt: Prevent O(N) array filtering on every render cycle.
+    // Hoist the invariant searchTerm.toLowerCase() outside the loop to avoid redundant per-element calculations.
+    const filteredHorarios = useMemo(() => {
         const search = searchTerm.toLowerCase();
-        const func = h.funcionarios?.profiles?.nombre?.toLowerCase() + ' ' + h.funcionarios?.profiles?.apellido?.toLowerCase();
-        const serv = h.servicios?.clientes?.razon_social?.toLowerCase() + ' ' + h.servicios?.nombre?.toLowerCase();
-        return func.includes(search) || serv.includes(search);
-    });
+
+        return horarios.filter((h: Horario) => {
+            // Filter by day of week if a date is selected
+            if (diaSemanaFiltro !== null && h.dia_semana !== diaSemanaFiltro) return false;
+
+            // Filter by vigencia: must be active on the selected date
+            if (!showAll && fechaFiltro) {
+                if (h.vigente_desde && fechaFiltro < h.vigente_desde) return false;
+                if (h.vigente_hasta && fechaFiltro > h.vigente_hasta) return false;
+            }
+
+            const func = h.funcionarios?.profiles?.nombre?.toLowerCase() + ' ' + h.funcionarios?.profiles?.apellido?.toLowerCase();
+            const serv = h.servicios?.clientes?.razon_social?.toLowerCase() + ' ' + h.servicios?.nombre?.toLowerCase();
+            return func.includes(search) || serv.includes(search);
+        });
+    }, [horarios, diaSemanaFiltro, showAll, fechaFiltro, searchTerm]);
 
     const openWhatsApp = (h: Horario) => {
         const nombreFuncionario = `${h.funcionarios?.profiles?.nombre} ${h.funcionarios?.profiles?.apellido}`;
